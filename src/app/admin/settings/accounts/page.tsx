@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import React from "react";
 
@@ -38,8 +39,10 @@ const AccountSettings = () => {
         </div>
       </div>
 
+      <Separator className="my-5" />
       <div className="flex gap-2 items-center mt-4 bg-card">
         <label>Restaurant</label>
+        {/* TODO : UPDATE THE INPUT WITH THE SERVER DATA */}
         <Input />
       </div>
     </section>
