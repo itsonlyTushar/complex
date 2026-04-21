@@ -17,7 +17,6 @@ With a simple QR code scan at the table, customers can browse menus, place order
 
 - **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Backend/Database**: [Supabase](https://supabase.com/)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
 - **UI Components**: [Radix UI](https://www.radix-ui.com/), [Shadcn UI](https://ui.shadcn.com/), [Lucide React](https://lucide.dev/)
 - **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
