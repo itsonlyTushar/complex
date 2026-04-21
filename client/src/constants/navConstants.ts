@@ -12,4 +12,16 @@ export const ADMIN_NAV_DATA: NavItem[] = [
   { title: "Settings", url: "/admin/settings", iconName: "Settings" },
 ];
 
+export const COURT_NAV_DATA: NavItem[] = [
+  {
+    title: "Dashboard", url: "/court", iconName: "LayoutDashboard"
+  },
+  {
+    title: "Restaurants", url: "/court/restaurants", iconName: "Store"
+  },
+  {
+    title: "Settings", url: "/court/settings", iconName: "Settings"
+  }
+]
+
 
