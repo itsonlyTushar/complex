@@ -13,7 +13,6 @@ async function getData(): Promise<Payment[]> {
     },
   ];
 }
-
 export default async function AdminPaymentsPage() {
   const data = await getData();
 

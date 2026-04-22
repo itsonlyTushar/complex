@@ -1,5 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 
+/* Types and interface for the restaurants */
+
 export type UserRole = 'food_court_admin' | 'shop_owner'
 
 export type Payment = {
@@ -9,6 +11,7 @@ export type Payment = {
     email: string
     orderId: string
 }
+
 
 export type Menu = {
     id: string
@@ -31,4 +34,16 @@ export interface Profile {
 export interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+}
+
+
+/* types and interface for the food court */
+
+export type Restaurants = {
+    date: string
+    status: boolean
+    id: string
+    email: string
+    owner: string
+
 }

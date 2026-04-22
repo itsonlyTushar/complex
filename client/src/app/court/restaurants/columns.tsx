@@ -1,8 +1,11 @@
-
-import { Payment } from "@/types";
+import { Restaurants } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Restaurants>[] = [
+  {
+    accessorKey: "date",
+    header: "Onboard Date",
+  },
   {
     accessorKey: "status",
     header: "Status",
@@ -12,15 +15,11 @@ export const columns: ColumnDef<Payment>[] = [
     header: "ID",
   },
   {
-    accessorKey: "orderId",
-    header: "Order Id",
-  },
-  {
     accessorKey: "email",
     header: "Email",
   },
   {
-    accessorKey: "amount",
-    header: "Amount",
+    accessorKey: "owner",
+    header: "Owner/Manager",
   },
 ];
