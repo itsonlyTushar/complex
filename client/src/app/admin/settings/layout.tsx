@@ -10,10 +10,6 @@ const settingsNavItems = [
     href: "/admin/settings",
   },
   {
-    title: "Notifications",
-    href: "/admin/settings/notifications",
-  },
-  {
     title: "Account",
     href: "/admin/settings/accounts",
   },
