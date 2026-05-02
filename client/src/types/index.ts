@@ -45,5 +45,4 @@ export type Restaurants = {
     id: string
     email: string
     owner: string
-
 }
