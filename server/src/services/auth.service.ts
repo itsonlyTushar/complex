@@ -1,6 +1,6 @@
-import { pool } from "../../config/db.js"
-import { hashPassword } from "../../utils/hash.js";
-import type { SignupInput } from "./auth.types.js";
+import { pool } from "../config/db.js"
+import { hashPassword } from "../utils/hash.js";
+import type { SignupInput } from "../controllers/auth/auth.types.js";
 
 export const signupService = async (data: SignupInput) => {
     const client = await pool.connect();
