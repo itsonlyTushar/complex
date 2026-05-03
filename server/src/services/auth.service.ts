@@ -26,7 +26,6 @@ export const signupService = async (data: SignupInput) => {
 
         const restaurant = restaurantRes.rows[0];
 
-
         const hashedPassword = await hashPassword(password)
 
         // CREATE USER 
@@ -36,7 +35,6 @@ export const signupService = async (data: SignupInput) => {
         );
 
         await client.query("COMMIT");
-
 
         return userRes.rows[0];
 

@@ -1,6 +1,6 @@
 import express from "express"
 import authRoutes from "./routes/auth.routes.js"
-
+import userRoutes from "./routes/user.routes.js"
 const app = express();
 
 // Manual CORS middleware (cors@2.8.6 is incompatible with Express 5)
@@ -17,11 +17,11 @@ app.use((req, res, next) => {
         res.sendStatus(204);
         return;
     }
-
     next();
 });
 
 app.use(express.json());
 app.use("/api/auth", authRoutes)
+app.use("/api", userRoutes)
 
 export default app;
