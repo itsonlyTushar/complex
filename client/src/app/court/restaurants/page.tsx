@@ -20,26 +20,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, SignupInput } from "@/lib/schemas";
 
-async function getData(): Promise<Restaurants[]> {
-  return [
-    {
-      id: "4334WE",
-      date: "20-3-2026",
-      status: true,
-      email: "@gmail.com",
-      owner: "Tushar",
-    },
-  ];
-}
+
 
 function RestaurantsPage() {
   const [data, setData] = useState<Restaurants[]>([]);
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    getData().then(setData);
-  }, []);
 
   // hook form configrations
   const {
@@ -55,7 +41,7 @@ function RestaurantsPage() {
     console.log("Submitting form with values:", value);
     setIsSubmitting(true);
     try {
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
+      const response = await fetch("http://127.0.0.1:5000/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(value),
