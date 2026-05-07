@@ -1,10 +1,9 @@
-import { Pool } from "pg"
-import "dotenv/config"
+import { PrismaClient } from "../generated/prisma/index.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
-export const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: parseInt(process.env.DB_PORT || "5432")
-});
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+
+// Create a single shared instance of the Prisma Client
+export const prisma = new PrismaClient({ adapter });

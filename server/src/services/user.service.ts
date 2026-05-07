@@ -1,17 +1,19 @@
-import { pool } from "../config/db.js"
-
+import { prisma } from "../config/db.js"
+ 
 export const userService = async () => {
-    const client = await pool.connect();
-
     try {
-        const data = await client.query(
-            "SELECT id, name, email, role, restaurant_id FROM users"
-        )
-        return data.rows
+        const users = await prisma.user.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                restaurantId: true
+            }
+        });
+        return users;
     } catch (error) {
-        console.error(error)
-        throw error
-    } finally {
-        client.release()
+        console.error(error);
+        throw error;
     }
 }

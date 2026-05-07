@@ -1,47 +1,41 @@
-import { pool } from "../config/db.js"
+import { prisma } from "../config/db.js";
 import { hashPassword } from "../utils/hash.js";
 import type { SignupInput } from "../controllers/auth/auth.types.js";
 
-export const signupService = async (data: SignupInput) => {
-    const client = await pool.connect();
+export const signupService = async (data: SignupInput, foodCourtId: number = 1) => {
+    const { restaurantName, location, ownerName, email, password } = data;
 
-    try {
-        const { restaurantName, location, ownerName, email, password } = data
+    // 1. Check if user exists
+    const existingUser = await prisma.user.findUnique({
+        where: { email: email }
+    });
 
-        const existing = await client.query(
-            "SELECT * FROM users WHERE email = $1",
-            [email]
-        );
-
-        if (existing.rows.length > 0) {
-            throw new Error("Email already exists");
-        }
-
-        await client.query("BEGIN");
-
-        const restaurantRes = await client.query(
-            "INSERT INTO restaurants (name, location) values ($1, $2)RETURNING *",
-            [restaurantName, location]
-        )
-
-        const restaurant = restaurantRes.rows[0];
-
-        const hashedPassword = await hashPassword(password)
-
-        // CREATE USER 
-        const userRes = await client.query(
-            `INSERT INTO users (name,email,password,role, restaurant_id) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [ownerName, email, hashedPassword, "vendor", restaurant.id]
-        );
-
-        await client.query("COMMIT");
-
-        return userRes.rows[0];
-
-    } catch (error) {
-        await client.query("ROLLBACK");
-        throw error
-    } finally {
-        client.release()
+    if (existingUser) {
+        throw new Error("Email already exists");
     }
-}
+
+    // 2. Hash the password
+    const hashedPassword = await hashPassword(password);
+
+    // 3. Create Restaurant AND the Vendor User in one transaction!
+    const newRestaurant = await prisma.restaurant.create({
+        data: {
+            name: restaurantName,
+            location: location,
+            foodCourtId: foodCourtId,
+            vendors: {
+                create: {
+                    name: ownerName,
+                    email: email,
+                    password: hashedPassword,
+                    role: "RESTAURANT_VENDOR"
+                }
+            }
+        },
+        include: {
+            vendors: true // Return the newly created user data along with the restaurant
+        }
+    });
+
+    return newRestaurant;
+};
