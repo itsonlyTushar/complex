@@ -1,6 +1,7 @@
 import { prisma } from "../config/db.js";
-import { hashPassword } from "../utils/hash.js";
-import type { SignupInput } from "../controllers/auth/auth.types.js";
+import { comparePassword, hashPassword } from "../utils/hash.js";
+import type { LoginInput, SignupInput } from "../controllers/auth/auth.types.js";
+import jwt from "jsonwebtoken"
 
 export const signupService = async (data: SignupInput, foodCourtId: number = 1) => {
     const { restaurantName, location, ownerName, email, password } = data;
@@ -39,3 +40,40 @@ export const signupService = async (data: SignupInput, foodCourtId: number = 1) 
 
     return newRestaurant;
 };
+
+
+// Login Service 
+
+export const loginService = async (data: LoginInput) => {
+    const { email, password } = data
+
+    const user = await prisma.user.findUnique({
+        where: { email }
+    });
+
+    if (!user) {
+        throw new Error("Invalid Credentials")
+    }
+
+    const isMatch = await comparePassword(password, user.password)
+
+    if (!isMatch) {
+        throw new Error("Invalid Credentials")
+    }
+
+    const token = jwt.sign(
+        { id: user.id, role: user.role },
+        process.env.JWT_SECRET || 'secret',
+        { expiresIn: '1d' }
+    )
+
+    return {
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        },
+        token
+    }
+}
