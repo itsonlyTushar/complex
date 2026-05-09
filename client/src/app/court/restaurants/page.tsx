@@ -20,8 +20,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, SignupInput } from "@/lib/schemas";
 
-
-
 function RestaurantsPage() {
   const [data, setData] = useState<Restaurants[]>([]);
   const [open, setOpen] = useState(false);
