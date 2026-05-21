@@ -1,8 +1,78 @@
-import React from 'react'
+"use client"
+
+import { foodCourtSchema, FoodCourtSignUp } from "@/lib/schemas"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { FoodCourt } from "@/types"
+import {
+  Field,
+  FieldLabel,
+  FieldError
+} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { formFields } from "@/constants/formFields"
 
 const CourtOnboard = () => {
+  const [data, setData] = useState<FoodCourt[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { handleSubmit, register, reset, formState: { errors } } = useForm<FoodCourtSignUp>({
+    resolver: zodResolver(foodCourtSchema)
+  });
+
+  const onBoardFoodCourt = async (value: FoodCourtSignUp) => {
+    setIsSubmitting(true);
+    // Onboarding logic can go here (e.g. API request)
+    setIsSubmitting(false);
+  }
+
   return (
-    <div>page</div>
+    <>
+      <div className='p-6 max-w-xl mx-auto'>
+        <main className="mb-6">
+          <h1 className='text-3xl font-bold tracking-tight'>New Court</h1>
+          <p className='text-sm text-muted-foreground mt-1'>
+            Fill in the details below to register and onboard a new food court.
+          </p>
+        </main>
+
+        <section>
+          <form
+            onSubmit={handleSubmit(onBoardFoodCourt)}
+            className="space-y-6"
+          >
+            <div className="space-y-4">
+              {formFields.map((field) => (
+                <div key={field.name} className="flex flex-col gap-1.5">
+                  <Field>
+                    <FieldLabel htmlFor={field.id}>
+                      {field.label}
+                    </FieldLabel>
+                    <Input
+                      id={field.id}
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      {...register(field.name)}
+                    />
+                  </Field>
+                  {errors[field.name] && (
+                    <FieldError>
+                      {errors[field.name]?.message}
+                    </FieldError>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Onboarding..." : "Onboard Food Court"}
+            </Button>
+          </form>
+        </section>
+      </div>
+    </>
   )
 }
 

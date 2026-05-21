@@ -37,12 +37,21 @@ export interface DataTableProps<TData, TValue> {
 }
 
 
-/* types and interface for the food court */
 
+/* types and interface for the food court */
 export type Restaurants = {
     date: string
     status: boolean
     id: string
     email: string
     owner: string
+}
+
+// types and interfaces for restaurant
+export type FoodCourt = {
+    foodCourtName: string
+    managementDetails: string
+    address: string
+    location: string
+    password: string
 }

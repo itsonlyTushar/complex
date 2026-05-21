@@ -19,6 +19,40 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, SignupInput } from "@/lib/schemas";
+import {
+  Field,
+  FieldLabel,
+  FieldError,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+
+const restaurantFormFields = [
+  {
+    name: "restaurantName",
+    label: "Name of restaurant",
+    type: "text",
+  },
+  {
+    name: "email",
+    label: "Add Mail",
+    type: "email",
+  },
+  {
+    name: "ownerName",
+    label: "Owner Name",
+    type: "text",
+  },
+  {
+    name: "location",
+    label: "Location",
+    type: "text",
+  },
+  {
+    name: "password",
+    label: "Set Password",
+    type: "password",
+  },
+] as const;
 
 function RestaurantsPage() {
   const [data, setData] = useState<Restaurants[]>([]);
@@ -36,7 +70,6 @@ function RestaurantsPage() {
   });
 
   const onBoardRestaurant = async (value: SignupInput) => {
-    console.log("Submitting form with values:", value);
     setIsSubmitting(true);
     try {
       const response = await fetch("http://127.0.0.1:5000/api/auth/signup", {
@@ -98,74 +131,27 @@ function RestaurantsPage() {
                     Onboard your restaurant or shop of the foodcourt
                   </DialogDescription>
                 </DialogHeader>
-                {/*TODO: INSERT THE FORM WITH VALIDATION HERE  */}
-
                 <div className="flex flex-col gap-4 py-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm">Name of restaurant</label>
-                    <input
-                      className="px-1 border py-1 rounded-md outline text-sm focus:outline-2"
-                      {...register("restaurantName")}
-                    />
-                    {errors.restaurantName && (
-                      <p className="text-xs text-red-500">
-                        {errors.restaurantName.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm">Add Mail</label>
-                    <input
-                      className="px-1 border py-1 rounded-md outline text-sm focus:outline-2"
-                      {...register("email")}
-                    />
-                    {errors.email && (
-                      <p className="text-xs text-red-500">
-                        {errors.email.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm">Owner Name</label>
-                    <input
-                      className=" px-1 border py-1 rounded-md outline text-sm focus:outline-2"
-                      {...register("ownerName")}
-                    />
-                    {errors.ownerName && (
-                      <p className="text-xs text-red-500">
-                        {errors.ownerName.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm">Location</label>
-                    <input
-                      className="px-1 border py-1 rounded-md outline text-sm focus:outline-2"
-                      {...register("location")}
-                    />
-                    {errors.location && (
-                      <p className="text-xs text-red-500">
-                        {errors.location.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm">Set Password</label>
-                    <input
-                      type="password"
-                      className="px-1 border py-1 rounded-md outline text-sm focus:outline-2"
-                      {...register("password")}
-                    />
-                    {errors.password && (
-                      <p className="text-xs text-red-500">
-                        {errors.password.message}
-                      </p>
-                    )}
-                  </div>
+                  {restaurantFormFields.map((field) => (
+                    <div key={field.name} className="flex flex-col gap-1.5">
+                      <Field>
+                        <FieldLabel htmlFor={field.name}>
+                          {field.label}
+                        </FieldLabel>
+                        <Input
+                          id={field.name}
+                          type={field.type}
+                          placeholder={`Enter ${field.label.toLowerCase()}...`}
+                          {...register(field.name)}
+                        />
+                      </Field>
+                      {errors[field.name] && (
+                        <FieldError>
+                          {errors[field.name]?.message}
+                        </FieldError>
+                      )}
+                    </div>
+                  ))}
                 </div>
 
                 <DialogFooter>
