@@ -10,6 +10,7 @@ export const signupSchema = z.object({
 
 export const foodCourtSchema = z.object({
     foodCourtName: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email format"),
     managementDetails: z.string().min(1, 'Detail is required'),
     address: z.string().min(10, "Enter Valid Address"),
     location: z.string().min(1, "Location is required"),

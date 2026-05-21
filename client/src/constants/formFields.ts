@@ -8,6 +8,13 @@ export const formFields = [
         placeholder: "Enter Name..",
     },
     {
+        name: "email",
+        label: "Email",
+        id: "email",
+        type: "email",
+        placeholder: "Enter Email..",
+    },
+    {
         name: "managementDetails",
         label: "Management Details",
         id: "management-details",

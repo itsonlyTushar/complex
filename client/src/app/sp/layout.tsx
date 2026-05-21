@@ -1,24 +1,12 @@
 'use client'
 
-import { Activity, LayoutDashboard, PlusCircle } from "lucide-react"
 import Link from "next/link";
 import { usePathname } from "next/navigation"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { SUP_NAV_DATA } from "@/constants/navConstants";
 
 const SuperAdminLayout = ({ children }: { children: React.ReactNode }) => {
     const pathName = usePathname()
-
-    const navItems = [
-        {
-            href: '/sp', label: 'Dashboard', icon: LayoutDashboard
-        },
-        {
-            href: '/sp/new-court', label: 'On Board Court', icon: PlusCircle
-        },
-        {
-            href: '/sp/activity', label: 'Activity', icon: Activity
-        }
-    ];
 
     return (
         <>
@@ -31,7 +19,7 @@ const SuperAdminLayout = ({ children }: { children: React.ReactNode }) => {
 
                         <div className="flex items-center gap-6">
                             {
-                                navItems.map((item) => {
+                                SUP_NAV_DATA.map((item) => {
                                     const Icon = item.icon
                                     const isActive = pathName === item.href
                                     return (

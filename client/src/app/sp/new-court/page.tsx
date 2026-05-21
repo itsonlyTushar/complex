@@ -24,8 +24,29 @@ const CourtOnboard = () => {
 
   const onBoardFoodCourt = async (value: FoodCourtSignUp) => {
     setIsSubmitting(true);
-    // Onboarding logic can go here (e.g. API request)
-    setIsSubmitting(false);
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/auth/new-court", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(value),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to onboard food court");
+      }
+
+      alert("Food Court onboarded successfully!");
+      reset();
+    } catch (error: any) {
+      console.error("Onboarding error:", error);
+      alert(error.message || "An error occurred while onboarding.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
