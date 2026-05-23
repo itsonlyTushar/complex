@@ -1,6 +1,7 @@
 'use server'
 
 import { Profile } from "@/types"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 export async function loginAction(formData: FormData): Promise<{ error: string } | void> {
@@ -16,4 +17,11 @@ export async function loginAction(formData: FormData): Promise<{ error: string }
     }
 
     return { error: 'Invalid credentials. Contact Support' }
+}
+
+export async function logout() {
+    const cookieStore = await cookies()
+    cookieStore.delete("token");
+    cookieStore.delete("user_role");
+    redirect("/login")
 }

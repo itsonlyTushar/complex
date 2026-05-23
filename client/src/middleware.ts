@@ -6,14 +6,11 @@ export function middleware(request: NextRequest) {
     const role = request.cookies.get("user_role")?.value;
     const { pathname } = request.nextUrl;
 
-    // 1. If not logged in, redirect to login page for protected routes
     if (!token && (pathname.startsWith("/sp") || pathname.startsWith("/court") || pathname.startsWith("/admin"))) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // 2. Role-Based access control mapping
     if (pathname.startsWith("/sp") && role !== "SUPER_ADMIN") {
-        // Redirect non-super-admins trying to access /sp to their own portal or login
         return NextResponse.redirect(new URL(role === "FOOD_COURT_ADMIN" ? "/court" : "/admin", request.url));
     }
 

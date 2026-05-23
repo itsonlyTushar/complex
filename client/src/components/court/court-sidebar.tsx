@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import {
   Sidebar,
@@ -11,6 +13,7 @@ import {
 import { COURT_NAV_DATA } from "@/constants/navConstants";
 import { NavLink } from "../court/nav-link";
 import { LogOut } from "lucide-react";
+import { logout } from "@/app/actions/auth";
 
 export const CourtSidebar = ({
   ...props
@@ -41,6 +44,7 @@ export const CourtSidebar = ({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
+              onClick={async () => await logout()}
               tooltip={"Logout"}
               className="text-destructive hover:text-desctructive"
             >

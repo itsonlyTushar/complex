@@ -1,5 +1,4 @@
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
 export default function AdminSettingsPage() {
