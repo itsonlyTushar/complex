@@ -25,34 +25,7 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-const restaurantFormFields = [
-  {
-    name: "restaurantName",
-    label: "Name of restaurant",
-    type: "text",
-  },
-  {
-    name: "email",
-    label: "Add Mail",
-    type: "email",
-  },
-  {
-    name: "ownerName",
-    label: "Owner Name",
-    type: "text",
-  },
-  {
-    name: "location",
-    label: "Location",
-    type: "text",
-  },
-  {
-    name: "password",
-    label: "Set Password",
-    type: "password",
-  },
-] as const;
+import { restaurantFormFields } from "@/constants/formFields";
 
 function RestaurantsPage() {
   const [data, setData] = useState<Restaurants[]>([]);

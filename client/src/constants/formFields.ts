@@ -1,4 +1,5 @@
 
+// Super Admin Side : to onboard new food courts 
 export const formFields = [
     {
         name: "foodCourtName",
@@ -42,4 +43,36 @@ export const formFields = [
         type: "password",
         placeholder: "Enter Password..",
     },
+] as const;
+
+
+// Food Court Side: to onboard new restaurants
+
+
+export const restaurantFormFields = [
+  {
+    name: "restaurantName",
+    label: "Name of restaurant",
+    type: "text",
+  },
+  {
+    name: "email",
+    label: "Add Mail",
+    type: "email",
+  },
+  {
+    name: "ownerName",
+    label: "Owner Name",
+    type: "text",
+  },
+  {
+    name: "location",
+    label: "Location",
+    type: "text",
+  },
+  {
+    name: "password",
+    label: "Set Password",
+    type: "password",
+  },
 ] as const;
