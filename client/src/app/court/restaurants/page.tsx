@@ -87,7 +87,7 @@ function RestaurantsPage() {
       const newUser = result;
 
       const newEntry: Restaurants = {
-        id: newUser.restaurant_id.toString(),
+        id: newUser.id.toString(),
         date: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
         status: true,
         email: value.email,

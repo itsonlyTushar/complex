@@ -4,6 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { SUP_NAV_DATA } from "@/constants/navConstants";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { logout } from "../actions/auth";
 
 const SuperAdminLayout = ({ children }: { children: React.ReactNode }) => {
     const pathName = usePathname()
@@ -37,8 +40,12 @@ const SuperAdminLayout = ({ children }: { children: React.ReactNode }) => {
                             }
                         </div>
 
-                        <div className="flex items-center">
+                        <div className="flex gap-3 items-center">
                             <ThemeToggle />
+
+                            <Button className="items-center" onClick={async () => logout()}>
+                                <LogOut />
+                            </Button>
                         </div>
                     </nav>
                 </header>
