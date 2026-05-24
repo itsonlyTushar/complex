@@ -31,3 +31,11 @@ export const addMenuService = async (data: Menu, restaurantId: number) => {
     return newItem
 }
 
+export const fetchMenuService = async (restaurandId: number) => {
+    const menuData = await prisma.menu.findMany({
+        where: {
+            restaurantId: restaurandId
+        }
+    });
+    return menuData
+}
