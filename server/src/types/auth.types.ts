@@ -1,4 +1,3 @@
-
 // For Restaurant 
 export interface SignupInput {
     restaurantName: string;

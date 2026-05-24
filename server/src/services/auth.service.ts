@@ -1,6 +1,6 @@
 import { prisma } from "../config/db.js";
 import { comparePassword, hashPassword } from "../utils/hash.js";
-import type { FoodCourtSignUp, LoginInput, SignupInput } from "../controllers/auth/auth.types.js";
+import type { FoodCourtSignUp, LoginInput, SignupInput } from "../types/index.js";
 import jwt from "jsonwebtoken"
 
 /* Sign up for the Restaurants */
