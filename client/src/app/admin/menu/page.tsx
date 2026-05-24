@@ -21,14 +21,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MenuInput, newMenuSchema } from "@/lib/schemas";
 import { Textarea } from "@/components/ui/textarea";
-
-const getCookie = (name: string): string => {
-  if (typeof document === "undefined") return "";
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift() || "";
-  return "";
-};
+import { getAuth } from "@/app/actions/auth";
 
 export default function AdminMenuPage() {
   const [data, setData] = useState<Menu[]>([]);
@@ -39,7 +32,12 @@ export default function AdminMenuPage() {
   useEffect(() => {
     const loadMenus = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/menus");
+        const token = await getAuth();
+        const response = await fetch("http://127.0.0.1:5000/api/menus", {
+          headers: {
+            "Authorization": `Bearer ${token || ""}`
+          }
+        });
         if (response.ok) {
           const list = await response.json();
           setData(list);
@@ -65,12 +63,12 @@ export default function AdminMenuPage() {
   const addNewItem = async (values: MenuInput) => {
     setIsSubmitting(true);
     try {
-      const token = getCookie("token");
+      const token = await getAuth();
       const response = await fetch("http://127.0.0.1:5000/api/add-menu", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token || ""}`
         },
         body: JSON.stringify(values),
       });

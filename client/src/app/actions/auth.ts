@@ -25,3 +25,8 @@ export async function logout() {
     cookieStore.delete("user_role");
     redirect("/login")
 }
+
+export async function getAuth() {
+    const cookiesStore = await cookies()
+    return cookiesStore.get("token")?.value
+}
