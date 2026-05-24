@@ -47,8 +47,6 @@ export const formFields = [
 
 
 // Food Court Side: to onboard new restaurants
-
-
 export const restaurantFormFields = [
   {
     name: "restaurantName",
@@ -76,3 +74,37 @@ export const restaurantFormFields = [
     type: "password",
   },
 ] as const;
+
+export const menuFormFields = [
+  {
+    name: "itemName",
+    label: "Item Name",
+    type: "text"
+  },
+  {
+    name: "category",
+    label: "Category",
+    type: "text"
+  },
+    {
+    name: "price",
+    label: "Price",
+    type: "number"
+  },
+    {
+    name: "cost",
+    label: "Cost",
+    type: "number"
+  },
+    {
+    name: "quantity",
+    label: "Qty",
+    type: "number"
+  },
+    {
+    name: "description",
+    label: "Description",
+    type: "textarea"
+  },
+
+] as const 

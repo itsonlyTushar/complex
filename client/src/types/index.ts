@@ -12,14 +12,15 @@ export type Payment = {
     orderId: string
 }
 
-
 export type Menu = {
-    id: string
-    name: string
+    id: number
+    image?: string
+    itemName: string
     category: string
     price: number
-    cost?: number | null
-    stock?: number | null
+    cost: number
+    quantity: number
+    description: string   
 }
 
 export interface Profile {

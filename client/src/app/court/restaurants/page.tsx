@@ -92,9 +92,7 @@ function RestaurantsPage() {
             </DialogTrigger>
             <DialogContent>
               <form
-                onSubmit={handleSubmit(onBoardRestaurant, (err) =>
-                  console.log("Validation Errors:", err),
-                )}
+                onSubmit={handleSubmit(onBoardRestaurant)}
               >
                 <DialogHeader>
                   <DialogTitle>

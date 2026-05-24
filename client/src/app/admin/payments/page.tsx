@@ -1,5 +1,6 @@
 import { Payment } from "@/types";
 import { DataTable } from "./data-table";
+import { columns } from "./columns";
 
 async function getData(): Promise<Payment[]> {
   return [
@@ -47,7 +48,7 @@ export default async function AdminPaymentsPage() {
       </section>
 
       <section>
-        <DataTable data={data} />
+        <DataTable columns={columns} data={data} />
       </section>
     </div>
   );

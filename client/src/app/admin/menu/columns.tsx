@@ -9,7 +9,7 @@ export const columns: ColumnDef<Menu>[] = [
     header: "ID",
   },
   {
-    accessorKey: "name",
+    accessorKey: "itemName",
     header: "Name",
   },
   {
@@ -25,7 +25,7 @@ export const columns: ColumnDef<Menu>[] = [
     header: "Cost",
   },
   {
-    accessorKey: "stock",
-    header: "Stock",
+    accessorKey: "quantity",
+    header: "Stock (Qty)",
   },
 ];
