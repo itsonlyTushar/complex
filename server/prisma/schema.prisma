@@ -28,14 +28,15 @@ model FoodCourt {
 }
 
 model Restaurant {
-  id          Int       @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   name        String
   location    String
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime   @default(now())
   foodCourtId Int
-  foodCourt   FoodCourt @relation(fields: [foodCourtId], references: [id])
+  foodCourt   FoodCourt  @relation(fields: [foodCourtId], references: [id])
   vendors     User[]
   menus       Menu[]
+  categories  Category[]
 }
 
 model User {
@@ -55,11 +56,20 @@ model Menu {
   id           Int         @id @default(autoincrement())
   image        String
   itemName     String
-  category     String
   price        Int
   cost         Int
   quantity     Int
   description  String
   restaurantId Int?
   restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+  category     Category?   @relation(fields: [categoryId], references: [id])
+  categoryId   Int?
+}
+
+model Category {
+  id           Int         @id @default(autoincrement())
+  name         String
+  restaurantId Int?
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+  menus        Menu[]
 }

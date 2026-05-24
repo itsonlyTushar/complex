@@ -1,5 +1,5 @@
 import type { Request, Response } from "express"
-import { addMenuService, fetchMenuService } from "../../services/menu.service.js"
+import { addCategory, addMenuService, fetchCategory, fetchMenuService } from "../../services/menu.service.js"
 
 export const addMenuController = async (req: Request, res: Response) => {
     try {
@@ -15,6 +15,26 @@ export const fetchMenuController = async (req: Request, res: Response) => {
     try {
         const restaurantId = (req as any).user?.restaurantId
         const data = await fetchMenuService(Number(restaurantId))
+        res.status(200).json(data)
+    } catch(error: any) {
+        res.status(400).json({message: error.message})
+    }
+}
+
+export const addCategoryController = async(req: Request, res: Response) => {
+    try {
+        const restaurandId = (req as any).user?.restaurandId
+        const data = await addCategory(req.body, restaurandId)
+        res.status(200).json(data)
+    } catch(error: any) {
+        res.status(400).json({message: error.message})
+    }
+}
+
+export const fetchCategoryController = async(req: Request, res:Response) => {
+    try {
+        const restaurandId = (req as any).user?.restaurandId
+        const data = await fetchCategory(Number(restaurandId))
         res.status(200).json(data)
     } catch(error: any) {
         res.status(400).json({message: error.message})

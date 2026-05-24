@@ -74,9 +74,9 @@ export default function AdminMenuPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add menu item");
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to add menu item");
       }
-
       const newItem = await response.json();
       setData((prev) => [...prev, newItem]);
 
