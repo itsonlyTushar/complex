@@ -23,8 +23,8 @@ export const fetchMenuController = async (req: Request, res: Response) => {
 
 export const addCategoryController = async(req: Request, res: Response) => {
     try {
-        const restaurandId = (req as any).user?.restaurandId
-        const data = await addCategory(req.body, restaurandId)
+        const restaurantId = (req as any).user?.restaurantId
+        const data = await addCategory(req.body, Number(restaurantId))
         res.status(200).json(data)
     } catch(error: any) {
         res.status(400).json({message: error.message})
@@ -33,8 +33,8 @@ export const addCategoryController = async(req: Request, res: Response) => {
 
 export const fetchCategoryController = async(req: Request, res:Response) => {
     try {
-        const restaurandId = (req as any).user?.restaurandId
-        const data = await fetchCategory(Number(restaurandId))
+        const restaurantId = (req as any).user?.restaurantId
+        const data = await fetchCategory(Number(restaurantId))
         res.status(200).json(data)
     } catch(error: any) {
         res.status(400).json({message: error.message})

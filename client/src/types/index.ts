@@ -56,3 +56,9 @@ export type FoodCourt = {
     location: string
     password: string
 }
+
+export type Category = {
+    id: number
+    name: string
+    restaurantId?: number | null
+}

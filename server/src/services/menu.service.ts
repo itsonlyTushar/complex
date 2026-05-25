@@ -64,7 +64,7 @@ export const addCategory = async (data: Category, restaurantId: number) => {
     return newCategory
 }
 
-export const fetchCategory = async (restaurantId:number) {
+export const fetchCategory = async (restaurantId:number) => {
     const data = await prisma.category.findMany({
         where: {
             restaurantId: restaurantId
