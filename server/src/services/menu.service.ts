@@ -1,4 +1,3 @@
-import { number } from "joi"
 import { prisma } from "../config/db.js"
 import type { Category, Menu } from "../types/menu.types.js"
 

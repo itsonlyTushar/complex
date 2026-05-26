@@ -122,10 +122,9 @@ export default function MenuSettingsPage() {
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
             Category Management
-            <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
           </h1>
           <p className="text-sm mt-2 text-muted-foreground max-w-lg leading-relaxed">
-            Organize your menu items by defining distinct categories. This makes it seamless for customers to browse and locate their favorite food or drinks.
+            Organize your menu items by defining categories.
           </p>
         </div>
       </div>
@@ -214,7 +213,6 @@ export default function MenuSettingsPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground/90 flex items-center gap-2">
-            <FolderHeart className="w-5 h-5 text-accent-foreground" />
             Existing Categories
           </h2>
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 shadow-sm">
@@ -222,71 +220,16 @@ export default function MenuSettingsPage() {
           </span>
         </div>
 
-        {/* Loading skeleton wrapper */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {[1, 2, 3].map((n) => (
-              <Skeleton key={n} className="h-16 rounded-xl border border-border/50 shadow-sm" />
-            ))}
-          </div>
-        ) : categories.length === 0 ? (
-          /* High-end empty state */
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center py-12 px-4 border border-dashed border-border/60 rounded-xl bg-muted/10 text-center"
-          >
-            <div className="p-4 rounded-full bg-primary/5 text-primary/60 mb-4 animate-bounce">
-              <Folder className="w-10 h-10 stroke-[1.5]" />
-            </div>
-            <h3 className="font-semibold text-foreground/90 mb-1">No categories added yet</h3>
-            <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-              Create your very first category above to begin building out your menu organization system.
-            </p>
-          </motion.div>
-        ) : (
-          /* Categories Grid list */
-          <motion.div 
-            layout
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
-          >
-            <AnimatePresence>
-              {categories.map((category, index) => (
-                <motion.div
-                  key={category.id}
-                  layoutId={`category-card-${category.id}`}
-                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: 0, 
-                    scale: 1,
-                    transition: { delay: index * 0.05, duration: 0.3 } 
-                  }}
-                  exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                  whileHover={{ 
-                    y: -4, 
-                    scale: 1.02,
-                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
-                  }}
-                  className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-accent/10 hover:border-primary/30 transition-all duration-300 cursor-default group"
-                >
-                  {/* Category decorative symbol */}
-                  <div className="p-2.5 rounded-lg bg-primary/5 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                    <Folder className="w-5 h-5 stroke-[2]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-                      {category.name}
-                    </p>
-                    <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground/70 mt-0.5">
-                      ID: #{category.id}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
+        <div className="border border-border py-4 px-2 rounded-xl">
+          {
+            categories.map((cat) => (
+              <div className="" key={cat.id}>
+                <span>{cat.name}</span>
+              </div>
+            ))
+          }
+
+        </div>
       </div>
     </section>
   );
