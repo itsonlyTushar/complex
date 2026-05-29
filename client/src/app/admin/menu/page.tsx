@@ -17,17 +17,27 @@ import { menuFormFields } from "@/constants/formFields";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MenuInput, newMenuSchema } from "@/lib/schemas";
 import { Textarea } from "@/components/ui/textarea";
 import { getAuth } from "@/app/actions/auth";
+import { useGetCategories } from "@/hooks/queries/useMenuQuery";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AdminMenuPage() {
   const [data, setData] = useState<Menu[]>([]);
   const [submitting, setIsSubmitting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const { data: categories = [], isLoading: isCategoriesLoading } = useGetCategories();
 
   useEffect(() => {
     const loadMenus = async () => {
@@ -55,6 +65,7 @@ export default function AdminMenuPage() {
     register,
     reset,
     setValue,
+    control,
     formState: { errors },
   } = useForm<MenuInput>({
     resolver: zodResolver(newMenuSchema) as any,
@@ -191,7 +202,32 @@ export default function AdminMenuPage() {
                         <FieldLabel htmlFor={field.name}>
                           {field.label}
                         </FieldLabel>
-                        {field.type === "textarea" ? (
+                        {field.name === "category" ? (
+                          <Controller
+                            name="category"
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                              <Select onValueChange={onChange} value={value || ""}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {isCategoriesLoading ? (
+                                    <SelectItem value="loading" disabled>Loading...</SelectItem>
+                                  ) : categories.length === 0 ? (
+                                    <SelectItem value="none" disabled>No categories found</SelectItem>
+                                  ) : (
+                                    categories.map((cat: any) => (
+                                      <SelectItem key={cat.id || cat.name} value={cat.name}>
+                                        {cat.name}
+                                      </SelectItem>
+                                    ))
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          />
+                        ) : field.type === "textarea" ? (
                           <Textarea
                             id={field.name}
                             placeholder={`Enter ${field.label.toLowerCase()}...`}

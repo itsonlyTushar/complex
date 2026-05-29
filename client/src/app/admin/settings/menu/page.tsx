@@ -11,46 +11,18 @@ import {
   FolderPlus, AlertCircle,
   CheckCircle, Hash
 } from "lucide-react";
-import { getAuth } from "@/app/actions/auth";
 import { Category } from "@/types";
+import { useGetCategories, useAddCategory } from "@/hooks/queries/useMenuQuery";
 
 export default function MenuSettingsPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [submitting, setSubmitting] = useState<boolean>(false);
   const [newCategoryName, setNewCategoryName] = useState<string>("");
 
   // Feedback alerts state
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Fetch categories on mount
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const token = await getAuth();
-        const response = await fetch("http://127.0.0.1:5000/api/categories", {
-          headers: {
-            "Authorization": `Bearer ${token || ""}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to load categories");
-        }
-
-        const data = await response.json();
-        setCategories(Array.isArray(data) ? data : []);
-      } catch (err: any) {
-        console.error("Fetch categories error:", err);
-        setErrorMsg("Failed to load categories. Please refresh the page.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
+  const { data: categories = [], isLoading: loading } = useGetCategories();
+  const { mutateAsync: addCategoryMutation, isPending: submitting } = useAddCategory();
 
   // Form submission handler
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -68,28 +40,12 @@ export default function MenuSettingsPage() {
       return;
     }
 
-    setSubmitting(true);
     setErrorMsg(null);
     setSuccessMsg(null);
 
     try {
-      const token = await getAuth();
-      const response = await fetch("http://127.0.0.1:5000/api/add-category", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token || ""}`
-        },
-        body: JSON.stringify({ name: trimmedName })
-      });
+      await addCategoryMutation({ name: trimmedName });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to create category");
-      }
-
-      const newCategory = await response.json();
-      setCategories(prev => [...prev, newCategory]);
       setNewCategoryName("");
       setSuccessMsg(`Category "${trimmedName}" added successfully!`);
 
@@ -100,8 +56,6 @@ export default function MenuSettingsPage() {
     } catch (err: any) {
       console.error("Create category error:", err);
       setErrorMsg(err.message || "Something went wrong. Please try again.");
-    } finally {
-      setSubmitting(false);
     }
   };
 
