@@ -214,7 +214,7 @@ export default function MenuSettingsPage() {
           </span>
         </div>
 
-        <div className="border border-border py-4 px-2 rounded-xl">
+        <div className="border border-border py-4 px-2 rounded-xl max-h-72 overflow-y-auto">
           {
             categories.map((cat) => (
               <div className="" key={cat.id}>

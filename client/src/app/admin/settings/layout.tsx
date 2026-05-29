@@ -31,8 +31,8 @@ export default function SettingsLayout({
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0 p-6">
-      <aside className="lg:w-1/5 border px-2 py-4 rounded-xl shadow ">
+    <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0 p-6 lg:items-start">
+      <aside className="lg:w-1/5 border px-2 py-4 rounded-xl shadow">
         <nav className="flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
           {settingsNavItems.map((item) => (
             <Link
