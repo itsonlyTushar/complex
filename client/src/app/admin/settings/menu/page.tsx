@@ -6,16 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { 
-  FolderPlus, 
-  FolderHeart, 
-  Folder, 
-  AlertCircle, 
-  CheckCircle,
-  Sparkles,
-  Hash
+import {
+  FolderPlus, AlertCircle,
+  CheckCircle, Hash
 } from "lucide-react";
 import { getAuth } from "@/app/actions/auth";
 import { Category } from "@/types";
@@ -25,7 +19,7 @@ export default function MenuSettingsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [newCategoryName, setNewCategoryName] = useState<string>("");
-  
+
   // Feedback alerts state
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -40,11 +34,11 @@ export default function MenuSettingsPage() {
             "Authorization": `Bearer ${token || ""}`
           }
         });
-        
+
         if (!response.ok) {
           throw new Error("Failed to load categories");
         }
-        
+
         const data = await response.json();
         setCategories(Array.isArray(data) ? data : []);
       } catch (err: any) {
@@ -61,7 +55,7 @@ export default function MenuSettingsPage() {
   // Form submission handler
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Client-side validations
     const trimmedName = newCategoryName.trim();
     if (!trimmedName) {
@@ -98,7 +92,7 @@ export default function MenuSettingsPage() {
       setCategories(prev => [...prev, newCategory]);
       setNewCategoryName("");
       setSuccessMsg(`Category "${trimmedName}" added successfully!`);
-      
+
       // Auto-dismiss success alert after 3.5s
       setTimeout(() => {
         setSuccessMsg(null);
@@ -142,7 +136,7 @@ export default function MenuSettingsPage() {
           >
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span className="flex-1">{errorMsg}</span>
-            <button 
+            <button
               onClick={() => setErrorMsg(null)}
               className="text-xs opacity-70 hover:opacity-100 transition-opacity font-bold underline cursor-pointer"
             >
@@ -192,8 +186,8 @@ export default function MenuSettingsPage() {
               </span>
             </div>
           </div>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={submitting}
             className="w-full sm:w-auto px-6 py-2 h-10 font-medium bg-primary hover:bg-primary/95 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 shrink-0"
           >

@@ -4,7 +4,11 @@ import { loginService, signFoodCourtService, signupService } from "../../service
 // For Food Court
 export const signupController = async (req: Request, res: Response) => {
     try {
-        const user = await signupService(req.body);
+        const foodCourtId = (req as any).user?.foodCourtId;
+        if (!foodCourtId) {
+            throw new Error("Unauthorized: No food court associated with this admin.");
+        }
+        const user = await signupService(req.body, Number(foodCourtId));
         res.status(201).json(user);
     } catch (error: any) {
         res.status(400).json({ message: error.message });

@@ -2,6 +2,8 @@ import express from "express"
 import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
 import menuRoutes from "./routes/menu.routes.js"
+import courtRoutes from "./routes/court.routes.js"
+
 const app = express();
 
 // Manual CORS middleware (cors@2.8.6 is incompatible with Express 5)
@@ -25,5 +27,6 @@ app.use(express.json({ limit: "10mb" }));
 app.use("/api/auth", authRoutes)
 app.use("/api", userRoutes)
 app.use("/api", menuRoutes)
+app.use("/api/court", courtRoutes)
 
 export default app;

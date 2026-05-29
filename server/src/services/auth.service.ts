@@ -30,7 +30,8 @@ export const signupService = async (data: SignupInput, foodCourtId: number = 1) 
                     name: ownerName,
                     email: email,
                     password: hashedPassword,
-                    role: "RESTAURANT_VENDOR"
+                    role: "RESTAURANT_VENDOR",
+                    foodCourtId: foodCourtId
                 }
             }
         },

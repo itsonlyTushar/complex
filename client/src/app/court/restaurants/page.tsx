@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { columns } from "./columns";
-import { Restaurants } from "@/types";
 import {
   Dialog,
   DialogContent,
@@ -19,18 +18,17 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, SignupInput } from "@/lib/schemas";
-import {
-  Field,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { restaurantFormFields } from "@/constants/formFields";
+import { useGetRestaurants, COURT_KEYS } from "@/hooks/queries/useCourtQuery";
+import { onboardRestaurant } from "@/services/court.service";
+import { useQueryClient } from "@tanstack/react-query";
 
 function RestaurantsPage() {
-  const [data, setData] = useState<Restaurants[]>([]);
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   // hook form configrations
   const {
@@ -42,31 +40,15 @@ function RestaurantsPage() {
     resolver: zodResolver(signupSchema),
   });
 
+  const { data: Restaurants, isLoading, isError, error } = useGetRestaurants();
+
   const onBoardRestaurant = async (value: SignupInput) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(value),
-      });
+      await onboardRestaurant(value);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to onboard");
-      }
-
-      const newUser = result;
-
-      const newEntry: Restaurants = {
-        id: newUser.id.toString(),
-        date: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
-        status: true,
-        email: value.email,
-        owner: value.ownerName,
-      };
-      setData((prev) => [...prev, newEntry]);
+      // Invalidate the cache to automatically refetch the updated list from the server
+      queryClient.invalidateQueries({ queryKey: COURT_KEYS.restaurants() });
       reset();
       setOpen(false);
       alert("Restaurant onboarded successfully!");
@@ -91,9 +73,7 @@ function RestaurantsPage() {
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <form
-                onSubmit={handleSubmit(onBoardRestaurant)}
-              >
+              <form onSubmit={handleSubmit(onBoardRestaurant)}>
                 <DialogHeader>
                   <DialogTitle>
                     Add New Restaurant in Your Food Court
@@ -117,9 +97,7 @@ function RestaurantsPage() {
                         />
                       </Field>
                       {errors[field.name] && (
-                        <FieldError>
-                          {errors[field.name]?.message}
-                        </FieldError>
+                        <FieldError>{errors[field.name]?.message}</FieldError>
                       )}
                     </div>
                   ))}
@@ -142,7 +120,13 @@ function RestaurantsPage() {
       </section>
 
       <section className="mx-2">
-        <DataTable columns={columns} data={data} />
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : isError ? (
+          <div>Error: {error?.message}</div>
+        ) : (
+          <DataTable columns={columns} data={Restaurants || []} />
+        )}
       </section>
     </>
   );
