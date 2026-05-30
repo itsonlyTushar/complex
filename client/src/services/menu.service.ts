@@ -54,6 +54,24 @@ export const updateCategory = async(data: Category): Promise<Category> => {
     return response.json()
 }
 
+export const deleteCategory = async (data: { id: number }): Promise<Category> => {
+    let token = await getAuth()
+    const response = await fetch(`http://127.0.0.1:5000/api/delete-category`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify(data)
+    })
+
+    if (!response.ok) {
+        const result = await response.json().catch(() => ({}))
+        throw new Error(result.message || "Failed to delete category")
+    }
+    return response.json()
+}
+
 export const fetchMenus = async (): Promise<Menu[]> => {
     let token = await getAuth()
     const response = await fetch(`http://127.0.0.1:5000/api/menus`, {
@@ -103,4 +121,21 @@ export const updateMenu = async (data: Menu): Promise<Menu> => {
         throw new Error(result.message || "Failed to update menu item")
     }
     return response.json();
+}
+
+export const deleteMenu = async (data: { id: number }): Promise<{ id: number }> => {
+    let token = await getAuth()
+    const response = await fetch(`http://127.0.0.1:5000/api/delete-menu`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type" : "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify(data)
+    })
+    if(!response.ok) {
+        const result = await response.json().catch(() => ({}))
+        throw new Error(result.message || "Error deleting the menu item")
+    }
+    return response.json()
 }

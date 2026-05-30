@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { MenuInput, newMenuSchema } from "@/lib/schemas";
 import { Textarea } from "@/components/ui/textarea";
 import { useGetCategories, useGetMenus } from "@/hooks/queries/useMenuQuery";
-import { useAddMenu, useUpdateMenu } from "@/hooks/mutations/useMenuMutation";
+import { useAddMenu, useUpdateMenu, useDeleteMenu } from "@/hooks/mutations/useMenuMutation";
 import {
   Select,
   SelectContent,
@@ -41,6 +41,7 @@ export default function AdminMenuPage() {
 
   const { mutateAsync: addMenuMutation, isPending: isAdding } = useAddMenu();
   const { mutateAsync: updateMenuMutation, isPending: isUpdating } = useUpdateMenu();
+  const { mutateAsync: deleteMenuMutation } = useDeleteMenu();
 
   // React Hook Form configs
   const {
@@ -84,6 +85,18 @@ export default function AdminMenuPage() {
     setIsOpen(true);
   };
 
+  const handleDeleteMenu = async (item: Menu) => {
+    if (confirm(`Are you sure you want to delete "${item.itemName}"?`)) {
+      try {
+        await deleteMenuMutation({ id: item.id });
+        alert("Menu item deleted successfully!");
+      } catch (error: any) {
+        console.error("Failed to delete menu item:", error);
+        alert(error.message || "Failed to delete item.");
+      }
+    }
+  };
+
   const onSubmit = async (values: MenuInput) => {
     try {
       if (editingItem) {
@@ -108,7 +121,7 @@ export default function AdminMenuPage() {
     }
   };
 
-  const columns = getColumns(handleEditClick);
+  const columns = getColumns(handleEditClick, handleDeleteMenu);
 
   return (
     <>

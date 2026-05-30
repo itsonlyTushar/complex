@@ -1,5 +1,5 @@
 import { MENU_KEYS } from "@/constants/queryFactory";
-import { addCategory, updateCategory, addMenu, updateMenu } from "@/services/menu.service";
+import { addCategory, updateCategory, addMenu, updateMenu, deleteMenu, deleteCategory } from "@/services/menu.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 
@@ -17,6 +17,16 @@ export const useUpdateCategory = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: MENU_KEYS.categories() });
+    },
+  });
+};
+
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: MENU_KEYS.categories() });
     },
@@ -42,3 +52,13 @@ export const useUpdateMenu = () => {
     },
   });
 };
+
+export const useDeleteMenu = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: deleteMenu,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: MENU_KEYS.menus()})
+        }
+    })
+}

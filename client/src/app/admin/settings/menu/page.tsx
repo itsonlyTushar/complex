@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Category } from "@/types";
 import { useGetCategories } from "@/hooks/queries/useMenuQuery";
-import { useAddCategory, useUpdateCategory } from "@/hooks/mutations/useMenuMutation";
+import { useAddCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/mutations/useMenuMutation";
 
 export default function MenuSettingsPage() {
   const [newCategoryName, setNewCategoryName] = useState<string>("");
@@ -27,6 +27,7 @@ export default function MenuSettingsPage() {
   const { data: categories = [], isLoading: loading } = useGetCategories();
   const { mutateAsync: addCategoryMutation, isPending: submitting } = useAddCategory();
   const { mutateAsync: addCategoryUpdate, isPending: updating } = useUpdateCategory();
+  const { mutateAsync: deleteCategoryMutation } = useDeleteCategory();
 
   // Form submission handler
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -96,6 +97,23 @@ export default function MenuSettingsPage() {
     } catch (err: any) {
       console.error("Update category error:", err);
       setErrorMsg(err.message || "Something went wrong. Please try again.");
+    }
+  };
+
+  const handleDeleteCategory = async (cat: Category) => {
+    if (confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
+      setErrorMsg(null);
+      setSuccessMsg(null);
+      try {
+        await deleteCategoryMutation({ id: cat.id });
+        setSuccessMsg(`Category "${cat.name}" deleted successfully!`);
+        setTimeout(() => {
+          setSuccessMsg(null);
+        }, 3500);
+      } catch (err: any) {
+        console.error("Delete category error:", err);
+        setErrorMsg(err.message || "Failed to delete category.");
+      }
     }
   };
 
@@ -260,19 +278,29 @@ export default function MenuSettingsPage() {
                   ) : (
                     <>
                       <span className="text-sm font-medium text-foreground/80">{cat.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingCategory(cat);
-                          setUpdatedCategory(cat.name);
-                          setIsEditing(true);
-                          setErrorMsg(null);
-                        }}
-                        className="h-8 px-3 text-xs font-semibold text-primary hover:text-primary-foreground hover:bg-primary rounded-lg transition-all duration-200 cursor-pointer"
-                      >
-                        Edit
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingCategory(cat);
+                            setUpdatedCategory(cat.name);
+                            setIsEditing(true);
+                            setErrorMsg(null);
+                          }}
+                          className="h-8 px-3 text-xs font-semibold text-primary hover:text-primary-foreground hover:bg-primary rounded-lg transition-all duration-200 cursor-pointer"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteCategory(cat)}
+                          className="h-8 px-3 text-xs font-semibold text-destructive hover:text-destructive-foreground hover:bg-destructive rounded-lg transition-all duration-200 cursor-pointer"
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </>
                   )}
                 </div>
