@@ -71,3 +71,14 @@ export const fetchCategory = async (restaurantId:number) => {
     })
     return data
 }
+
+export const updateCategory = async (data: Category) => {
+    const { id, name } = data
+    const updateCat = await prisma.category.update({
+        where: {
+           id 
+        },
+        data: {name}
+    })
+    return updateCat
+}
