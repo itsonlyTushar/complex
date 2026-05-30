@@ -2,7 +2,7 @@
 
 import { Menu } from "@/types";
 import { DataTable } from "../payments/data-table";
-import { columns } from "./columns";
+import { getColumns } from "./columns";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,13 +16,13 @@ import { PlusCircle, Loader2, ImagePlus, X } from "lucide-react";
 import { menuFormFields } from "@/constants/formFields";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MenuInput, newMenuSchema } from "@/lib/schemas";
 import { Textarea } from "@/components/ui/textarea";
-import { getAuth } from "@/app/actions/auth";
-import { useGetCategories } from "@/hooks/queries/useMenuQuery";
+import { useGetCategories, useGetMenus } from "@/hooks/queries/useMenuQuery";
+import { useAddMenu, useUpdateMenu } from "@/hooks/mutations/useMenuMutation";
 import {
   Select,
   SelectContent,
@@ -32,32 +32,15 @@ import {
 } from "@/components/ui/select";
 
 export default function AdminMenuPage() {
-  const [data, setData] = useState<Menu[]>([]);
-  const [submitting, setIsSubmitting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [editingItem, setEditingItem] = useState<Menu | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { data: categories = [], isLoading: isCategoriesLoading } = useGetCategories();
+  const { data: menus = [], isLoading: isMenusLoading } = useGetMenus();
 
-  useEffect(() => {
-    const loadMenus = async () => {
-      try {
-        const token = await getAuth();
-        const response = await fetch("http://127.0.0.1:5000/api/menus", {
-          headers: {
-            "Authorization": `Bearer ${token || ""}`
-          }
-        });
-        if (response.ok) {
-          const list = await response.json();
-          setData(list);
-        }
-      } catch (error) {
-        console.error("Failed to load menus:", error);
-      }
-    };
-    loadMenus();
-  }, []);
+  const { mutateAsync: addMenuMutation, isPending: isAdding } = useAddMenu();
+  const { mutateAsync: updateMenuMutation, isPending: isUpdating } = useUpdateMenu();
 
   // React Hook Form configs
   const {
@@ -71,36 +54,61 @@ export default function AdminMenuPage() {
     resolver: zodResolver(newMenuSchema) as any,
   });
 
-  const addNewItem = async (values: MenuInput) => {
-    setIsSubmitting(true);
-    try {
-      const token = await getAuth();
-      const response = await fetch("http://127.0.0.1:5000/api/add-menu", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token || ""}`
-        },
-        body: JSON.stringify(values),
-      });
+  const handleAddNewClick = () => {
+    setEditingItem(null);
+    reset({
+      itemName: "",
+      category: "",
+      price: undefined,
+      cost: undefined,
+      quantity: undefined,
+      description: "",
+      image: "",
+    });
+    setImagePreview(null);
+    setIsOpen(true);
+  };
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.message || "Failed to add menu item");
+  const handleEditClick = (item: Menu) => {
+    setEditingItem(item);
+    reset({
+      itemName: item.itemName,
+      category: item.category,
+      price: item.price,
+      cost: item.cost,
+      quantity: item.quantity,
+      description: item.description,
+      image: item.image || "",
+    });
+    setImagePreview(item.image || null);
+    setIsOpen(true);
+  };
+
+  const onSubmit = async (values: MenuInput) => {
+    try {
+      if (editingItem) {
+        await updateMenuMutation({
+          ...editingItem,
+          ...values,
+          image: values.image || editingItem.image || "",
+        });
+        alert("Menu item updated successfully!");
+      } else {
+        await addMenuMutation(values);
+        alert("Menu item added successfully!");
       }
-      const newItem = await response.json();
-      setData((prev) => [...prev, newItem]);
 
       reset();
       setImagePreview(null);
       setIsOpen(false);
-      alert("Menu item added successfully!");
-    } catch (error) {
-      console.error("Failed to add menu item:", error);
-    } finally {
-      setIsSubmitting(false);
+      setEditingItem(null);
+    } catch (error: any) {
+      console.error("Failed to save menu item:", error);
+      alert(error.message || "Something went wrong.");
     }
   };
+
+  const columns = getColumns(handleEditClick);
 
   return (
     <>
@@ -112,21 +120,28 @@ export default function AdminMenuPage() {
           </p>
         </div>
 
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(open) => {
+          setIsOpen(open);
+          if (!open) {
+            setEditingItem(null);
+            reset();
+            setImagePreview(null);
+          }
+        }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={handleAddNewClick}>
               <PlusCircle className="mr-2 h-4 w-4" /> Add New Item
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[480px] max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden">
             <form
-              onSubmit={handleSubmit(addNewItem)}
+              onSubmit={handleSubmit(onSubmit)}
               className="flex flex-col max-h-[85vh]"
             >
               <DialogHeader className="p-6 pb-4 border-b">
-                <DialogTitle>Add New Menu</DialogTitle>
+                <DialogTitle>{editingItem ? "Edit Menu Item" : "Add New Menu"}</DialogTitle>
                 <DialogDescription>
-                  Add new items to the existing list of your menu.
+                  {editingItem ? "Edit the details of this existing menu item." : "Add new items to the existing list of your menu."}
                 </DialogDescription>
               </DialogHeader>
 
@@ -259,14 +274,14 @@ export default function AdminMenuPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? (
+                <Button type="submit" disabled={isAdding || isUpdating}>
+                  {isAdding || isUpdating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
-                      Adding...
+                      {editingItem ? "Saving..." : "Adding..."}
                     </>
                   ) : (
-                    "Add Item"
+                    editingItem ? "Save Changes" : "Add Item"
                   )}
                 </Button>
               </div>
@@ -276,7 +291,13 @@ export default function AdminMenuPage() {
       </section>
 
       <section className="mt-6">
-        <DataTable columns={columns} data={data} />
+        {isMenusLoading ? (
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <DataTable columns={columns} data={menus} />
+        )}
       </section>
     </>
   );

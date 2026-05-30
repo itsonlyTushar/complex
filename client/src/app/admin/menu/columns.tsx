@@ -2,8 +2,10 @@
 
 import { Menu } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
 
-export const columns: ColumnDef<Menu>[] = [
+export const getColumns = (onEdit: (item: Menu) => void): ColumnDef<Menu>[] => [
   {
     accessorKey: "id",
     header: "ID",
@@ -27,5 +29,22 @@ export const columns: ColumnDef<Menu>[] = [
   {
     accessorKey: "quantity",
     header: "Stock (Qty)",
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const menu = row.original;
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onEdit(menu)}
+          className="h-8 px-3 text-xs font-semibold text-primary hover:text-primary-foreground hover:bg-primary rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5"
+        >
+          <Edit className="h-3.5 w-3.5" /> Edit
+        </Button>
+      );
+    },
   },
 ];
