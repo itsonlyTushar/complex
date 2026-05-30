@@ -12,17 +12,21 @@ import {
   CheckCircle, Hash
 } from "lucide-react";
 import { Category } from "@/types";
-import { useGetCategories, useAddCategory } from "@/hooks/queries/useMenuQuery";
+import { useGetCategories } from "@/hooks/queries/useMenuQuery";
+import { useAddCategory, useUpdateCategory } from "@/hooks/mutations/useMenuMutation";
 
 export default function MenuSettingsPage() {
   const [newCategoryName, setNewCategoryName] = useState<string>("");
-
+  const [updatedCategory, setUpdatedCategory] = useState<string>("")
   // Feedback alerts state
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState<boolean>(false) 
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
   const { data: categories = [], isLoading: loading } = useGetCategories();
   const { mutateAsync: addCategoryMutation, isPending: submitting } = useAddCategory();
+  const { mutateAsync: addCategoryUpdate, isPending: updating } = useUpdateCategory();
 
   // Form submission handler
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -55,6 +59,42 @@ export default function MenuSettingsPage() {
       }, 3500);
     } catch (err: any) {
       console.error("Create category error:", err);
+      setErrorMsg(err.message || "Something went wrong. Please try again.");
+    }
+  };
+ 
+  const handleEditCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editingCategory) return;
+
+    const trimmedCat = updatedCategory.trim();
+    if (!trimmedCat) {
+      setErrorMsg("Category name cannot be empty.");
+      return;
+    }
+
+    if (categories.some(cat => cat.name.toLowerCase() === trimmedCat.toLowerCase() && cat.id !== editingCategory.id)) {
+      setErrorMsg("This category already exists.");
+      return;
+    }
+
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      await addCategoryUpdate({ id: editingCategory.id, name: trimmedCat });
+
+      setSuccessMsg(`Category successfully updated to "${trimmedCat}"!`);
+      setUpdatedCategory("");
+      setIsEditing(false);
+      setEditingCategory(null);
+
+      // Auto-dismiss success alert after 3.5s
+      setTimeout(() => {
+        setSuccessMsg(null);
+      }, 3500);
+    } catch (err: any) {
+      console.error("Update category error:", err);
       setErrorMsg(err.message || "Something went wrong. Please try again.");
     }
   };
@@ -147,7 +187,7 @@ export default function MenuSettingsPage() {
           >
             {submitting ? (
               <>
-                <Spinner className="mr-2 text-primary-foreground" />
+                <Spinner className="mr-2 text-primary-foreground animate-spin" />
                 Adding...
               </>
             ) : (
@@ -168,15 +208,77 @@ export default function MenuSettingsPage() {
           </span>
         </div>
 
-        <div className="border border-border py-4 px-2 rounded-xl max-h-72 overflow-y-auto">
+        <div className="border border-border py-2 px-3 rounded-xl max-h-72 overflow-y-auto divide-y divide-border/30">
           {
-            categories.map((cat) => (
-              <div className="" key={cat.id}>
-                <span>{cat.name}</span>
-              </div>
-            ))
-          }
+            categories.map((cat) => {
+              const isThisCategoryEditing = isEditing && editingCategory?.id === cat.id;
 
+              return (
+                <div 
+                  className="flex items-center justify-between py-2.5 hover:bg-muted/10 rounded-lg px-2 transition-all duration-200" 
+                  key={cat.id}
+                >
+                  {isThisCategoryEditing ? (
+                    <form onSubmit={handleEditCategory} className="flex flex-1 items-center gap-3">
+                      <div className="flex-1 relative">
+                        <Input
+                          value={updatedCategory}
+                          onChange={(e) => {
+                            setUpdatedCategory(e.target.value);
+                            if (errorMsg) setErrorMsg(null);
+                          }}
+                          placeholder="Category Name"
+                          disabled={updating}
+                          className="w-full h-9 bg-background/50 border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 rounded-lg px-3 transition-all duration-300 text-sm"
+                        />
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setIsEditing(false);
+                            setEditingCategory(null);
+                            setUpdatedCategory("");
+                            setErrorMsg(null);
+                          }}
+                          className="h-8 px-3 text-xs border-border/80 hover:bg-muted/50 rounded-lg"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          size="sm"
+                          disabled={updating}
+                          className="h-8 px-4 text-xs font-semibold bg-primary hover:bg-primary/95 text-primary-foreground rounded-lg shadow-sm"
+                        >
+                          {updating ? "Saving..." : "Save"}
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <span className="text-sm font-medium text-foreground/80">{cat.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditingCategory(cat);
+                          setUpdatedCategory(cat.name);
+                          setIsEditing(true);
+                          setErrorMsg(null);
+                        }}
+                        className="h-8 px-3 text-xs font-semibold text-primary hover:text-primary-foreground hover:bg-primary rounded-lg transition-all duration-200 cursor-pointer"
+                      >
+                        Edit
+                      </Button>
+                    </>
+                  )}
+                </div>
+              );
+            })
+          }
         </div>
       </div>
     </section>

@@ -1,9 +1,6 @@
-import { fetchCategories, addCategory } from "@/services/menu.service"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-
-export const MENU_KEYS = {
-    categories: () => ['categories'],
-}
+import { MENU_KEYS } from "@/constants/queryFactory"
+import { fetchCategories } from "@/services/menu.service"
+import { useQuery } from "@tanstack/react-query"
 
 export const useGetCategories = () => {
     return useQuery({
@@ -12,12 +9,3 @@ export const useGetCategories = () => {
     })
 }
 
-export const useAddCategory = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: addCategory,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: MENU_KEYS.categories() });
-        }
-    })
-}
