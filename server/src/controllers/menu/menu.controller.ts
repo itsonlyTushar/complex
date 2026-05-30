@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import {
     addCategory,
     addMenuService,
+    deleteCategory,
+    deleteMenuService,
     fetchCategory,
     fetchMenuService,
     updateCategory,
@@ -66,3 +68,21 @@ export const updateCategoryController = async (req: Request, res: Response) => {
         res.status(400).json({ message: err.message });
     }
 };
+
+export const deleteCategoryController = async (req: Request, res: Response) => {
+    try {
+        const data = await deleteCategory(req.body)
+        res.status(200).json(data);
+    } catch (err: any) {
+        res.status(400).json({ message: err.message })
+    }
+}
+
+export const deleteMenuController = async (req: Request, res: Response) => {
+    try {
+        const deletedItem = await deleteMenuService(req.body);
+        res.status(200).json(deletedItem);
+    } catch (error: any) {
+        res.status(400).json({ message: error.message });
+    }
+}

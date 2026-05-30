@@ -149,3 +149,23 @@ export const updateCategory = async (data: Category) => {
     })
     return updateCat
 }
+
+export const deleteCategory = async (data: Category) => {
+    const {id} = data
+    const deleteCat = await prisma.category.delete({
+        where: {
+            id
+        }
+    })
+    return deleteCat
+}
+
+export const deleteMenuService = async (data: { id: number }) => {
+    const { id } = data;
+    const deletedItem = await prisma.menu.delete({
+        where: {
+            id: Number(id)
+        }
+    });
+    return deletedItem;
+}
