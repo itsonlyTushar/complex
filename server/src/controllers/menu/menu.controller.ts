@@ -5,6 +5,7 @@ import {
     fetchCategory,
     fetchMenuService,
     updateCategory,
+    updateMenuService,
 } from "../../services/menu.service.js";
 
 export const addMenuController = async (req: Request, res: Response) => {
@@ -22,6 +23,16 @@ export const fetchMenuController = async (req: Request, res: Response) => {
         const restaurantId = (req as any).user?.restaurantId;
         const data = await fetchMenuService(Number(restaurantId));
         res.status(200).json(data);
+    } catch (error: any) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export const updateMenuController = async (req: Request, res: Response) => {
+    try {
+        const restaurantId = (req as any).user?.restaurantId;
+        const updatedItem = await updateMenuService(req.body, Number(restaurantId));
+        res.status(200).json(updatedItem);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
     }
