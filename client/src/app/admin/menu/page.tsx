@@ -24,6 +24,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { useGetCategories, useGetMenus } from "@/hooks/queries/useMenuQuery";
 import { useAddMenu, useUpdateMenu, useDeleteMenu } from "@/hooks/mutations/useMenuMutation";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -35,6 +45,8 @@ export default function AdminMenuPage() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [editingItem, setEditingItem] = useState<Menu | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
+  const [itemToDelete, setItemToDelete] = useState<Menu | null>(null);
 
   const { data: categories = [], isLoading: isCategoriesLoading } = useGetCategories();
   const { data: menus = [], isLoading: isMenusLoading } = useGetMenus();
@@ -85,15 +97,22 @@ export default function AdminMenuPage() {
     setIsOpen(true);
   };
 
-  const handleDeleteMenu = async (item: Menu) => {
-    if (confirm(`Are you sure you want to delete "${item.itemName}"?`)) {
-      try {
-        await deleteMenuMutation({ id: item.id });
-        alert("Menu item deleted successfully!");
-      } catch (error: any) {
-        console.error("Failed to delete menu item:", error);
-        alert(error.message || "Failed to delete item.");
-      }
+  const handleDeleteMenu = (item: Menu) => {
+    setItemToDelete(item);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteMenuMutation({ id: itemToDelete.id });
+      alert("Menu item deleted successfully!");
+    } catch (error: any) {
+      console.error("Failed to delete menu item:", error);
+      alert(error.message || "Failed to delete item.");
+    } finally {
+      setItemToDelete(null);
+      setDeleteConfirmOpen(false);
     }
   };
 
@@ -312,6 +331,21 @@ export default function AdminMenuPage() {
           <DataTable columns={columns} data={menus} />
         )}
       </section>
+
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Menu Item</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{itemToDelete?.itemName}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} variant="destructive">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

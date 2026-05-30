@@ -14,6 +14,16 @@ import {
 import { Category } from "@/types";
 import { useGetCategories } from "@/hooks/queries/useMenuQuery";
 import { useAddCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/mutations/useMenuMutation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function MenuSettingsPage() {
   const [newCategoryName, setNewCategoryName] = useState<string>("");
@@ -23,6 +33,8 @@ export default function MenuSettingsPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false) 
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
 
   const { data: categories = [], isLoading: loading } = useGetCategories();
   const { mutateAsync: addCategoryMutation, isPending: submitting } = useAddCategory();
@@ -100,20 +112,27 @@ export default function MenuSettingsPage() {
     }
   };
 
-  const handleDeleteCategory = async (cat: Category) => {
-    if (confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
-      setErrorMsg(null);
-      setSuccessMsg(null);
-      try {
-        await deleteCategoryMutation({ id: cat.id });
-        setSuccessMsg(`Category "${cat.name}" deleted successfully!`);
-        setTimeout(() => {
-          setSuccessMsg(null);
-        }, 3500);
-      } catch (err: any) {
-        console.error("Delete category error:", err);
-        setErrorMsg(err.message || "Failed to delete category.");
-      }
+  const handleDeleteCategory = (cat: Category) => {
+    setCategoryToDelete(cat);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      await deleteCategoryMutation({ id: categoryToDelete.id });
+      setSuccessMsg(`Category "${categoryToDelete.name}" deleted successfully!`);
+      setTimeout(() => {
+        setSuccessMsg(null);
+      }, 3500);
+    } catch (err: any) {
+      console.error("Delete category error:", err);
+      setErrorMsg(err.message || "Failed to delete category.");
+    } finally {
+      setCategoryToDelete(null);
+      setDeleteConfirmOpen(false);
     }
   };
 
@@ -309,6 +328,21 @@ export default function MenuSettingsPage() {
           }
         </div>
       </div>
+
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Category</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete category "{categoryToDelete?.name}"? All associated menu items might lose their category reference. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCategoryToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCategory} variant="destructive">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
