@@ -2,7 +2,8 @@ export interface Menu {
     id: number
     image?: string
     itemName: string
-    categoryId: number
+    category?: string
+    categoryId?: number | null
     price: number
     cost: number
     quantity: number

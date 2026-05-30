@@ -122,7 +122,7 @@ export default function AdminMenuPage() {
         await updateMenuMutation({
           ...editingItem,
           ...values,
-          image: values.image || editingItem.image || "",
+          image: values.image || "",
         });
         alert("Menu item updated successfully!");
       } else {

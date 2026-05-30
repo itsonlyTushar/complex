@@ -1,7 +1,8 @@
 import { prisma } from "../config/db.js"
 import type { Category, Menu } from "../types/menu.types.js"
+import { uploadImageToCloudinary } from "../config/cloudinary.js"
 
-export const addMenuService = async (data: any, restaurantId: number) => {
+export const addMenuService = async (data: Menu, restaurantId: number) => {
     const { itemName, category, image, price, cost, quantity, description } = data
 
     const exsistingItem = await prisma.menu.findFirst({
@@ -31,7 +32,7 @@ export const addMenuService = async (data: any, restaurantId: number) => {
     const newItem = await prisma.menu.create({
         data: {
             itemName,
-            image: image || "",
+            image: image ? await uploadImageToCloudinary(image) : "",
             categoryId: resolvedCategoryId,
             price: Math.round(Number(price)),
             cost: Math.round(Number(cost)),
@@ -66,7 +67,7 @@ export const fetchMenuService = async (restaurandId: number) => {
     }));
 }
 
-export const updateMenuService = async (data: any, restaurantId: number) => {
+export const updateMenuService = async (data: Menu, restaurantId: number) => {
     const { id, itemName, category, image, price, cost, quantity, description } = data;
 
     let resolvedCategoryId: number | null = null;
@@ -88,7 +89,7 @@ export const updateMenuService = async (data: any, restaurantId: number) => {
         },
         data: {
             itemName,
-            image: image || "",
+            image: image ? await uploadImageToCloudinary(image) : "",
             categoryId: resolvedCategoryId,
             price: Math.round(Number(price)),
             cost: Math.round(Number(cost)),
