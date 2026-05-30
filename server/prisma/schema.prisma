@@ -40,16 +40,18 @@ model Restaurant {
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
-  name         String
-  email        String      @unique
-  password     String
-  role         Role
-  createdAt    DateTime    @default(now())
-  foodCourtId  Int?
-  foodCourt    FoodCourt?  @relation(fields: [foodCourtId], references: [id])
-  restaurantId Int?
-  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+  id                    Int         @id @default(autoincrement())
+  name                  String
+  email                 String      @unique
+  password              String
+  role                  Role
+  createdAt             DateTime    @default(now())
+  foodCourtId           Int?
+  foodCourt             FoodCourt?  @relation(fields: [foodCourtId], references: [id])
+  restaurantId          Int?
+  restaurant            Restaurant? @relation(fields: [restaurantId], references: [id])
+  logo                  String?
+  restaurantDescription String?
 }
 
 model Menu {

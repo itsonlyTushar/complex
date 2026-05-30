@@ -17,9 +17,31 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { useUploadLogo } from "@/hooks/mutations/useUserMutation";
 
 const AccountSettings = () => {
   const { data: user, isLoading, isError } = useGetMe();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { mutate: uploadLogoMutate, isPending: isUploading } = useUploadLogo();
+  const [fileError, setFileError] = React.useState<string | null>(null);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setFileError("File size must be under 2MB");
+      return;
+    }
+    setFileError(null);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      uploadLogoMutate(base64String);
+    };
+    reader.readAsDataURL(file);
+  };
 
   if (isLoading) {
     return <div className="p-8 text-muted-foreground animate-pulse">Loading account details...</div>;
@@ -68,7 +90,7 @@ const AccountSettings = () => {
       <div className="flex items-center gap-6">
         <Image
           src={
-            "https://images.unsplash.com/photo-1506863530036-1efeddceb993?q=80&w=1044&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            user.logo || "https://images.unsplash.com/photo-1506863530036-1efeddceb993?q=80&w=1044&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           }
           alt="profile"
           width={80}
@@ -77,20 +99,65 @@ const AccountSettings = () => {
         />
         <div className="space-y-2">
           <div className="flex gap-3">
-            <Button variant="outline" size="sm">
-              Change Logo
-            </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleLogoChange}
+              accept="image/*"
+              className="hidden"
+            />
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
             >
-              Remove
+              {isUploading ? "Uploading..." : "Change Logo"}
             </Button>
+            {user.logo && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    disabled={isUploading}
+                  >
+                    Remove
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Remove Logo</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to remove your profile logo? This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <DialogClose asChild>
+                      <Button
+                        variant="destructive"
+                        onClick={() => uploadLogoMutate("")}
+                      >
+                        Remove Logo
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
           <p className="text-sm text-muted-foreground">
             supports PNGs, JPEGs and GIFs under 2MB
           </p>
+          {fileError && (
+            <p className="text-sm font-medium text-destructive mt-1">
+              {fileError}
+            </p>
+          )}
         </div>
       </div>
 

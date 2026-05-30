@@ -16,3 +16,20 @@ export const fetchMe = async () => {
     }
     return response.json();
 }
+
+export const uploadLogo = async (logo: string) => {
+    let token = await getAuth()
+
+    const response = await fetch(`${API_URL}/users/update-logo`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify({ logo })
+    })
+    if(!response.ok) {
+        throw new Error("Failed to upload logo")
+    }
+    return response.json()
+}
