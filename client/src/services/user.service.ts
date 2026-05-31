@@ -33,3 +33,21 @@ export const uploadLogo = async (logo: string) => {
     }
     return response.json()
 }
+
+export const updateRestaurantStatus = async (isClosed: boolean) => {
+    let token = await getAuth()
+
+    const response = await fetch(`${API_URL}/users/update-restaurant-status`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify({ isClosed })
+    })
+    if(!response.ok) {
+        const errData = await response.json().catch(() => ({}))
+        throw new Error(errData.message || "Failed to update store status")
+    }
+    return response.json()
+}

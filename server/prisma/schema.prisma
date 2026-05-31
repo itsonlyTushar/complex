@@ -37,6 +37,7 @@ model Restaurant {
   vendors     User[]
   menus       Menu[]
   categories  Category[]
+  isClosed    Boolean    @default(false)
 }
 
 model User {

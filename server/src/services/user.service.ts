@@ -13,7 +13,14 @@ export const userService = async (userId: number) => {
                 restaurantId: true,
                 foodCourtId: true,
                 logo: true,
-                restaurantDescription: true
+                restaurantDescription: true,
+                restaurant: {
+                    select: {
+                        id: true,
+                        name: true,
+                        isClosed: true
+                    }
+                }
             }
         });
         return user;
@@ -22,6 +29,25 @@ export const userService = async (userId: number) => {
         throw error;
     }
 }
+
+export const updateRestaurantStatus = async (restaurantId: number, isClosed: boolean) => {
+    try {
+        const restaurant = await prisma.restaurant.update({
+            where: { id: restaurantId },
+            data: { isClosed },
+            select: {
+                id: true,
+                name: true,
+                isClosed: true
+            }
+        });
+        return restaurant;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
 
 export const uploadLogo = async (userId: number, logo: string | URL) => {
     try {
