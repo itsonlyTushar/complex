@@ -10,6 +10,10 @@ const settingsNavItems = [
     href: "/court/settings",
   },
   {
+    title: "Restaurants",
+    href: "/court/settings/restaurants",
+  },
+  {
     title: "Account",
     href: "/court/settings/accounts",
   },

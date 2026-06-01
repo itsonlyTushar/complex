@@ -32,3 +32,20 @@ export const onboardRestaurant = async (data: any) => {
     }
     return response.json();
 }
+
+export const deleteRestaurant = async (id: number) => {
+    let token = await getAuth()
+    const response = await fetch(`http://localhost:5000/api/court/restaurants/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        }
+    })
+    
+    if(!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.message || "Failed to delete restaurant")
+    }
+    return response.json();
+}
