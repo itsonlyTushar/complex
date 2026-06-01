@@ -14,6 +14,17 @@ import { COURT_NAV_DATA } from "@/constants/navConstants";
 import { NavLink } from "../court/nav-link";
 import { LogOut } from "lucide-react";
 import { logout } from "@/app/actions/auth";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 export const CourtSidebar = ({
   ...props
@@ -43,14 +54,34 @@ export const CourtSidebar = ({
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={async () => await logout()}
-              tooltip={"Logout"}
-              className="text-destructive hover:text-desctructive"
-            >
-              <LogOut className="size-4" />
-              <span>Logout</span>
-            </SidebarMenuButton>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <SidebarMenuButton
+                  tooltip={"Logout"}
+                  className="text-destructive hover:text-destructive cursor-pointer"
+                >
+                  <LogOut className="size-4" />
+                  <span>Logout</span>
+                </SidebarMenuButton>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will be signed out of your Food Court session. Any unsaved changes may be lost.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => await logout()}
+                    variant="destructive"
+                  >
+                    Log Out
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

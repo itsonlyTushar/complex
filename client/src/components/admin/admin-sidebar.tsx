@@ -15,6 +15,18 @@ import { LogOut } from "lucide-react";
 import { NavLink } from "./nav-link";
 import { useGetMe } from "@/hooks/queries/useUserQuery";
 import Image from "next/image";
+import { logout } from "@/app/actions/auth";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 export function AdminSidebar({
   ...props
@@ -65,13 +77,34 @@ export function AdminSidebar({
       <SidebarFooter>
         <SidebarMenu className="px-2">
           <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Logout"
-              className="text-destructive hover:text-destructive"
-            >
-              <LogOut className="size-4" />
-              <span>Logout</span>
-            </SidebarMenuButton>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <SidebarMenuButton
+                  tooltip="Logout"
+                  className="text-destructive hover:text-destructive cursor-pointer"
+                >
+                  <LogOut className="size-4" />
+                  <span>Logout</span>
+                </SidebarMenuButton>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will be signed out of your admin dashboard. Any unsaved changes may be lost.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => await logout()}
+                    variant="destructive"
+                  >
+                    Log Out
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
