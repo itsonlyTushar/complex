@@ -6,17 +6,16 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/lib/toast";
 
 export default function LoginPage() {
   const router = useRouter();
   const { register, handleSubmit } = useForm();
 
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   async function handleLogin(data: any) {
     setLoading(true);
-    setError(null);
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
@@ -33,6 +32,8 @@ export default function LoginPage() {
       document.cookie = `token=${result.token}; path=/; max-age=86400; SameSite=Lax`;
       document.cookie = `user_role=${result.user.role}; path=/; max-age=86400; SameSite=Lax`;
 
+      toast.success("Welcome back! Login successful.");
+
       const role = result.user.role;
       if (role === "SUPER_ADMIN") {
         router.push("/sp");
@@ -42,7 +43,7 @@ export default function LoginPage() {
         router.push("/admin");
       }
     } catch (err: any) {
-      setError(err.message);
+      toast.error(err, "Login failed");
     } finally {
       setLoading(false);
     }
@@ -80,8 +81,6 @@ export default function LoginPage() {
               {...register("password")}
             />
           </Field>
-
-          {error && <p className="text-sm text-red-500">{error}</p>}
         </div>
 
         <Button type="submit" className="w-full mt-2" disabled={loading}>
@@ -91,3 +90,4 @@ export default function LoginPage() {
     </form>
   );
 }
+

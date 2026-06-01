@@ -24,6 +24,7 @@ import { restaurantFormFields } from "@/constants/formFields";
 import { useGetRestaurants, COURT_KEYS } from "@/hooks/queries/useCourtQuery";
 import { onboardRestaurant } from "@/services/court.service";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/lib/toast";
 
 function RestaurantsPage() {
   const [open, setOpen] = useState(false);
@@ -51,10 +52,10 @@ function RestaurantsPage() {
       queryClient.invalidateQueries({ queryKey: COURT_KEYS.restaurants() });
       reset();
       setOpen(false);
-      alert("Restaurant onboarded successfully!");
+      toast.success("Restaurant onboarded successfully!");
     } catch (error: any) {
       console.error("Onboarding error:", error);
-      alert(error.message || "An error occurred while onboarding.");
+      toast.error(error, "An error occurred while onboarding.");
     } finally {
       setIsSubmitting(false);
     }

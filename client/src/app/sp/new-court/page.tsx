@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { formFields } from "@/constants/formFields"
+import { toast } from "@/lib/toast"
 
 const CourtOnboard = () => {
   const [data, setData] = useState<FoodCourt[]>([]);
@@ -39,11 +40,11 @@ const CourtOnboard = () => {
         throw new Error(result.message || "Failed to onboard food court");
       }
 
-      alert("Food Court onboarded successfully!");
+      toast.success("Food Court onboarded successfully!");
       reset();
     } catch (error: any) {
       console.error("Onboarding error:", error);
-      alert(error.message || "An error occurred while onboarding.");
+      toast.error(error, "An error occurred while onboarding.");
     } finally {
       setIsSubmitting(false);
     }

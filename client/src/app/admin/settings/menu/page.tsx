@@ -1,16 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  FolderPlus, AlertCircle,
-  CheckCircle, Hash
-} from "lucide-react";
+import { FolderPlus, Hash } from "lucide-react";
 import { Category } from "@/types";
 import { useGetCategories } from "@/hooks/queries/useMenuQuery";
 import { useAddCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/mutations/useMenuMutation";
@@ -24,13 +21,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "@/lib/toast";
 
 export default function MenuSettingsPage() {
   const [newCategoryName, setNewCategoryName] = useState<string>("");
   const [updatedCategory, setUpdatedCategory] = useState<string>("")
-  // Feedback alerts state
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false) 
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
@@ -48,31 +43,22 @@ export default function MenuSettingsPage() {
     // Client-side validations
     const trimmedName = newCategoryName.trim();
     if (!trimmedName) {
-      setErrorMsg("Category name cannot be empty.");
+      toast.warning("Category name cannot be empty.");
       return;
     }
 
     if (categories.some(cat => cat.name.toLowerCase() === trimmedName.toLowerCase())) {
-      setErrorMsg("This category already exists.");
+      toast.warning("This category already exists.");
       return;
     }
 
-    setErrorMsg(null);
-    setSuccessMsg(null);
-
     try {
       await addCategoryMutation({ name: trimmedName });
-
       setNewCategoryName("");
-      setSuccessMsg(`Category "${trimmedName}" added successfully!`);
-
-      // Auto-dismiss success alert after 3.5s
-      setTimeout(() => {
-        setSuccessMsg(null);
-      }, 3500);
+      toast.success(`Category "${trimmedName}" added successfully!`);
     } catch (err: any) {
       console.error("Create category error:", err);
-      setErrorMsg(err.message || "Something went wrong. Please try again.");
+      toast.error(err, "Something went wrong. Please try again.");
     }
   };
  
@@ -83,32 +69,24 @@ export default function MenuSettingsPage() {
 
     const trimmedCat = updatedCategory.trim();
     if (!trimmedCat) {
-      setErrorMsg("Category name cannot be empty.");
+      toast.warning("Category name cannot be empty.");
       return;
     }
 
     if (categories.some(cat => cat.name.toLowerCase() === trimmedCat.toLowerCase() && cat.id !== editingCategory.id)) {
-      setErrorMsg("This category already exists.");
+      toast.warning("This category already exists.");
       return;
     }
 
-    setErrorMsg(null);
-    setSuccessMsg(null);
     try {
       await addCategoryUpdate({ id: editingCategory.id, name: trimmedCat });
-
-      setSuccessMsg(`Category successfully updated to "${trimmedCat}"!`);
+      toast.success(`Category successfully updated to "${trimmedCat}"!`);
       setUpdatedCategory("");
       setIsEditing(false);
       setEditingCategory(null);
-
-      // Auto-dismiss success alert after 3.5s
-      setTimeout(() => {
-        setSuccessMsg(null);
-      }, 3500);
     } catch (err: any) {
       console.error("Update category error:", err);
-      setErrorMsg(err.message || "Something went wrong. Please try again.");
+      toast.error(err, "Something went wrong. Please try again.");
     }
   };
 
@@ -119,17 +97,12 @@ export default function MenuSettingsPage() {
 
   const confirmDeleteCategory = async () => {
     if (!categoryToDelete) return;
-    setErrorMsg(null);
-    setSuccessMsg(null);
     try {
       await deleteCategoryMutation({ id: categoryToDelete.id });
-      setSuccessMsg(`Category "${categoryToDelete.name}" deleted successfully!`);
-      setTimeout(() => {
-        setSuccessMsg(null);
-      }, 3500);
+      toast.success(`Category "${categoryToDelete.name}" deleted successfully!`);
     } catch (err: any) {
       console.error("Delete category error:", err);
-      setErrorMsg(err.message || "Failed to delete category.");
+      toast.error(err, "Failed to delete category.");
     } finally {
       setCategoryToDelete(null);
       setDeleteConfirmOpen(false);
@@ -156,38 +129,6 @@ export default function MenuSettingsPage() {
 
       <Separator className="my-6 bg-border/60" />
 
-      {/* Error & Success Alert Bars with AnimatePresence */}
-      <AnimatePresence mode="wait">
-        {errorMsg && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-center gap-3 p-4 mb-6 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium shadow-sm"
-          >
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <span className="flex-1">{errorMsg}</span>
-            <button
-              onClick={() => setErrorMsg(null)}
-              className="text-xs opacity-70 hover:opacity-100 transition-opacity font-bold underline cursor-pointer"
-            >
-              Dismiss
-            </button>
-          </motion.div>
-        )}
-
-        {successMsg && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-center gap-3 p-4 mb-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium shadow-sm"
-          >
-            <CheckCircle className="w-5 h-5 shrink-0" />
-            <span className="flex-1">{successMsg}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Create Category Form */}
       <div className="bg-muted/30 dark:bg-muted/10 border border-border/40 rounded-xl p-6 mb-8 shadow-inner">
@@ -206,7 +147,6 @@ export default function MenuSettingsPage() {
                 value={newCategoryName}
                 onChange={(e) => {
                   setNewCategoryName(e.target.value);
-                  if (errorMsg) setErrorMsg(null); // Clear errors dynamically as they type
                 }}
                 placeholder="e.g. Appetizers, Desserts, Beverages"
                 disabled={submitting}
@@ -262,7 +202,6 @@ export default function MenuSettingsPage() {
                           value={updatedCategory}
                           onChange={(e) => {
                             setUpdatedCategory(e.target.value);
-                            if (errorMsg) setErrorMsg(null);
                           }}
                           placeholder="Category Name"
                           disabled={updating}
@@ -278,7 +217,6 @@ export default function MenuSettingsPage() {
                             setIsEditing(false);
                             setEditingCategory(null);
                             setUpdatedCategory("");
-                            setErrorMsg(null);
                           }}
                           className="h-8 px-3 text-xs border-border/80 hover:bg-muted/50 rounded-lg"
                         >
@@ -305,7 +243,6 @@ export default function MenuSettingsPage() {
                             setEditingCategory(cat);
                             setUpdatedCategory(cat.name);
                             setIsEditing(true);
-                            setErrorMsg(null);
                           }}
                           className="h-8 px-3 text-xs font-semibold text-primary hover:text-primary-foreground hover:bg-primary rounded-lg transition-all duration-200 cursor-pointer"
                         >

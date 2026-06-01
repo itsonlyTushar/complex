@@ -40,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "@/lib/toast";
 
 export default function AdminMenuPage() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -106,10 +107,10 @@ export default function AdminMenuPage() {
     if (!itemToDelete) return;
     try {
       await deleteMenuMutation({ id: itemToDelete.id });
-      alert("Menu item deleted successfully!");
+      toast.success("Menu item deleted successfully!");
     } catch (error: any) {
       console.error("Failed to delete menu item:", error);
-      alert(error.message || "Failed to delete item.");
+      toast.error(error, "Failed to delete item.");
     } finally {
       setItemToDelete(null);
       setDeleteConfirmOpen(false);
@@ -124,10 +125,10 @@ export default function AdminMenuPage() {
           ...values,
           image: values.image || "",
         });
-        alert("Menu item updated successfully!");
+        toast.success("Menu item updated successfully!");
       } else {
         await addMenuMutation(values);
-        alert("Menu item added successfully!");
+        toast.success("Menu item added successfully!");
       }
 
       reset();
@@ -136,7 +137,7 @@ export default function AdminMenuPage() {
       setEditingItem(null);
     } catch (error: any) {
       console.error("Failed to save menu item:", error);
-      alert(error.message || "Something went wrong.");
+      toast.error(error, "Something went wrong.");
     }
   };
 

@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import ReactQueryProvider from "@/lib/react-query";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,9 +38,11 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <Toaster closeButton richColors position="top-right" />
           </ThemeProvider>
         </ReactQueryProvider>
       </body>
     </html>
   );
 }
+
