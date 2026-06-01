@@ -4,9 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SidebarMenuButton } from "../ui/sidebar";
 import { LayoutDashboard, Settings, Store, type LucideIcon } from "lucide-react";
+import { MdOutlineTableRestaurant } from "react-icons/md";
 
-const ICON_MAP: Record<string, LucideIcon> = {
+const ICON_MAP: Record<string, React.ComponentType<any>> = {
   LayoutDashboard,
+  MdOutlineTableRestaurant,
   Store,
   Settings,
 };

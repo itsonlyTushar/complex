@@ -24,9 +24,13 @@ export const COURT_NAV_DATA: NavItem[] = [
   {
     title: "Restaurants", url: "/court/restaurants", iconName: "Store"
   },
+      {
+    title: "Tables", url: "/court/tables", iconName: "MdOutlineTableRestaurant"
+  },
   {
     title: "Settings", url: "/court/settings", iconName: "Settings"
   }
+
 ]
 
 

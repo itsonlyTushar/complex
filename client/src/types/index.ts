@@ -62,3 +62,23 @@ export type Category = {
     name: string
     restaurantId?: number | null
 }
+
+
+// types for the court/tables 
+
+export interface PlacedItem {
+    id: string
+    type: string
+    x: number
+    y: number
+    width: number
+    height: number
+    rotation?: number
+}
+
+export interface Line {
+    x1: number
+    y1: number
+    x2: number
+    y2: number
+}
