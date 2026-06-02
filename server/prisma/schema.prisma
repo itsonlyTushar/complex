@@ -25,6 +25,20 @@ model FoodCourt {
   createdAt   DateTime     @default(now())
   restaurants Restaurant[]
   admins      User[]
+  tables      Table[]
+}
+
+model Table {
+  id          Int        @id @default(autoincrement())
+  number      String
+  occupacy    Int
+  shape       String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  foodCourt   FoodCourt? @relation(fields: [foodCourtId], references: [id])
+  foodCourtId Int?
+
+  @@unique([foodCourtId, number])
 }
 
 model Restaurant {
