@@ -3,6 +3,7 @@ import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
 import menuRoutes from "./routes/menu.routes.js"
 import courtRoutes from "./routes/court.routes.js"
+import tableRoutes from "./routes/tables.routes.js"
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.use("/api/auth", authRoutes)
 app.use("/api", userRoutes)
 app.use("/api", menuRoutes)
 app.use("/api/court", courtRoutes)
+app.use("/api", tableRoutes)
 
 export default app;

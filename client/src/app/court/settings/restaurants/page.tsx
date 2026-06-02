@@ -142,7 +142,6 @@ export default function CourtSettingsRestaurantsPage() {
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDelete(restaurant)}
-                            className="bg-destructive hover:bg-destructive/90 text-white"
                           >
                             {deletingId === restaurant.id ? "Deleting..." : "Delete"}
                           </AlertDialogAction>

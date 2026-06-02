@@ -13,6 +13,11 @@ const settingsNavItems = [
     title: "Restaurants",
     href: "/court/settings/restaurants",
   },
+    {
+    title: "Tables",
+    href: "/court/settings/tables",
+  },
+  
   {
     title: "Account",
     href: "/court/settings/accounts",
@@ -21,6 +26,7 @@ const settingsNavItems = [
     title: "Payments",
     href: "/court/settings/payments",
   },
+
 ];
 
 export default function SettingsLayout({

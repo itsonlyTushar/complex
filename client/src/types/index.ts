@@ -65,7 +65,6 @@ export type Category = {
 
 
 // types for the court/tables 
-
 export interface PlacedItem {
     id: string
     type: string
@@ -81,4 +80,17 @@ export interface Line {
     y1: number
     x2: number
     y2: number
+}
+
+
+// types for the court to create new table
+
+export interface Table {
+    id?: number;
+    foodCourtId: number;
+    number: string;
+    occupacy: number;
+    shape: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }

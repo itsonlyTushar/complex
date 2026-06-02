@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { number, z } from "zod"
 
 export const signupSchema = z.object({
     restaurantName: z.string().min(1, "Restaurant Name is required"),
@@ -28,6 +28,14 @@ export const newMenuSchema = z.object({
     description: z.string().min(1, "Description is required"), 
 })
 
+// Table form fields schema
+export const newTableSchema = z.object({
+    number: z.number().positive("Price must be greated than 0"),
+    occupacy: z.number().min(0, "Add proper value"),
+    shape: z.string().min(1, "shape is required")
+})
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type FoodCourtSignUp = z.infer<typeof foodCourtSchema>;
 export type MenuInput = z.infer<typeof newMenuSchema>;
+export type TableInput = z.infer<typeof newTableSchema>
