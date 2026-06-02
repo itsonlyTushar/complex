@@ -50,3 +50,22 @@ export const deleteRestaurantService = async (restaurantId: number, foodCourtId:
     });
 };
 
+export const editRestaurantService = async (restaurantId: number, foodCourtId: number, updateData: { name?: string; location?: string; isClosed?: boolean }) => {
+    const restaurant = await prisma.restaurant.findUnique({
+        where: { id: restaurantId }
+    });
+
+    if (!restaurant) {
+        throw new Error("Restaurant not found");
+    }
+
+    if (restaurant.foodCourtId !== foodCourtId) {
+        throw new Error("Unauthorized to edit this restaurant");
+    }
+
+    return await prisma.restaurant.update({
+        where: { id: restaurantId },
+        data: updateData
+    });
+};
+

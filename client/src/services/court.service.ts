@@ -48,4 +48,22 @@ export const deleteRestaurant = async (id: number) => {
         throw new Error(result.message || "Failed to delete restaurant")
     }
     return response.json();
+}
+
+export const editRestaurant = async (id: number, data: any) => {
+    let token = await getAuth()
+    const response = await fetch(`http://localhost:5000/api/court/restaurants/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify(data)
+    })
+    
+    if(!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.message || "Failed to edit restaurant")
+    }
+    return response.json();
 }

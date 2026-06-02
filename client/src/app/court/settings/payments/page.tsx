@@ -9,9 +9,6 @@ export default function page() {
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Payments</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage the payments controlls
-          </p>
         </div>
       </div>
 

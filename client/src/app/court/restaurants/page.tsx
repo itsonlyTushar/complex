@@ -2,6 +2,7 @@
 
 import { DataTable } from "@/app/admin/payments/data-table";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { columns } from "./columns";
@@ -122,7 +123,9 @@ function RestaurantsPage() {
 
       <section className="mx-2">
         {isLoading ? (
-          <div>Loading...</div>
+          <div className="flex w-full items-center justify-center p-12 min-h-[200px]">
+            <Spinner className="h-8 w-8 text-primary" />
+          </div>
         ) : isError ? (
           <div>Error: {error?.message}</div>
         ) : (

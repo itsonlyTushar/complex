@@ -40,9 +40,7 @@ function Tables() {
             <div className="mb-6 flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight mb-2">Manage Tables</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Create, organize, and manage the tables in your food court.
-                    </p>
+
                 </div>
             </div>
 
@@ -55,7 +53,7 @@ function Tables() {
 
                     <form onSubmit={handleAddNewTable} className="space-y-4">
                         <div>
-                            <label htmlFor="number" className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            <label htmlFor="number" className="block text-xs font-semibold tracking-wider text-muted-foreground mb-1.5">
                                 Table Number
                             </label>
                             <input
@@ -71,7 +69,7 @@ function Tables() {
                         </div>
 
                         <div>
-                            <label htmlFor="occupacy" className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            <label htmlFor="occupacy" className="block text-xs font-semibold tracking-wider text-muted-foreground mb-1.5">
                                 Max Occupancy
                             </label>
                             <input
@@ -87,7 +85,7 @@ function Tables() {
                         </div>
 
                         <div>
-                            <label htmlFor="shape" className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            <label htmlFor="shape" className="block text-xs font-semibold tracking-wider text-muted-foreground mb-1.5">
                                 Shape
                             </label>
                             <Controller
