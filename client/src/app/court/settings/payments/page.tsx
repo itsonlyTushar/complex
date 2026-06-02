@@ -1,5 +1,49 @@
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import React from "react";
 
 export default function page() {
-  return <div>page</div>;
+  return (
+
+    <section className="bg-card rounded-xl border shadow-sm p-6 h-full flex flex-col">
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Payments</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage the payments controlls
+          </p>
+        </div>
+      </div>
+
+      <section className="flex gap-5 justify-around">
+
+      <div className="flex gap-2 items-center">
+        <Switch id="stripe" />
+        <div>
+          <Label
+            htmlFor="stripe"
+            className="text-base font-semibold leading-none cursor-pointer"
+            >
+            Stripe
+          </Label>
+          <span className="text-xs text-muted-foreground ">Activate Stripe Payments</span>
+        </div>
+      </div>
+
+      <div className="flex gap-2 items-center">
+        <Switch id="razor-pay" />
+        <div>
+          <Label
+            htmlFor="razor-pay"
+            className="text-base font-semibold leading-none cursor-pointer"
+          >
+            Razor Pay
+          </Label>
+          <span className="text-xs text-muted-foreground ">Activate Razor Pay Payments</span>
+        </div>
+      </div>
+      </section>
+
+    </section>
+  )
 }

@@ -9,10 +9,6 @@ const settingsNavItems = [
     title: "General",
     href: "/court/settings",
   },
-  {
-    title: "Restaurants",
-    href: "/court/settings/restaurants",
-  },
     {
     title: "Tables",
     href: "/court/settings/tables",
