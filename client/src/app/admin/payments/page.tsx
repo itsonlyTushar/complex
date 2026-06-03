@@ -1,4 +1,4 @@
-import { Payment } from "@/types";
+import { Payment } from "@/types/payment.types";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 

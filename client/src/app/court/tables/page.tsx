@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
-import { PlacedItem, Line } from "@/types";
+import { PlacedItem, Line } from "@/types/table.types";
 import { RotateCw, Trash2 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 

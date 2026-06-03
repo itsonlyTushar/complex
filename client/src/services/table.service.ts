@@ -1,5 +1,5 @@
 import { getAuth } from "@/app/actions/auth";
-import { Table } from "@/types";
+import { Table } from "@/types/table.types";
 
 export const addTable = async (data: Table): Promise<Table> => {
     let token = await getAuth()

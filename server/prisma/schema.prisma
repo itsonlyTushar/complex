@@ -23,6 +23,7 @@ model FoodCourt {
   name        String
   location    String?
   createdAt   DateTime     @default(now())
+  currancy    String       @default("USD")
   restaurants Restaurant[]
   admins      User[]
   tables      Table[]

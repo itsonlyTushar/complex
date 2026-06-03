@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { FolderPlus, Hash } from "lucide-react";
-import { Category } from "@/types";
+import { Category } from "@/types/menu.types";
 import { useGetCategories } from "@/hooks/queries/useMenuQuery";
 import { useAddCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/mutations/useMenuMutation";
 import {

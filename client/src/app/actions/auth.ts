@@ -1,6 +1,6 @@
 'use server'
 
-import { Profile } from "@/types"
+import { Profile } from "@/types/user.types"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 

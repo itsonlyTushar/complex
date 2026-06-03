@@ -1,5 +1,5 @@
 "use client";
-import { Payment } from "@/types";
+import { Payment } from "@/types/payment.types";
 import { ColumnDef } from "@tanstack/react-table";
 
 export const columns: ColumnDef<Payment>[] = [

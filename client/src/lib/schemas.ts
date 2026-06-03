@@ -14,6 +14,7 @@ export const foodCourtSchema = z.object({
     managementDetails: z.string().min(1, 'Detail is required'),
     address: z.string().min(10, "Enter Valid Address"),
     location: z.string().min(1, "Location is required"),
+    currancy: z.string().min(1, "Currency is required"),
     password: z.string().min(6, "Password must be at least 6 characters")
 })
 

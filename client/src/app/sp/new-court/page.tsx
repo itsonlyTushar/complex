@@ -2,9 +2,9 @@
 
 import { foodCourtSchema, FoodCourtSignUp } from "@/lib/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { FoodCourt } from "@/types"
+import { useState, Fragment } from "react"
+import { useForm, Controller } from "react-hook-form"
+import { FoodCourt } from "@/types/restaurant.types"
 import {
   Field,
   FieldLabel,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formFields } from "@/constants/formFields"
 import { toast } from "@/lib/toast"
 
@@ -19,7 +20,7 @@ const CourtOnboard = () => {
   const [data, setData] = useState<FoodCourt[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { handleSubmit, register, reset, formState: { errors } } = useForm<FoodCourtSignUp>({
+  const { handleSubmit, register, reset, control, formState: { errors } } = useForm<FoodCourtSignUp>({
     resolver: zodResolver(foodCourtSchema)
   });
 
@@ -66,26 +67,63 @@ const CourtOnboard = () => {
             className="space-y-6"
           >
             <div className="space-y-4">
-              {formFields.map((field) => (
-                <div key={field.name} className="flex flex-col gap-1.5">
-                  <Field>
-                    <FieldLabel htmlFor={field.id}>
-                      {field.label}
-                    </FieldLabel>
-                    <Input
-                      id={field.id}
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      {...register(field.name)}
-                    />
-                  </Field>
-                  {errors[field.name] && (
-                    <FieldError>
-                      {errors[field.name]?.message}
-                    </FieldError>
-                  )}
-                </div>
-              ))}
+              {formFields.map((field) => {
+                const renderField = (
+                  <div key={field.name} className="flex flex-col gap-1.5">
+                    <Field>
+                      <FieldLabel htmlFor={field.id}>
+                        {field.label}
+                      </FieldLabel>
+                      <Input
+                        id={field.id}
+                        type={field.type}
+                        placeholder={field.placeholder}
+                        {...register(field.name)}
+                      />
+                    </Field>
+                    {errors[field.name] && (
+                      <FieldError>
+                        {errors[field.name]?.message}
+                      </FieldError>
+                    )}
+                  </div>
+                );
+
+                if (field.name === "password") {
+                  return (
+                    <Fragment key="currency-and-password">
+                      <div className="flex flex-col gap-1.5">
+                        <Field>
+                          <FieldLabel htmlFor="currancy">Currency</FieldLabel>
+                          <Controller
+                            name="currancy"
+                            control={control}
+                            render={({ field: selectField }) => (
+                              <Select onValueChange={selectField.onChange} value={selectField.value || ""}>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select Currency" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="USD">USD ($)</SelectItem>
+                                  <SelectItem value="INR">INR (₹)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          />
+                        </Field>
+                        {errors.currancy && (
+                          <FieldError>
+                            {errors.currancy.message}
+                          </FieldError>
+                        )}
+                      </div>
+                      {renderField}
+                    </Fragment>
+                  );
+                }
+
+                return renderField;
+              })}
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>

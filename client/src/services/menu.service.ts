@@ -1,5 +1,5 @@
 import { getAuth } from "@/app/actions/auth"
-import { Category, Menu } from "@/types"
+import { Category, Menu } from "@/types/menu.types"
 
 export const fetchCategories = async (): Promise<Category[]> => {
     let token = await getAuth()

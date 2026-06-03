@@ -2,7 +2,7 @@
 import { MdDeleteOutline } from "react-icons/md";
 import { MdOutlineEdit } from "react-icons/md";
 
-import { Menu } from "@/types";
+import { Menu } from "@/types/menu.types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Delete, Edit } from "lucide-react";

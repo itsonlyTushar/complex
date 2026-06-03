@@ -1,19 +1,5 @@
+import { CartStore } from '@/types/cart.types';
 import { create } from 'zustand';
-import { Menu } from '@/types';
-
-export interface CartItem extends Menu {
-  cartQuantity: number;
-}
-
-interface CartStore {
-  items: Record<number, CartItem>;
-  addItem: (menu: Menu) => void;
-  removeItem: (menuId: number) => void;
-  updateQuantity: (menuId: number, delta: number) => void;
-  clearCart: () => void;
-  getTotalPrice: () => number;
-  getTotalItems: () => number;
-}
 
 export const useCartStore = create<CartStore>((set, get) => ({
   items: {},

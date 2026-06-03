@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu } from "@/types";
+import { Menu } from "@/types/menu.types";
 import { DataTable } from "../payments/data-table";
 import { getColumns } from "./columns";
 import { Button } from "@/components/ui/button";

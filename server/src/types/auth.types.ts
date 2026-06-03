@@ -14,6 +14,7 @@ export interface FoodCourtSignUp {
     managementDetails: string
     address: string
     location: string
+    currancy: string
     password: string
 }
 

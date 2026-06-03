@@ -46,7 +46,7 @@ export const signupService = async (data: SignupInput, foodCourtId: number = 1) 
 
 /* SIGN-UP FOR THE FOOD COURT */
 export const signFoodCourtService = async (data: FoodCourtSignUp, foodCourtId: number = 1) => {
-    const { foodCourtName, location, email, password, managementDetails } = data
+    const { foodCourtName, location, email, password, managementDetails, currancy } = data
 
     const existingUser = await prisma.user.findUnique({
         where: { email: email }
@@ -62,6 +62,7 @@ export const signFoodCourtService = async (data: FoodCourtSignUp, foodCourtId: n
         data: {
             name: foodCourtName,
             location: location,
+            currancy: currancy || "USD",
             admins: {
                 create: {
                     name: managementDetails,
