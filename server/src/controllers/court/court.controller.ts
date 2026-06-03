@@ -1,5 +1,5 @@
 import type { Request, Response } from "express"
-import { fetchRestaurantService, deleteRestaurantService, editRestaurantService } from "../../services/court.service.js"
+import { fetchRestaurantService, deleteRestaurantService, editRestaurantService, fetchPublicFoodCourtService } from "../../services/court.service.js"
 
 export const fetchRestaurantsController = async (req: Request, res: Response) => {
     try {
@@ -56,4 +56,20 @@ export const editRestaurantController = async (req: Request, res: Response) => {
     } catch(error: any) {
         res.status(400).json({ message: error.message });
     }
-}
+}
+
+export const fetchPublicRestaurantsController = async (req: Request, res: Response) => {
+    try {
+        const { foodCourtId } = req.params;
+        const { tableId } = req.query;
+        if (!foodCourtId) {
+             res.status(400).json({ message: "Food Court ID is required" });
+             return;
+        }
+        const data = await fetchPublicFoodCourtService(Number(foodCourtId), tableId ? String(tableId) : undefined);
+        res.status(200).json(data);
+    } catch(error: any) {
+        res.status(400).json({ message: error.message });
+    }
+}
+

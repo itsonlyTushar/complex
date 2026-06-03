@@ -1,9 +1,13 @@
 import { Router } from "express";
-import { fetchRestaurantsController, deleteRestaurantController, editRestaurantController } from "../controllers/court/court.controller.js";
+import { fetchRestaurantsController, deleteRestaurantController, editRestaurantController, fetchPublicRestaurantsController } from "../controllers/court/court.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router()
 
+// Public route to fetch restaurants by foodCourtId
+router.get("/public/:foodCourtId/restaurants", fetchPublicRestaurantsController)
+
+// Protected routes
 router.get("/restaurants", authMiddleware, fetchRestaurantsController)
 router.patch("/restaurants/:id", authMiddleware, editRestaurantController)
 router.delete("/restaurants/:id", authMiddleware, deleteRestaurantController)

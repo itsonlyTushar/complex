@@ -1,7 +1,6 @@
 import { prisma } from "../config/db.js";
 import type { Table } from "../types/tables.types.js";
 
-
 export const addTable = async (data: Omit<Table, "id"  | 'createdAt' | 'updatedAt'>) => {
     return await prisma.table.create({
         data: {

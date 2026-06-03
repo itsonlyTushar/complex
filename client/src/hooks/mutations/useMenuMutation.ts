@@ -2,7 +2,6 @@ import { MENU_KEYS } from "@/constants/queryFactory";
 import { addCategory, updateCategory, addMenu, updateMenu, deleteMenu, deleteCategory } from "@/services/menu.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-
 export const useAddCategory = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -54,11 +53,11 @@ export const useUpdateMenu = () => {
 };
 
 export const useDeleteMenu = () => {
-    const queryClient = useQueryClient()
-    return useMutation({
-        mutationFn: deleteMenu,
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: MENU_KEYS.menus()})
-        }
-    })
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteMenu,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: MENU_KEYS.menus() })
+    }
+  })
 }

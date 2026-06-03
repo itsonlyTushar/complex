@@ -69,3 +69,24 @@ export const editRestaurantService = async (restaurantId: number, foodCourtId: n
     });
 };
 
+export const fetchPublicFoodCourtService = async (foodCourtId: number, tableNumber?: string) => {
+    const foodCourt = await prisma.foodCourt.findUnique({
+        where: { id: foodCourtId }
+    });
+    
+    if (!foodCourt) throw new Error("Food Court not found");
+
+    if (tableNumber) {
+        const table = await prisma.table.findFirst({
+            where: {
+                number: tableNumber,
+                foodCourtId: foodCourtId
+            }
+        });
+        if (!table) throw new Error("Invalid Table for this Food Court");
+    }
+
+    const restaurants = await fetchRestaurantService(foodCourtId);
+
+    return { foodCourt, restaurants };
+}
