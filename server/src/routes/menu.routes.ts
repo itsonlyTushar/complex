@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addCategoryController, addMenuController, deleteCategoryController, deleteMenuController, fetchCategoryController, fetchMenuController, updateCategoryController, updateMenuController } from "../controllers/menu/menu.controller.js";
+import { addCategoryController, addMenuController, deleteCategoryController, deleteMenuController, fetchCategoryController, fetchMenuController, updateCategoryController } from "../controllers/menu/menu.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -9,7 +9,6 @@ router.get("/menus", authMiddleware, fetchMenuController);
 router.post("/add-category", authMiddleware, addCategoryController);
 router.get("/categories", authMiddleware, fetchCategoryController)
 router.put("/update-category", authMiddleware, updateCategoryController)
-router.put("/update-menu", authMiddleware, updateMenuController)
 router.delete("/delete-category", authMiddleware, deleteCategoryController)
 router.delete("/delete-menu", authMiddleware, deleteMenuController)
 

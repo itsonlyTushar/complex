@@ -30,16 +30,6 @@ export const fetchMenuController = async (req: Request, res: Response) => {
     }
 };
 
-export const updateMenuController = async (req: Request, res: Response) => {
-    try {
-        const restaurantId = (req as any).user?.restaurantId;
-        const updatedItem = await updateMenuService(req.body, Number(restaurantId));
-        res.status(200).json(updatedItem);
-    } catch (error: any) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
 export const addCategoryController = async (req: Request, res: Response) => {
     try {
         const restaurantId = (req as any).user?.restaurantId;
