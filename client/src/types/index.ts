@@ -30,6 +30,25 @@ export interface Profile {
     restaurant_id: string | null
 }
 
+export interface OrderItem {
+    id: number
+    menuID: number
+    quantity: number
+    price: number
+    menu?: Menu
+}
+
+export interface Order {
+    id:number
+    userId?: number
+    restaurantId: number
+    totalAmount: number
+    status: 'PENDING' | 'PREPARING' | 'COMPLETED' | 'CANCELLED'
+    createdAt: Date
+    tableName: number
+    tableId: number
+    items: OrderItem[] 
+}
 
 // to be used for the data table in Payments
 export interface DataTableProps<TData, TValue> {
