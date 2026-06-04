@@ -15,6 +15,7 @@ export interface FoodCourtSignUp {
     address: string
     location: string
     currancy: string
+    paymentSystem?: string
     password: string
 }
 

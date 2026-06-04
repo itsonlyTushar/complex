@@ -1,5 +1,12 @@
 import { Router } from "express";
-import { foodCourtSignUpController, loginController, signupController } from "../controllers/auth/auth.controller.js";
+import { 
+    foodCourtSignUpController, 
+    loginController, 
+    signupController,
+    fetchFoodCourtsController,
+    editFoodCourtController,
+    deleteFoodCourtController
+} from "../controllers/auth/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -7,5 +14,10 @@ const router = Router();
 router.post("/signup", authMiddleware, signupController)
 router.post("/new-court", foodCourtSignUpController)
 router.post("/login", loginController)
+
+// CRUD routes for food courts (Super Admin panel)
+router.get("/courts", fetchFoodCourtsController)
+router.patch("/courts/:id", editFoodCourtController)
+router.delete("/courts/:id", deleteFoodCourtController)
 
 export default router

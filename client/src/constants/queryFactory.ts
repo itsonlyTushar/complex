@@ -10,3 +10,7 @@ export const USER_KEYS = {
 export const TABLE_KEYS = {
     table: () => ['table']
 }
+
+export const SP_KEYS = {
+    courts: () => ['courts']
+}

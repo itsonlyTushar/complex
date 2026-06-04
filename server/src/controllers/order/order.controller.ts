@@ -5,6 +5,8 @@ import {
   updateOrderService,
   updateOrderStatusService,
 } from "../../services/order.service.js";
+import { refundPayment } from "../../services/payment.service.js";
+import { restoreInventory } from "../../services/menu.service.js";
 
 export const createOrderController = async (req: Request, res: Response) => {
   try {
@@ -56,10 +58,30 @@ export const updateOrderController = async (req: Request, res: Response) => {
 export const cancelOrderController = async (req: Request, res: Response) => {
   try {
     const { id } = req.body;
-    await updateOrderStatusService(id, "CANCELLED");
+    const updatedOrder = await updateOrderStatusService(id, "CANCELLED");
+
+    let refund = null;
+    if (updatedOrder.paymentIntentId) {
+      refund = await refundPayment(updatedOrder.restaurantId, updatedOrder.id);
+    }
+
+    // Restore inventory for each item in the order
+    if (updatedOrder.items && updatedOrder.items.length > 0) {
+      await Promise.all(
+        updatedOrder.items.map((item) =>
+          restoreInventory({ id: item.menuId, quantity: item.quantity })
+        )
+      );
+    }
+
+    res.status(200).json({
+      message: "Order cancelled successfully!",
+      order: updatedOrder,
+      refund,
+    });
   } catch (error: any) {
     res
       .status(400)
-      .json({ error: "Failed to cancel order! try again please." });
+      .json({ error: error.message || "Failed to cancel order! try again please." });
   }
 };

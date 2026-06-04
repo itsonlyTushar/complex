@@ -34,9 +34,9 @@ export const addMenuService = async (data: Menu, restaurantId: number) => {
             itemName,
             image: image ? await uploadImageToCloudinary(image) : "",
             categoryId: resolvedCategoryId,
-            price: Math.round(Number(price)),
-            cost: Math.round(Number(cost)),
-            quantity: Math.round(Number(quantity)),
+            price: Math.round(price),
+            cost: Math.round(cost),
+            quantity: Math.round(quantity),
             description,
             restaurantId
         },
@@ -85,15 +85,15 @@ export const updateMenuService = async (data: Menu, restaurantId: number) => {
 
     const updatedItem = await prisma.menu.update({
         where: {
-            id: Number(id)
+            id: id
         },
         data: {
             itemName,
             image: image ? await uploadImageToCloudinary(image) : "",
             categoryId: resolvedCategoryId,
-            price: Math.round(Number(price)),
-            cost: Math.round(Number(cost)),
-            quantity: Math.round(Number(quantity)),
+            price: Math.round(price),
+            cost: Math.round(cost),
+            quantity: Math.round(quantity),
             description
         },
         include: {
@@ -165,8 +165,23 @@ export const deleteMenuService = async (data: { id: number }) => {
     const { id } = data;
     const deletedItem = await prisma.menu.delete({
         where: {
-            id: Number(id)
+            id: id
         }
     });
     return deletedItem;
+}
+
+export const restoreInventory = async (data: { id: number, quantity: number }) => {
+    const { id, quantity } = data;
+    const restoreItem = await prisma.menu.update({
+        where: {
+            id: id
+        },
+        data: {
+            quantity: {
+                increment: quantity
+            }
+        }
+    });
+    return restoreItem;
 }

@@ -23,11 +23,11 @@ export const addTableController = async (req: Request, res: Response) => {
              return
         }
 
-        const table = await addTable({
-            number: String(number),
-            occupacy: Number(occupacy),
-            shape: String(shape),
-            foodCourtId: Number(foodCourtId)
+                const table = await addTable({
+            number,
+            occupacy,
+            shape,
+            foodCourtId
         })
 
         res.status(201).json({ message: "Table added successfully", data: table })
@@ -46,7 +46,7 @@ export const fetchTablesController = async (req: Request, res: Response) => {
              return
         }
 
-        const tables = await fetchTables(Number(foodCourtId))
+        const tables = await fetchTables(foodCourtId)
         res.status(200).json(tables)
     } catch(error: any) {
         res.status(400).json({ message: error.message })

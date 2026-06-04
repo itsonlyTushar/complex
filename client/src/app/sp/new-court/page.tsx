@@ -117,11 +117,36 @@ const CourtOnboard = () => {
                           </FieldError>
                         )}
                       </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <Field>
+                          <FieldLabel htmlFor="paymentSystem">Payment System</FieldLabel>
+                          <Controller
+                            name="paymentSystem"
+                            control={control}
+                            render={({ field: selectField }) => (
+                              <Select onValueChange={selectField.onChange} value={selectField.value || ""}>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select Payment System" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="stripe">Stripe</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          />
+                        </Field>
+                        {errors.paymentSystem && (
+                          <FieldError>
+                            {errors.paymentSystem.message}
+                          </FieldError>
+                        )}
+                      </div>
+
                       {renderField}
                     </Fragment>
                   );
                 }
-
                 return renderField;
               })}
             </div>

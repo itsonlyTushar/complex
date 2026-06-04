@@ -7,7 +7,7 @@ export const userController = async (req: Request, res: Response) => {
         if (!userId) {
             throw new Error("Unauthorized");
         }
-        const user = await userService(Number(userId))
+        const user = await userService(userId)
         res.status(200).json(user)
     } catch (error: any) {
         res.status(400).json({ message: error.message })
@@ -38,7 +38,7 @@ export const updateRestaurantStatusController = async (req: Request, res: Respon
         if (typeof isClosed !== "boolean") {
             throw new Error("isClosed must be a boolean")
         }
-        const restaurant = await updateRestaurantStatus(Number(restaurantId), isClosed)
+        const restaurant = await updateRestaurantStatus(restaurantId, isClosed)
         res.status(200).json(restaurant)
     } catch(err: any) {
         res.status(400).json({ message: err.message })

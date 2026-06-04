@@ -13,7 +13,7 @@ import {
 export const addMenuController = async (req: Request, res: Response) => {
     try {
         const restaurantId = (req as any).user?.restaurantId;
-        const newItem = await addMenuService(req.body, Number(restaurantId));
+        const newItem = await addMenuService(req.body, restaurantId);
         res.status(201).json(newItem);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
@@ -23,7 +23,7 @@ export const addMenuController = async (req: Request, res: Response) => {
 export const fetchMenuController = async (req: Request, res: Response) => {
     try {
         const restaurantId = (req as any).user?.restaurantId;
-        const data = await fetchMenuService(Number(restaurantId));
+        const data = await fetchMenuService(restaurantId);
         res.status(200).json(data);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
@@ -33,7 +33,7 @@ export const fetchMenuController = async (req: Request, res: Response) => {
 export const addCategoryController = async (req: Request, res: Response) => {
     try {
         const restaurantId = (req as any).user?.restaurantId;
-        const data = await addCategory(req.body, Number(restaurantId));
+        const data = await addCategory(req.body, restaurantId);
         res.status(200).json(data);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
@@ -43,7 +43,7 @@ export const addCategoryController = async (req: Request, res: Response) => {
 export const fetchCategoryController = async (req: Request, res: Response) => {
     try {
         const restaurantId = (req as any).user?.restaurantId;
-        const data = await fetchCategory(Number(restaurantId));
+        const data = await fetchCategory(restaurantId);
         res.status(200).json(data);
     } catch (error: any) {
         res.status(400).json({ message: error.message });

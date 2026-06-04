@@ -4,7 +4,7 @@ import { fetchRestaurantService, deleteRestaurantService, editRestaurantService,
 export const fetchRestaurantsController = async (req: Request, res: Response) => {
     try {
         const foodCourtId = (req as any).user?.foodCourtId
-        const data = await fetchRestaurantService(Number(foodCourtId))
+        const data = await fetchRestaurantService(foodCourtId)
         res.status(200).json(data)
     } catch(error: any) {
         res.status(400).json({messsage: error.message})
@@ -27,7 +27,7 @@ export const deleteRestaurantController = async (req: Request, res: Response) =>
              return;
         }
 
-        const deletedRestaurant = await deleteRestaurantService(Number(id), Number(foodCourtId));
+        const deletedRestaurant = await deleteRestaurantService(Number(id), foodCourtId);
         res.status(200).json({ message: "Restaurant deleted successfully", data: deletedRestaurant });
     } catch(error: any) {
         res.status(400).json({ message: error.message });
@@ -51,7 +51,7 @@ export const editRestaurantController = async (req: Request, res: Response) => {
              return;
         }
 
-        const updatedRestaurant = await editRestaurantService(Number(id), Number(foodCourtId), updateData);
+        const updatedRestaurant = await editRestaurantService(Number(id), foodCourtId, updateData);
         res.status(200).json({ message: "Restaurant updated successfully", data: updatedRestaurant });
     } catch(error: any) {
         res.status(400).json({ message: error.message });
@@ -66,7 +66,7 @@ export const fetchPublicRestaurantsController = async (req: Request, res: Respon
              res.status(400).json({ message: "Food Court ID is required" });
              return;
         }
-        const data = await fetchPublicFoodCourtService(Number(foodCourtId), tableId ? String(tableId) : undefined);
+        const data = await fetchPublicFoodCourtService(Number(foodCourtId), tableId as string | undefined);
         res.status(200).json(data);
     } catch(error: any) {
         res.status(400).json({ message: error.message });

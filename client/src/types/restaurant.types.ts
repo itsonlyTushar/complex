@@ -12,5 +12,6 @@ export type FoodCourt = {
     address: string
     location: string
     currancy: string
+    paymentSystem: string
     password: string
 }

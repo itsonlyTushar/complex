@@ -19,14 +19,15 @@ enum Role {
 }
 
 model FoodCourt {
-  id          Int          @id @default(autoincrement())
-  name        String
-  location    String?
-  createdAt   DateTime     @default(now())
-  currancy    String       @default("USD")
-  restaurants Restaurant[]
-  admins      User[]
-  tables      Table[]
+  id            Int          @id @default(autoincrement())
+  name          String
+  location      String?
+  createdAt     DateTime     @default(now())
+  currancy      String       @default("USD")
+  paymentSystem String       @default("stripe")
+  restaurants   Restaurant[]
+  admins        User[]
+  tables        Table[]
 }
 
 model Table {
@@ -43,17 +44,21 @@ model Table {
 }
 
 model Restaurant {
-  id          Int        @id @default(autoincrement())
-  name        String
-  location    String
-  createdAt   DateTime   @default(now())
-  foodCourtId Int
-  foodCourt   FoodCourt  @relation(fields: [foodCourtId], references: [id])
-  vendors     User[]
-  menus       Menu[]
-  categories  Category[]
-  isClosed    Boolean    @default(false)
-  orders      Order[]
+  id                  Int        @id @default(autoincrement())
+  name                String
+  location            String
+  createdAt           DateTime   @default(now())
+  foodCourtId         Int
+  foodCourt           FoodCourt  @relation(fields: [foodCourtId], references: [id])
+  vendors             User[]
+  menus               Menu[]
+  categories          Category[]
+  isClosed            Boolean    @default(false)
+  orders              Order[]
+  razorpayKeyId       String?
+  razorpaySecret      String?
+  stripeAccountId     String?
+  onBoradingCompleted Boolean    @default(false)
 }
 
 model User {
@@ -95,15 +100,16 @@ model Category {
 }
 
 model Order {
-  id           Int         @id @default(autoincrement())
-  totalAmount  Int
-  status       String      @default("PENDING")
-  createdAt    DateTime    @default(now())
-  restaurantId Int
-  tableName    Int
-  tableNumber  Int
-  restarant    Restaurant  @relation(fields: [restaurantId], references: [id])
-  items        OrderItem[]
+  id              Int         @id @default(autoincrement())
+  totalAmount     Int
+  status          String      @default("PENDING")
+  createdAt       DateTime    @default(now())
+  restaurantId    Int
+  tableName       Int
+  tableNumber     Int
+  paymentIntentId String?
+  restarant       Restaurant  @relation(fields: [restaurantId], references: [id])
+  items           OrderItem[]
 }
 
 model OrderItem {

@@ -17,6 +17,7 @@ export interface Order {
     createdAt: Date
     tableName: number
     tableId: number
+    paymentIntentId?: string
     items: OrderItem[] 
 }
 
