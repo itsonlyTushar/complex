@@ -46,3 +46,25 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     res.status(401).json({ message: "Invalid or expired token" });
   }
 };
+
+export const optionalAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any as DecodedToken;
+        const user = await prisma.user.findUnique({
+          where: { id: decoded.userId },
+        });
+        if (user) {
+          (req as any).user = user;
+        }
+      }
+    }
+    next();
+  } catch (error) {
+    next();
+  }
+};
+

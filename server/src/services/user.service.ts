@@ -18,7 +18,9 @@ export const userService = async (userId: number) => {
                     select: {
                         id: true,
                         name: true,
-                        isClosed: true
+                        isClosed: true,
+                        stripeAccountId: true,
+                        onBoradingCompleted: true
                     }
                 }
             }

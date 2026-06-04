@@ -108,6 +108,7 @@ model Order {
   tableName       Int
   tableNumber     Int
   paymentIntentId String?
+  customerName    String
   restarant       Restaurant  @relation(fields: [restaurantId], references: [id])
   items           OrderItem[]
 }

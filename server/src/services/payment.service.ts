@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { prisma } from "../config/db.js";
 import type { Payments } from "../types/payment.types.js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe((process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY)!, {
     apiVersion: '2022-11-15' as any
 })
 
@@ -17,7 +17,7 @@ export const onboardRestaurantStripe = async (restaurantId: number) => {
     let stripeAccountId = restaurant.stripeAccountId
 
     if(!stripeAccountId) {
-        const account = stripe.accounts.create({
+        const account = await stripe.accounts.create({
             type: "express",
             capabilities: {
                 card_payments: {
@@ -27,26 +27,52 @@ export const onboardRestaurantStripe = async (restaurantId: number) => {
             }
         })
 
-        stripeAccountId = (await account).id
+        stripeAccountId = account.id
 
         await prisma.restaurant.update({
             where: {id: restaurantId},
             data: {stripeAccountId}
         })
-
-        // TODO: UPDATE THE refresh and return url LATER 
-        const accountLink = await stripe.accountLinks.create({
-            account: stripeAccountId,
-            refresh_url: `${process.env.CLIENT_URL}/sp/onboarding/refresh?restaurantId=${restaurantId}`,
-            return_url: `${process.env.CLIENT_URL}/sp/onboarding/success?restaurantId=${restaurantId}`,
-            type: 'account_onboarding'
-        })
-        
-        return {
-            stripeAccountId,
-            onboardingUrl: accountLink.url
-        }
     }
+
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const accountLink = await stripe.accountLinks.create({
+        account: stripeAccountId,
+        refresh_url: `${clientUrl}/admin/settings/payment?status=refresh&restaurantId=${restaurantId}`,
+        return_url: `${clientUrl}/admin/settings/payment?status=success&restaurantId=${restaurantId}`,
+        type: 'account_onboarding'
+    })
+    
+    return {
+        stripeAccountId,
+        onboardingUrl: accountLink.url
+    }
+}
+
+export const verifyRestaurantOnboarding = async (restaurantId: number) => {
+    const restaurant = await prisma.restaurant.findUnique({
+        where: { id: restaurantId }
+    })
+
+    if (!restaurant) {
+        throw new Error("Restaurant not found")
+    }
+
+    if (!restaurant.stripeAccountId) {
+        return { completed: false }
+    }
+
+    const account = await stripe.accounts.retrieve(restaurant.stripeAccountId)
+    const completed = account.details_submitted
+
+    if (completed !== restaurant.onBoradingCompleted) {
+        await prisma.restaurant.update({
+            where: { id: restaurantId },
+            data: { onBoradingCompleted: completed }
+        })
+    }
+
+    return { completed }
 }
 
 export const createPaymentIntent = async (data: Payments, restaurantId: number) => {

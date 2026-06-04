@@ -3,6 +3,7 @@ import {
   onboardRestaurantStripe,
   createPaymentIntent,
   refundPayment,
+  verifyRestaurantOnboarding,
 } from "../../services/payment.service.js";
 
 export const onboardRestaurantStripeController = async (req: Request, res: Response) => {
@@ -21,6 +22,25 @@ export const onboardRestaurantStripeController = async (req: Request, res: Respo
     });
   } catch (error: any) {
     res.status(400).json({ error: error.message || "Failed to onboard Stripe." });
+  }
+};
+
+export const verifyOnboardingController = async (req: Request, res: Response) => {
+  try {
+    const restaurantId = (req as any).user?.restaurantId;
+
+    if (!restaurantId) {
+      return res.status(400).json({ error: "Restaurant ID is required." });
+    }
+
+    const verification = await verifyRestaurantOnboarding(Number(restaurantId));
+
+    res.status(200).json({
+      message: "Stripe onboarding verified successfully.",
+      ...verification,
+    });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message || "Failed to verify Stripe onboarding." });
   }
 };
 

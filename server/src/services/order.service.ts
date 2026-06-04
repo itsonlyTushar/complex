@@ -6,7 +6,7 @@ import { updatePaymentIntentMetadata } from "./payment.service.js";
 type CreateOrderPayload = Omit<Order, 'id' | 'status' | 'createdAt'>;
 
 export const addOrder = async (data: CreateOrderPayload) => {
-    const { restaurantId, totalAmount, items, tableId, tableName, paymentIntentId } = data;
+    const { restaurantId, totalAmount, items, tableId, tableName, paymentIntentId, customerName } = data;
 
     const newOrder = await prisma.order.create({
         data: {
@@ -15,6 +15,7 @@ export const addOrder = async (data: CreateOrderPayload) => {
             tableName,
             tableNumber: tableId,
             paymentIntentId,
+            customerName,
             items: {
                 create: items.map((item) => ({
                     menuId: item.menuID,

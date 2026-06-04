@@ -22,7 +22,10 @@ export const addMenuController = async (req: Request, res: Response) => {
 
 export const fetchMenuController = async (req: Request, res: Response) => {
     try {
-        const restaurantId = (req as any).user?.restaurantId;
+        const restaurantId = (req as any).user?.restaurantId || Number(req.query.restaurantId);
+        if (!restaurantId) {
+            return res.status(400).json({ message: "Restaurant ID is required." });
+        }
         const data = await fetchMenuService(restaurantId);
         res.status(200).json(data);
     } catch (error: any) {

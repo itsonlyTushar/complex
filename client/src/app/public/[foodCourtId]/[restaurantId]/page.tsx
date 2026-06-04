@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { Search, ShoppingCart } from "lucide-react";
 import React, { useState } from "react";
 import {
@@ -21,11 +20,21 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useGetMenus } from "@/hooks/queries/useMenuQuery";
 import { useCartStore } from "@/stores/useCartStore";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import { useSearchParams } from "next/navigation";
+import { CheckoutForm } from "@/components/CheckoutForm";
+import { Spinner } from "@/components/ui/spinner";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
 function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
   const { restaurantId } = React.use(params);
 
-  const { data: menus = [], isLoading: isMenusLoading } = useGetMenus();
+  const { data: menus = [], isLoading: isMenusLoading } = useGetMenus(Number(restaurantId));
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const tableIdFromUrl = searchParams.get("tableId");
 
   const itemsMap = useCartStore((state) => state.items);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
@@ -63,9 +72,9 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
   return (
     <>
       <div className="rounded-b-[2rem] px-2 py-4 h-34 rounded-b bg-accent flex flex-col justify-between">
-        <section className=" flex justify-between items-center">
-          <h1 className="text-4xl font-semibold">{restaurantId}</h1>
-          <Sheet>
+        <section className="flex justify-between items-center">
+          <h1 className="text-4xl font-semibold leading-none">{restaurantId}</h1>
+          <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
             <SheetTrigger asChild>
               <div className="flex min-w-[4.5rem] justify-center gap-2 items-center bg-primary text-black px-3 py-1.5 rounded-lg cursor-pointer transition-all">
                 <ShoppingCart size={18} />
@@ -116,12 +125,20 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
               </div>
               {/* 3. Footer / Checkout */}
               {cartItems.length > 0 && (
-                <div className="border-t pt-4 mt-auto px-2 py-2">
-                  <div className="flex justify-between font-bold text-lg mb-4">
+                <div className="border-t pt-4 mt-auto px-2 py-2 flex flex-col gap-4">
+                  <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
                     <span>${cartTotal.toFixed(2)}</span>
                   </div>
-                  <Button className="w-full">Proceed to Checkout</Button>
+                  <Elements stripe={stripePromise}>
+                    <CheckoutForm
+                      restaurantId={Number(restaurantId)}
+                      cartItems={cartItems}
+                      cartTotal={cartTotal}
+                      onSuccess={() => setIsCartOpen(false)}
+                      tableIdFromUrl={tableIdFromUrl}
+                    />
+                  </Elements>
                 </div>
               )}
             </SheetContent>
@@ -141,8 +158,8 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
 
       <section className="my-10 mx-2">
         {isMenusLoading ? (
-          <div>
-            <span>Loading Menu</span>
+          <div className="flex justify-center items-center py-20 w-full">
+            <Spinner className="size-8 text-primary" />
           </div>
         ) : (
           Object.entries(groupedMenus).map(([category, items], index) => (

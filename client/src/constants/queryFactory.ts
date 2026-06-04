@@ -1,6 +1,6 @@
 export const MENU_KEYS = {
     categories: () => ['categories'],
-    menus: () => ['menus'],
+    menus: (restaurantId?: number) => ['menus', restaurantId],
 }
 
 export const USER_KEYS = {
