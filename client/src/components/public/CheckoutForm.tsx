@@ -94,8 +94,7 @@ export function CheckoutForm({ restaurantId, cartItems, cartTotal, onSuccess, ta
         await addOrder({
           restaurantId,
           totalAmount: Math.round(cartTotal),
-          tableName: parsedTableNum,
-          tableId: parsedTableNum,
+          tableNumber: parsedTableNum,
           paymentIntentId,
           customerName,
           items: cartItems.map((item) => ({

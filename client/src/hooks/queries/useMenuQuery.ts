@@ -9,7 +9,7 @@ export const useGetCategories = () => {
     })
 }
 
-export const useGetMenus = (restaurantId?: number) => {
+export const useGetMenus = (restaurantId?: string) => {
     return useQuery({
         queryKey: MENU_KEYS.menus(restaurantId),
         queryFn: () => fetchMenus(restaurantId)

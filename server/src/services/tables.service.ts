@@ -12,7 +12,7 @@ export const addTable = async (data: Omit<Table, "id"  | 'createdAt' | 'updatedA
     });
 }
 
-export const fetchTables = async (foodCourtId: number) => {
+export const fetchTables = async (foodCourtId: string) => {
     return await prisma.table.findMany({
         where: { foodCourtId }
     });
@@ -32,7 +32,7 @@ export const deleteTable = async (id: number) => {
 }
 
 export const saveLayout = async (
-    foodCourtId: number,
+    foodCourtId: string,
     walls: any[],
     infrastructure: any[],
     placedTables: { id: number; x: number; y: number; rotation: number }[]
@@ -78,7 +78,7 @@ export const saveLayout = async (
     });
 };
 
-export const fetchLayout = async (foodCourtId: number) => {
+export const fetchLayout = async (foodCourtId: string) => {
     const foodCourt = await prisma.foodCourt.findUnique({
         where: { id: foodCourtId },
         select: { layout: true },

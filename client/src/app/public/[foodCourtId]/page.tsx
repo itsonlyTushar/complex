@@ -103,10 +103,8 @@ function PublicFoodCourtContent() {
             <section className="py-12 px-6">
                 {
                     restaurants.map((restaurant) => {
-                        // Extract details from the first nested vendor
-                        const vendor = restaurant?.vendors?.[0];
-                        const logoUrl = vendor?.logo || "";
-                        const description = vendor?.restaurantDescription || 'Lorem ipsum, dolor sit amet consectetur';
+                        const logoUrl = restaurant?.logo || "";
+                        const description = restaurant?.description || 'Lorem ipsum, dolor sit amet consectetur';
 
                         return (
                             <Link  

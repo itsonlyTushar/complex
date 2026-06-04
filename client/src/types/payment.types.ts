@@ -11,7 +11,7 @@ export interface PaymentIntentPayload {
     currency: string;
     commissionAmount: string;
     application_fee_amount: number;
-    restaurantId: number;
+    restaurantId: string;
 }
 
 export interface PaymentIntentResponse {
@@ -25,7 +25,7 @@ export interface PaymentIntentResponse {
 }
 
 export interface CheckoutFormProps {
-  restaurantId: number;
+  restaurantId: string;
   cartItems: any[];
   cartTotal: number;
   onSuccess: () => void;

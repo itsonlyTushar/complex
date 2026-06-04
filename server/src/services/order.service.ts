@@ -6,27 +6,44 @@ import { updatePaymentIntentMetadata } from "./payment.service.js";
 type CreateOrderPayload = Omit<Order, 'id' | 'status' | 'createdAt'>;
 
 export const addOrder = async (data: CreateOrderPayload) => {
-    const { restaurantId, totalAmount, items, tableId, tableName, paymentIntentId, customerName } = data;
+    const { restaurantId, totalAmount, items, tableNumber, paymentIntentId, customerName } = data;
 
-    const newOrder = await prisma.order.create({
-        data: {
-            restaurantId,
-            totalAmount,
-            tableName,
-            tableNumber: tableId,
-            paymentIntentId,
-            customerName,
-            items: {
-                create: items.map((item) => ({
-                    menuId: item.menuID,
-                    quantity: item.quantity,
-                    price: item.price,
-                }))
+    // Use a transaction to ensure both operations succeed together
+    const newOrder = await prisma.$transaction(async (tx) => {
+        // 1. Create the order
+        const order = await tx.order.create({
+            data: {
+                restaurantId,
+                totalAmount,
+                tableNumber,
+                paymentIntentId,
+                customerName,
+                items: {
+                    create: items.map((item) => ({
+                        menuId: item.menuID,
+                        quantity: item.quantity,
+                        price: item.price,
+                    }))
+                }
+            },
+            include: {
+                items: true
             }
-        },
-        include: {
-            items: true
+        });
+
+        // 2. Subtract inventory for each item
+        for (const item of items) {
+            await tx.menu.update({
+                where: { id: item.menuID },
+                data: {
+                    quantity: {
+                        decrement: item.quantity
+                    }
+                }
+            });
         }
+
+        return order;
     });
 
     if (paymentIntentId) {
@@ -36,7 +53,7 @@ export const addOrder = async (data: CreateOrderPayload) => {
     return newOrder;
 }
 
-export const fetchOrdersForRestaurant = async (restaurantId: number) => {
+export const fetchOrdersForRestaurant = async (restaurantId: string) => {
     // Find all orders for this restaurant
     const orders = await prisma.order.findMany({
         where: {

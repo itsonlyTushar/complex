@@ -33,7 +33,7 @@ export const onboardRestaurant = async (data: any) => {
     return response.json();
 }
 
-export const deleteRestaurant = async (id: number) => {
+export const deleteRestaurant = async (id: string) => {
     let token = await getAuth()
     const response = await fetch(`http://localhost:5000/api/court/restaurants/${id}`, {
         method: "DELETE",
@@ -50,7 +50,7 @@ export const deleteRestaurant = async (id: number) => {
     return response.json();
 }
 
-export const editRestaurant = async (id: number, data: any) => {
+export const editRestaurant = async (id: string, data: any) => {
     let token = await getAuth()
     const response = await fetch(`http://localhost:5000/api/court/restaurants/${id}`, {
         method: "PATCH",

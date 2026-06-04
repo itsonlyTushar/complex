@@ -39,10 +39,10 @@ export function AdminSidebar({
       <SidebarHeader className="p-4 flex flex-row items-center gap-3 border-b border-border/50">
         {isLoading ? (
           <div className="size-11 bg-muted animate-pulse rounded-lg flex-shrink-0" />
-        ) : user?.logo ? (
+        ) : user?.restaurant?.logo ? (
           <div className="relative size-11 rounded-lg overflow-hidden border border-border bg-background shadow-sm flex-shrink-0">
             <Image 
-              src={user.logo} 
+              src={user.restaurant.logo} 
               alt="logo" 
               fill
               className="object-cover animate-in fade-in duration-300"

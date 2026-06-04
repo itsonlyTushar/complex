@@ -11,13 +11,13 @@ import {
 
 export const onboardRestaurantStripeController = async (req: Request, res: Response) => {
   try {
-    const restaurantId = (req as any).user?.restaurantId || Number(req.body.restaurantId || req.query.restaurantId);
+    const restaurantId = (req as any).user?.restaurantId || (req.body.restaurantId || req.query.restaurantId) as string;
 
     if (!restaurantId) {
       return res.status(400).json({ error: "Restaurant ID is required." });
     }
 
-    const onboardingData = await onboardRestaurantStripe(Number(restaurantId));
+    const onboardingData = await onboardRestaurantStripe(restaurantId);
 
     res.status(200).json({
       message: "Stripe onboarding URL generated successfully.",
@@ -36,7 +36,7 @@ export const verifyOnboardingController = async (req: Request, res: Response) =>
       return res.status(400).json({ error: "Restaurant ID is required." });
     }
 
-    const verification = await verifyRestaurantOnboarding(Number(restaurantId));
+    const verification = await verifyRestaurantOnboarding(restaurantId);
 
     res.status(200).json({
       message: "Stripe onboarding verified successfully.",
@@ -144,7 +144,7 @@ export const updateRestaurantCommissionController = async (req: Request, res: Re
       return res.status(400).json({ error: "Valid commissionRate is required." });
     }
 
-    const updated = await updateRestaurantCommission(Number(id), Number(commissionRate));
+    const updated = await updateRestaurantCommission(id as string, Number(commissionRate));
     res.status(200).json({
       message: "Restaurant commission rate updated successfully.",
       restaurant: updated,

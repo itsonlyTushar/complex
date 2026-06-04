@@ -27,7 +27,7 @@ export const deleteRestaurantController = async (req: Request, res: Response) =>
              return;
         }
 
-        const deletedRestaurant = await deleteRestaurantService(Number(id), foodCourtId);
+        const deletedRestaurant = await deleteRestaurantService(id as string, foodCourtId as string);
         res.status(200).json({ message: "Restaurant deleted successfully", data: deletedRestaurant });
     } catch(error: any) {
         res.status(400).json({ message: error.message });
@@ -51,7 +51,7 @@ export const editRestaurantController = async (req: Request, res: Response) => {
              return;
         }
 
-        const updatedRestaurant = await editRestaurantService(Number(id), foodCourtId, updateData);
+        const updatedRestaurant = await editRestaurantService(id as string, foodCourtId as string, updateData);
         res.status(200).json({ message: "Restaurant updated successfully", data: updatedRestaurant });
     } catch(error: any) {
         res.status(400).json({ message: error.message });
@@ -66,7 +66,7 @@ export const fetchPublicRestaurantsController = async (req: Request, res: Respon
              res.status(400).json({ message: "Food Court ID is required" });
              return;
         }
-        const data = await fetchPublicFoodCourtService(Number(foodCourtId), tableId as string | undefined);
+        const data = await fetchPublicFoodCourtService(foodCourtId as string, tableId as string | undefined);
         res.status(200).json(data);
     } catch(error: any) {
         res.status(400).json({ message: error.message });

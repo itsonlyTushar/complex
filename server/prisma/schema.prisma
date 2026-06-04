@@ -19,7 +19,7 @@ enum Role {
 }
 
 model FoodCourt {
-  id            Int          @id @default(autoincrement())
+  id            String       @id @default(uuid())
   name          String
   location      String?
   createdAt     DateTime     @default(now())
@@ -43,17 +43,17 @@ model Table {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   foodCourt   FoodCourt? @relation(fields: [foodCourtId], references: [id])
-  foodCourtId Int?
+  foodCourtId String?
 
   @@unique([foodCourtId, number])
 }
 
 model Restaurant {
-  id                  Int        @id @default(autoincrement())
+  id                  String     @id @default(uuid())
   name                String
   location            String
   createdAt           DateTime   @default(now())
-  foodCourtId         Int
+  foodCourtId         String
   foodCourt           FoodCourt  @relation(fields: [foodCourtId], references: [id])
   vendors             User[]
   menus               Menu[]
@@ -65,6 +65,8 @@ model Restaurant {
   stripeAccountId     String?
   onBoradingCompleted Boolean    @default(false)
   commissionRate      Float      @default(5.0)
+  logo                String?
+  description         String?
 }
 
 model User {
@@ -74,12 +76,10 @@ model User {
   password              String
   role                  Role
   createdAt             DateTime    @default(now())
-  foodCourtId           Int?
+  foodCourtId           String?
   foodCourt             FoodCourt?  @relation(fields: [foodCourtId], references: [id])
-  restaurantId          Int?
+  restaurantId          String?
   restaurant            Restaurant? @relation(fields: [restaurantId], references: [id])
-  logo                  String?
-  restaurantDescription String?
 }
 
 model Menu {
@@ -90,7 +90,7 @@ model Menu {
   cost         Int
   quantity     Int
   description  String
-  restaurantId Int?
+  restaurantId String?
   restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
   category     Category?   @relation(fields: [categoryId], references: [id])
   categoryId   Int?
@@ -100,7 +100,7 @@ model Menu {
 model Category {
   id           Int         @id @default(autoincrement())
   name         String
-  restaurantId Int?
+  restaurantId String?
   restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
   menus        Menu[]
 }
@@ -110,8 +110,7 @@ model Order {
   totalAmount     Int
   status          String      @default("PENDING")
   createdAt       DateTime    @default(now())
-  restaurantId    Int
-  tableName       Int
+  restaurantId    String
   tableNumber     Int
   paymentIntentId String?
   customerName    String

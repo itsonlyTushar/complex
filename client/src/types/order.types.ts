@@ -11,12 +11,11 @@ export interface OrderItem {
 export interface Order {
     id: number;
     userId?: number;
-    restaurantId: number;
+    restaurantId: string;
     totalAmount: number;
     status: 'PENDING' | 'PREPARING' | 'COMPLETED' | 'CANCELLED';
     createdAt: Date;
-    tableName: number;
-    tableId: number;
+    tableNumber: number;
     paymentIntentId?: string;
     customerName: string;
     items: OrderItem[];

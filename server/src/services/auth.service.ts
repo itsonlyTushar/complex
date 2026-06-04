@@ -4,7 +4,7 @@ import type { FoodCourtSignUp, LoginInput, SignupInput } from "../types/index.js
 import jwt from "jsonwebtoken"
 
 /* Sign up for the Restaurants */
-export const signupService = async (data: SignupInput, foodCourtId: number = 1) => {
+export const signupService = async (data: SignupInput, foodCourtId: string) => {
     const { restaurantName, location, ownerName, email, password } = data;
 
     // 1. Check if user exists
@@ -45,7 +45,7 @@ export const signupService = async (data: SignupInput, foodCourtId: number = 1) 
 
 
 /* SIGN-UP FOR THE FOOD COURT */
-export const signFoodCourtService = async (data: FoodCourtSignUp, foodCourtId: number = 1) => {
+export const signFoodCourtService = async (data: FoodCourtSignUp) => {
     const { foodCourtName, location, email, password, managementDetails, currancy, paymentSystem } = data
 
     const existingUser = await prisma.user.findUnique({
@@ -125,7 +125,7 @@ export const fetchFoodCourtsService = async () => {
     });
 };
 
-export const editFoodCourtService = async (id: number, data: any) => {
+export const editFoodCourtService = async (id: string, data: any) => {
     const { foodCourtName, location, currancy, paymentSystem, managementDetails, email } = data;
     return await prisma.$transaction(async (tx) => {
         const updatedCourt = await tx.foodCourt.update({
@@ -159,7 +159,7 @@ export const editFoodCourtService = async (id: number, data: any) => {
     });
 };
 
-export const deleteFoodCourtService = async (id: number) => {
+export const deleteFoodCourtService = async (id: string) => {
     return await prisma.$transaction(async (tx) => {
         const restaurants = await tx.restaurant.findMany({
             where: { foodCourtId: id },

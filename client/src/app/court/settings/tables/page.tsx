@@ -26,7 +26,7 @@ function Tables() {
                 number: String(data.number),
                 occupacy: Number(data.occupacy),
                 shape: String(data.shape),
-                foodCourtId: 0 // Automatically overridden by the server using the logged-in admin's foodCourtId
+                foodCourtId: "" // Automatically overridden by the server using the logged-in admin's foodCourtId
             })
             toast.success(`Table ${data.number} added successfully!`)
             reset()

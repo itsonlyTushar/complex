@@ -33,7 +33,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
 function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
   const { restaurantId } = React.use(params);
 
-  const { data: menus = [], isLoading: isMenusLoading } = useGetMenus(Number(restaurantId));
+  const { data: menus = [], isLoading: isMenusLoading } = useGetMenus(restaurantId);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const searchParams = useSearchParams();
   const tableIdFromUrl = searchParams.get("tableId");
@@ -151,7 +151,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
                   </div>
                   <Elements stripe={stripePromise}>
                     <CheckoutForm
-                      restaurantId={Number(restaurantId)}
+                      restaurantId={restaurantId}
                       cartItems={cartItems}
                       cartTotal={cartTotal}
                       onSuccess={() => setIsCartOpen(false)}

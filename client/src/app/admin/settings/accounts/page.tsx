@@ -90,7 +90,7 @@ const AccountSettings = () => {
       <div className="flex items-center gap-6">
         <Image
           src={
-            user.logo || "https://images.unsplash.com/photo-1506863530036-1efeddceb993?q=80&w=1044&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            user.restaurant?.logo || "https://images.unsplash.com/photo-1506863530036-1efeddceb993?q=80&w=1044&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           }
           alt="profile"
           width={80}
@@ -114,7 +114,7 @@ const AccountSettings = () => {
             >
               {isUploading ? "Uploading..." : "Change Logo"}
             </Button>
-            {user.logo && (
+            {user.restaurant?.logo && (
               <Dialog>
                 <DialogTrigger asChild>
                   <Button

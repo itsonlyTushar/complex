@@ -72,7 +72,7 @@ export const deleteCategory = async (data: { id: number }): Promise<Category> =>
     return response.json()
 }
 
-export const fetchMenus = async (restaurantId?: number): Promise<Menu[]> => {
+export const fetchMenus = async (restaurantId?: string): Promise<Menu[]> => {
     let token = await getAuth()
     const url = restaurantId
         ? `http://127.0.0.1:5000/api/menus?restaurantId=${restaurantId}`

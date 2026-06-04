@@ -1,6 +1,6 @@
 import { prisma } from "../config/db.js"
 
-export const fetchRestaurantService  = async (foodCourtId: number) => {
+export const fetchRestaurantService  = async (foodCourtId: string) => {
     const data = await prisma.restaurant.findMany({
         where: {
             foodCourtId: foodCourtId
@@ -12,7 +12,7 @@ export const fetchRestaurantService  = async (foodCourtId: number) => {
     return data
 }
 
-export const deleteRestaurantService = async (restaurantId: number, foodCourtId: number) => {
+export const deleteRestaurantService = async (restaurantId: string, foodCourtId: string) => {
     // 1. Verify restaurant exists and belongs to this food court
     const restaurant = await prisma.restaurant.findUnique({
         where: { id: restaurantId }
@@ -50,7 +50,7 @@ export const deleteRestaurantService = async (restaurantId: number, foodCourtId:
     });
 };
 
-export const editRestaurantService = async (restaurantId: number, foodCourtId: number, updateData: { name?: string; location?: string; isClosed?: boolean }) => {
+export const editRestaurantService = async (restaurantId: string, foodCourtId: string, updateData: { name?: string; location?: string; isClosed?: boolean }) => {
     const restaurant = await prisma.restaurant.findUnique({
         where: { id: restaurantId }
     });
@@ -69,7 +69,7 @@ export const editRestaurantService = async (restaurantId: number, foodCourtId: n
     });
 };
 
-export const fetchPublicFoodCourtService = async (foodCourtId: number, tableNumber?: string) => {
+export const fetchPublicFoodCourtService = async (foodCourtId: string, tableNumber?: string) => {
     const foodCourt = await prisma.foodCourt.findUnique({
         where: { id: foodCourtId }
     });

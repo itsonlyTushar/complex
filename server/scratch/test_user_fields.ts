@@ -17,17 +17,21 @@ async function main() {
     const updatedLogoUser = await uploadLogo(firstUser.id, 'https://example.com/logo.png');
     console.log('Updated Logo User (uploadLogo return):', updatedLogoUser);
 
-    // 3. Test updating restaurantDescription directly
-    console.log('Testing restaurantDescription update...');
-    const updatedDescUser = await prisma.user.update({
-      where: { id: firstUser.id },
-      data: {
-        restaurantDescription: 'A premium restaurant offering local culinary delights!'
-      }
-    });
-    console.log('Updated Description User:', updatedDescUser);
+    // 3. Test updating restaurant description directly
+    console.log('Testing restaurant description update...');
+    if (firstUser.restaurantId) {
+      const updatedDescRestaurant = await prisma.restaurant.update({
+        where: { id: firstUser.restaurantId },
+        data: {
+          description: 'A premium restaurant offering local culinary delights!'
+        }
+      });
+      console.log('Updated Description Restaurant:', updatedDescRestaurant);
+    } else {
+      console.log('User has no associated restaurant to update description.');
+    }
 
-    // 4. Test userService to see if logo and restaurantDescription are successfully selected and returned
+    // 4. Test userService to see if logo and description are successfully selected and returned
     console.log('Testing userService select...');
     const fetchedUser = await userService(firstUser.id);
     console.log('Fetched User (userService):', fetchedUser);

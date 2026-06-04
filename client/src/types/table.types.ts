@@ -27,7 +27,7 @@ export interface Line {
 
 export interface Table {
     id?: number;
-    foodCourtId: number;
+    foodCourtId: string;
     number: string;
     occupacy: number;
     shape: string;

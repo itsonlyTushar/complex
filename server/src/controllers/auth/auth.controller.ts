@@ -46,7 +46,7 @@ export const fetchFoodCourtsController = async (req: Request, res: Response) => 
 export const editFoodCourtController = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const court = await editFoodCourtService(Number(id), req.body);
+        const court = await editFoodCourtService(id as string, req.body);
         res.status(200).json(court);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
@@ -56,7 +56,7 @@ export const editFoodCourtController = async (req: Request, res: Response) => {
 export const deleteFoodCourtController = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        await deleteFoodCourtService(Number(id));
+        await deleteFoodCourtService(id as string);
         res.status(200).json({ message: "Food Court deleted successfully" });
     } catch (error: any) {
         res.status(400).json({ message: error.message });

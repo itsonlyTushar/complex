@@ -12,5 +12,5 @@ export type Menu = {
 export type Category = {
     id: number
     name: string
-    restaurantId?: number | null
+    restaurantId?: string | null
 }

@@ -6,7 +6,7 @@ const stripe = new Stripe((process.env.STRIPE_SECRET || process.env.STRIPE_SECRE
     apiVersion: '2022-11-15' as any
 })
 
-export const onboardRestaurantStripe = async (restaurantId: number) => {
+export const onboardRestaurantStripe = async (restaurantId: string) => {
     const restaurant = await prisma.restaurant.findUnique({
         where: {id: restaurantId}
     })
@@ -49,7 +49,7 @@ export const onboardRestaurantStripe = async (restaurantId: number) => {
     }
 }
 
-export const verifyRestaurantOnboarding = async (restaurantId: number) => {
+export const verifyRestaurantOnboarding = async (restaurantId: string) => {
     const restaurant = await prisma.restaurant.findUnique({
         where: { id: restaurantId }
     })
@@ -75,7 +75,7 @@ export const verifyRestaurantOnboarding = async (restaurantId: number) => {
     return { completed }
 }
 
-export const createPaymentIntent = async (data: Payments, restaurantId: number) => {
+export const createPaymentIntent = async (data: Payments, restaurantId: string) => {
     const { amount, currency, commissionAmount, application_fee_amount, orderId } = data;
 
     const restaurant = await prisma.restaurant.findUnique({
@@ -123,7 +123,7 @@ export const updatePaymentIntentMetadata = async (paymentIntentId: string, order
 };
 
 
-export const refundPayment = async (restaurantId: number, orderId: number) => {
+export const refundPayment = async (restaurantId: string, orderId: number) => {
     const restaurant = await prisma.restaurant.findUnique({
         where: { id: restaurantId }
     });
@@ -204,7 +204,7 @@ export const getRestaurantsCommission = async () => {
     });
 };
 
-export const updateRestaurantCommission = async (id: number, commissionRate: number) => {
+export const updateRestaurantCommission = async (id: string, commissionRate: number) => {
     return await prisma.restaurant.update({
         where: { id },
         data: { commissionRate },
