@@ -4,17 +4,25 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/lib/toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, LoginInput } from "@/lib/schemas";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+  });
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  async function handleLogin(data: any) {
+  async function handleLogin(data: LoginInput) {
     setLoading(true);
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
@@ -66,9 +74,10 @@ export default function LoginPage() {
               id="email"
               type="email"
               placeholder="Email"
-              required
+              aria-invalid={!!errors.email}
               {...register("email")}
             />
+            {errors.email && <FieldError>{errors.email.message}</FieldError>}
           </Field>
 
           <Field>
@@ -77,9 +86,10 @@ export default function LoginPage() {
               id="password"
               type="password"
               placeholder="Password"
-              required
+              aria-invalid={!!errors.password}
               {...register("password")}
             />
+            {errors.password && <FieldError>{errors.password.message}</FieldError>}
           </Field>
         </div>
 

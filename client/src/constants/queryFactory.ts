@@ -8,7 +8,8 @@ export const USER_KEYS = {
 }
 
 export const TABLE_KEYS = {
-    table: () => ['table']
+    table: () => ['table'],
+    layout: () => ['table', 'layout']
 }
 
 export const SP_KEYS = {

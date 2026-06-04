@@ -1,5 +1,5 @@
 import { TABLE_KEYS } from "@/constants/queryFactory"
-import { getTables } from "@/services/table.service"
+import { getTables, getLayout } from "@/services/table.service"
 import { useQuery } from "@tanstack/react-query"
 
 export const useGetTables = () => {
@@ -8,3 +8,11 @@ export const useGetTables = () => {
         queryFn: getTables
     })
 }
+
+export const useGetLayout = () => {
+    return useQuery({
+        queryKey: TABLE_KEYS.layout(),
+        queryFn: getLayout
+    })
+}
+

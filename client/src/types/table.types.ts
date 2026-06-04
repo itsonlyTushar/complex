@@ -13,6 +13,9 @@ export interface PlacedItem {
     width: number
     height: number
     rotation?: number
+    tableId?: number
+    tableNumber?: string
+    occupacy?: number
 }
 
 export interface Line {
@@ -28,6 +31,10 @@ export interface Table {
     number: string;
     occupacy: number;
     shape: string;
+    x?: number | null;
+    y?: number | null;
+    rotation?: number | null;
+    isPlaced?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }

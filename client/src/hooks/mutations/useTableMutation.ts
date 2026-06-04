@@ -1,5 +1,5 @@
 import { TABLE_KEYS } from "@/constants/queryFactory";
-import { addTable } from "@/services/table.service";
+import { addTable, saveLayout } from "@/services/table.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useAddTable = () => {
@@ -12,3 +12,16 @@ export const useAddTable = () => {
     },
   });
 };
+
+export const useSaveLayout = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: saveLayout,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TABLE_KEYS.layout() });
+      queryClient.invalidateQueries({ queryKey: TABLE_KEYS.table() });
+    },
+  });
+};
+

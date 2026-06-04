@@ -28,6 +28,7 @@ model FoodCourt {
   restaurants   Restaurant[]
   admins        User[]
   tables        Table[]
+  layout        Json?
 }
 
 model Table {
@@ -35,6 +36,10 @@ model Table {
   number      String
   occupacy    Int
   shape       String
+  x           Float?
+  y           Float?
+  rotation    Float?     @default(0)
+  isPlaced    Boolean    @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   foodCourt   FoodCourt? @relation(fields: [foodCourtId], references: [id])

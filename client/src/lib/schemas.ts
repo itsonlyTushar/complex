@@ -37,7 +37,13 @@ export const newTableSchema = z.object({
     shape: z.string().min(1, "shape is required")
 })
 
+export const loginSchema = z.object({
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(1, "Password is required")
+})
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type FoodCourtSignUp = z.infer<typeof foodCourtSchema>;
 export type MenuInput = z.infer<typeof newMenuSchema>;
-export type TableInput = z.infer<typeof newTableSchema>
+export type TableInput = z.infer<typeof newTableSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;

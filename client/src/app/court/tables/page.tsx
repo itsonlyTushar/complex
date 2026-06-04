@@ -2,14 +2,17 @@
 
 import { Button } from "@/components/ui/button";
 import { PlacedItem, Line } from "@/types/table.types";
-import { RotateCw, Trash2 } from "lucide-react";
+import { RotateCw, Trash2, Loader2 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { useGetLayout } from "@/hooks/queries/useTableQuery";
+import { useSaveLayout } from "@/hooks/mutations/useTableMutation";
+import { toast } from "@/lib/toast";
+import { TableLayoutMap } from "@/components/court/TableLayoutMap";
 
 const Tables = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [placedItems, setPlacedItems] = useState<PlacedItem[]>([]);
     const [lines, setLines] = useState<Line[]>([]);
-    const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
     
     // "select" to manage/delete/move elements, "draw" to sketch walls/lines
     const [toolMode, setToolMode] = useState<"select" | "draw">("select");
@@ -24,27 +27,65 @@ const Tables = () => {
     // State for the currently selected item to show the rotate/delete toolbar
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-    // Sync canvas resolution with the parent container dynamically
+    // React Query layout and table fetching / saving hooks
+    const { data: layoutData, isLoading: isLayoutLoading } = useGetLayout();
+    const { mutateAsync: saveLayout, isPending: isSaving } = useSaveLayout();
+
+    // Map database shape names to internal canvas layout item types
+    const mapShapeToType = (shape: string) => {
+        switch (shape.toLowerCase()) {
+            case "square":
+                return "table_square";
+            case "rectangle":
+                return "table_rectangle";
+            case "circle":
+            case "round":
+                return "table_round";
+            default:
+                return "table_square";
+        }
+    };
+
+    // Populate lines and placedItems on component mount / query fetch
     useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+        if (layoutData) {
+            // Set walls
+            setLines(layoutData.layout?.walls || []);
 
-        const parent = canvas.parentElement;
-        if (!parent) return;
+            // Set infrastructure
+            const infra = layoutData.layout?.infrastructure || [];
 
-        const resizeObserver = new ResizeObserver((entries) => {
-            for (let entry of entries) {
-                const { width, height } = entry.contentRect;
-                setCanvasSize({ width, height });
-            }
-        });
+            // Map database tables that are placed
+            const placedTables = (layoutData.tables || [])
+                .filter((t) => t.isPlaced && t.x !== null && t.y !== null)
+                .map((t) => {
+                    const mappedType = mapShapeToType(t.shape);
+                    let width = 60;
+                    let height = 60;
+                    if (mappedType === "table_rectangle") {
+                        width = 110;
+                        height = 55;
+                    } else if (mappedType === "table_round") {
+                        width = 65;
+                        height = 65;
+                    }
+                    return {
+                        id: `table_${t.id}`,
+                        type: mappedType,
+                        x: t.x!,
+                        y: t.y!,
+                        width,
+                        height,
+                        rotation: t.rotation || 0,
+                        tableId: t.id,
+                        tableNumber: t.number,
+                        occupacy: t.occupacy
+                    };
+                });
 
-        resizeObserver.observe(parent);
-
-        return () => {
-            resizeObserver.disconnect();
-        };
-    }, []);
+            setPlacedItems([...infra, ...placedTables]);
+        }
+    }, [layoutData]);
 
     // Keyboard listener for deleting selected elements
     useEffect(() => {
@@ -74,315 +115,13 @@ const Tables = () => {
         };
     }, [selectedItemId]);
 
-    // Drawing Loop
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw elegant designer grid lines
-        ctx.strokeStyle = "rgba(0, 0, 0, 0.04)";
-        ctx.lineWidth = 1;
-        const gridSize = 40;
-
-        // Draw vertical lines
-        for (let x = 0; x < canvas.width; x += gridSize) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, canvas.height);
-            ctx.stroke();
-        }
-
-        // Draw horizontal lines
-        for (let y = 0; y < canvas.height; y += gridSize) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(canvas.width, y);
-            ctx.stroke();
-        }
-
-        // Draw all finalized sketched lines/walls
-        ctx.strokeStyle = "#475569"; // slate-600
-        ctx.lineWidth = 3;
-        ctx.lineCap = "round";
-
-        lines.forEach((line) => {
-            ctx.beginPath();
-            ctx.moveTo(line.x1, line.y1);
-            ctx.lineTo(line.x2, line.y2);
-            ctx.stroke();
-        });
-
-        // Draw live active line preview if drawing
-        if (drawingStart && currentMousePos) {
-            ctx.beginPath();
-            ctx.setLineDash([6, 6]);
-            ctx.strokeStyle = "#3b82f6"; // blue-500
-            ctx.lineWidth = 2;
-            ctx.moveTo(drawingStart.x, drawingStart.y);
-            ctx.lineTo(currentMousePos.x, currentMousePos.y);
-            ctx.stroke();
-            ctx.setLineDash([]); // Reset line dash
-        }
-
-        // Draw placed elements (Square, Rectangle, and Round tables, and Infrastructure)
-        placedItems.forEach((item) => {
-            const isSelectedThis = item.id === selectedItemId;
-
-            ctx.save();
-            // Move origin to item center and apply its individual rotation
-            ctx.translate(item.x, item.y);
-            ctx.rotate(((item.rotation || 0) * Math.PI) / 180);
-
-            const chairRadius = 7;
-
-            // Draw Chairs centered at (0, 0)
-            if (item.type === "table_square") {
-                ctx.fillStyle = "#cbd5e1"; // slate-300
-                ctx.strokeStyle = "#64748b"; // slate-500
-                ctx.lineWidth = 1.5;
-
-                const dist = item.width / 2 + 8;
-                const chairs = [
-                    { cx: 0, cy: -dist },
-                    { cx: 0, cy: dist },
-                    { cx: -dist, cy: 0 },
-                    { cx: dist, cy: 0 },
-                ];
-                chairs.forEach((c) => {
-                    ctx.beginPath();
-                    ctx.arc(c.cx, c.cy, chairRadius, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                });
-            } else if (item.type === "table_rectangle") {
-                ctx.fillStyle = "#cbd5e1";
-                ctx.strokeStyle = "#64748b";
-                ctx.lineWidth = 1.5;
-
-                const distY = item.height / 2 + 8;
-                const distX = item.width / 2 + 8;
-                const chairs = [
-                    { cx: -30, cy: -distY },
-                    { cx: 0, cy: -distY },
-                    { cx: 30, cy: -distY },
-                    { cx: -30, cy: distY },
-                    { cx: 0, cy: distY },
-                    { cx: 30, cy: distY },
-                    { cx: -distX, cy: 0 },
-                    { cx: distX, cy: 0 },
-                ];
-                chairs.forEach((c) => {
-                    ctx.beginPath();
-                    ctx.arc(c.cx, c.cy, chairRadius, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                });
-            } else if (item.type === "table_round") {
-                ctx.fillStyle = "#cbd5e1";
-                ctx.strokeStyle = "#64748b";
-                ctx.lineWidth = 1.5;
-
-                const radialDist = item.width / 2 + 9;
-                const numChairs = 5;
-                for (let i = 0; i < numChairs; i++) {
-                    const angle = (i * 2 * Math.PI) / numChairs - Math.PI / 2;
-                    const cx = Math.cos(angle) * radialDist;
-                    const cy = Math.sin(angle) * radialDist;
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, chairRadius, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                }
-            } else if (item.type === "bar") {
-                ctx.fillStyle = "#94a3b8"; // slate-400
-                ctx.strokeStyle = "#475569";
-                ctx.lineWidth = 1.5;
-                const stools = [
-                    { cx: -45, cy: item.height / 2 + 8 },
-                    { cx: -15, cy: item.height / 2 + 8 },
-                    { cx: 15, cy: item.height / 2 + 8 },
-                    { cx: 45, cy: item.height / 2 + 8 },
-                ];
-                stools.forEach((s) => {
-                    ctx.beginPath();
-                    ctx.arc(s.cx, s.cy, 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                });
-            }
-
-            // Draw Selected Indicator Outline Dash
-            if (isSelectedThis) {
-                ctx.save();
-                ctx.strokeStyle = "rgba(59, 130, 246, 0.45)";
-                ctx.lineWidth = 1.5;
-                ctx.setLineDash([4, 4]);
-                ctx.beginPath();
-                ctx.roundRect(-item.width / 2 - 12, -item.height / 2 - 12, item.width + 24, item.height + 24, 10);
-                ctx.stroke();
-                ctx.restore();
-            }
-
-            // Draw Main shapes centered at (0, 0)
-            ctx.fillStyle = "#ffffff";
-            ctx.strokeStyle = isSelectedThis ? "#3b82f6" : "#1e293b";
-            ctx.lineWidth = 2.5;
-
-            if (item.type === "table_square") {
-                ctx.beginPath();
-                ctx.roundRect(-item.width / 2, -item.height / 2, item.width, item.height, 8);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = "#334155";
-                ctx.font = "bold 11px Inter, sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("4 Seats", 0, 0);
-
-            } else if (item.type === "table_rectangle") {
-                ctx.beginPath();
-                ctx.roundRect(-item.width / 2, -item.height / 2, item.width, item.height, 8);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = "#334155";
-                ctx.font = "bold 11px Inter, sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("6-8 Seats", 0, 0);
-
-            } else if (item.type === "table_round") {
-                ctx.beginPath();
-                ctx.arc(0, 0, item.width / 2, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = "#334155";
-                ctx.font = "bold 11px Inter, sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("Round", 0, 0);
-
-            } else if (item.type === "bar") {
-                ctx.fillStyle = "#334155"; // Slate-700
-                ctx.beginPath();
-                ctx.roundRect(-item.width / 2, -item.height / 2, item.width, item.height, 4);
-                ctx.fill();
-                ctx.stroke();
-
-                // Double inner line representing counter trim
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.roundRect(-item.width / 2 + 4, -item.height / 2 + 4, item.width - 8, item.height - 8, 2);
-                ctx.stroke();
-
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 10px Inter, sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("BAR COUNTER", 0, 0);
-
-            } else if (item.type === "kitchen") {
-                ctx.fillStyle = "rgba(249, 115, 22, 0.07)"; // Soft orange backdrop
-                ctx.strokeStyle = isSelectedThis ? "#3b82f6" : "#f97316"; // Orange-500
-                ctx.lineWidth = 2.5;
-                ctx.beginPath();
-                ctx.roundRect(-item.width / 2, -item.height / 2, item.width, item.height, 6);
-                ctx.fill();
-                ctx.stroke();
-
-                // Draw floor plan double-cross lines
-                ctx.strokeStyle = "rgba(249, 115, 22, 0.2)";
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(-item.width / 2, -item.height / 2);
-                ctx.lineTo(item.width / 2, item.height / 2);
-                ctx.moveTo(item.width / 2, -item.height / 2);
-                ctx.lineTo(-item.width / 2, item.height / 2);
-                ctx.stroke();
-
-                ctx.fillStyle = "#c2410c"; // Orange-700
-                ctx.font = "bold 12px Inter, sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("KITCHEN ZONE", 0, 0);
-
-            } else if (item.type === "gate") {
-                ctx.fillStyle = "rgba(16, 185, 129, 0.08)"; // Soft emerald backdrop
-                ctx.strokeStyle = isSelectedThis ? "#3b82f6" : "#10b981"; // Emerald-500
-                ctx.lineWidth = 2;
-                ctx.setLineDash([4, 4]);
-                ctx.beginPath();
-                ctx.roundRect(-item.width / 2, -item.height / 2, item.width, item.height, 4);
-                ctx.fill();
-                ctx.stroke();
-                ctx.setLineDash([]); // Reset dash
-
-                // Draw swing arc
-                ctx.strokeStyle = "#10b981";
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.arc(-item.width / 2, item.height / 2, item.height, -Math.PI / 2, 0, false);
-                ctx.stroke();
-
-                ctx.fillStyle = "#047857"; // Emerald-700
-                ctx.font = "bold 10px Inter, sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("🚪 ENTRANCE", 8, 0);
-
-            } else if (item.type === "shop") {
-                // Draw Shop / Stall
-                ctx.fillStyle = "rgba(99, 102, 241, 0.07)"; // Soft indigo backdrop
-                ctx.strokeStyle = isSelectedThis ? "#3b82f6" : "#6366f1"; // Indigo-500
-                ctx.lineWidth = 2.5;
-                ctx.beginPath();
-                ctx.roundRect(-item.width / 2, -item.height / 2, item.width, item.height, 6);
-                ctx.fill();
-                ctx.stroke();
-
-                // Draw a nice striped awning pattern at the front of the shop (top edge)
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(-item.width / 2, -item.height / 2, item.width, 12);
-                ctx.clip();
-
-                const stripeWidth = 12;
-                for (let sx = -item.width / 2; sx < item.width / 2; sx += stripeWidth) {
-                    ctx.fillStyle = sx % (stripeWidth * 2) === 0 ? "#6366f1" : "#ffffff";
-                    ctx.fillRect(sx, -item.height / 2, stripeWidth, 12);
-                }
-                ctx.restore();
-
-                // Draw outline for the awning block
-                ctx.strokeStyle = "#4f46e5"; // Indigo-600
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.rect(-item.width / 2, -item.height / 2, item.width, 12);
-                ctx.stroke();
-
-                ctx.fillStyle = "#4338ca"; // Indigo-700
-                ctx.font = "bold 11px Inter, sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("SHOP / STALL", 0, item.height / 2 - 22);
-            }
-
-            ctx.restore();
-        });
-
-    }, [placedItems, canvasSize, lines, drawingStart, currentMousePos, draggedItemId, selectedItemId]);
-
     // Drag and Drop Elements Handlers (Palette to Canvas)
     const handleDragStart = (e: React.DragEvent, itemType: string) => {
         e.dataTransfer.setData("itemType", itemType);
+    };
+
+    const handleDragStartTable = (e: React.DragEvent, tableId: number) => {
+        e.dataTransfer.setData("tableId", String(tableId));
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -396,23 +135,54 @@ const Tables = () => {
         if (!canvas) return;
 
         const itemType = e.dataTransfer.getData("itemType");
-        if (!itemType) return;
+        const tableIdStr = e.dataTransfer.getData("tableId");
 
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        // Custom default bounds for each element type
+        if (tableIdStr) {
+            // Dragged a specific table configuration
+            const tableId = Number(tableIdStr);
+            const table = (layoutData?.tables || []).find((t) => t.id === tableId);
+            if (!table) return;
+
+            const mappedType = mapShapeToType(table.shape);
+            let width = 60;
+            let height = 60;
+
+            if (mappedType === "table_rectangle") {
+                width = 110;
+                height = 55;
+            } else if (mappedType === "table_round") {
+                width = 65;
+                height = 65;
+            }
+
+            const newItem: PlacedItem = {
+                id: `table_${table.id}`,
+                type: mappedType,
+                x,
+                y,
+                width,
+                height,
+                rotation: 0,
+                tableId: table.id,
+                tableNumber: table.number,
+                occupacy: table.occupacy
+            };
+            setPlacedItems((prev) => [...prev, newItem]);
+            setSelectedItemId(newItem.id); // Auto-select placed table!
+            return;
+        }
+
+        if (!itemType) return;
+
+        // Custom default bounds for infrastructure
         let width = 60;
         let height = 60;
 
-        if (itemType === "table_rectangle") {
-            width = 110;
-            height = 55;
-        } else if (itemType === "table_round") {
-            width = 65;
-            height = 65;
-        } else if (itemType === "bar") {
+        if (itemType === "bar") {
             width = 140;
             height = 40;
         } else if (itemType === "kitchen") {
@@ -564,8 +334,57 @@ const Tables = () => {
         setMouseDownPos(null);
     };
 
+    // Save Table Layout to API
+    const handleSaveLayout = async () => {
+        try {
+            const walls = lines;
+            const infrastructure = placedItems.filter((item) => item.tableId === undefined);
+            const placedTables = placedItems
+                .filter((item) => item.tableId !== undefined)
+                .map((item) => ({
+                    id: item.tableId!,
+                    x: item.x,
+                    y: item.y,
+                    rotation: item.rotation || 0
+                }));
+
+            await saveLayout({
+                walls,
+                infrastructure,
+                placedTables
+            });
+            toast.success("Layout saved successfully!");
+        } catch (error: any) {
+            toast.error(error.message || "Failed to save layout");
+        }
+    };
+
     // Locate coordinates to render floating contextual menu options
     const selectedItem = placedItems.find((item) => item.id === selectedItemId);
+
+    // Compute which tables are not yet placed on the canvas
+    const placedTableIds = new Set(
+        placedItems
+            .filter((item) => item.tableId !== undefined)
+            .map((item) => item.tableId)
+    );
+    const availableTables = (layoutData?.tables || []).filter(
+        (t) => !placedTableIds.has(t.id)
+    );
+
+    // Show premium loader if fetching initial layout data
+    if (isLayoutLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[500px]">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-sm font-medium text-muted-foreground animate-pulse">
+                        Loading Table Map Layout...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -603,7 +422,16 @@ const Tables = () => {
                                 Draw Walls
                             </button>
                         </div>
-                        <Button>Save Layout</Button>
+                        <Button onClick={handleSaveLayout} disabled={isSaving}>
+                            {isSaving ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                "Save Layout"
+                            )}
+                        </Button>
                     </div>
                 </div>
 
@@ -626,37 +454,58 @@ const Tables = () => {
                             <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-5">
                                 {/* Tables Category */}
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground/80">Tables</span>
+                                    <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground/80">
+                                        Configured Tables
+                                    </span>
                                     
-                                    {/* Square Table (4) */}
-                                    <div
-                                        draggable
-                                        onDragStart={(e) => handleDragStart(e, "table_square")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs"
-                                    >
-                                        <span>Square Table (4)</span>
-                                        <div className="w-5 h-5 border-2 border-slate-700 bg-slate-100 rounded" />
-                                    </div>
-
-                                    {/* Rectangle Table (6-8) */}
-                                    <div
-                                        draggable
-                                        onDragStart={(e) => handleDragStart(e, "table_rectangle")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs"
-                                    >
-                                        <span>Rect Table (6-8)</span>
-                                        <div className="w-8 h-5 border-2 border-slate-700 bg-slate-100 rounded" />
-                                    </div>
-
-                                    {/* Round Table */}
-                                    <div
-                                        draggable
-                                        onDragStart={(e) => handleDragStart(e, "table_round")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs"
-                                    >
-                                        <span>Round Table</span>
-                                        <div className="w-5 h-5 border-2 border-slate-700 bg-slate-100 rounded-full" />
-                                    </div>
+                                    {availableTables.length === 0 ? (
+                                        <div className="p-3 text-center border border-dashed rounded-lg text-muted-foreground text-xs bg-muted/20">
+                                            {layoutData?.tables?.length === 0 ? (
+                                                <div>
+                                                    <p className="font-semibold mb-1 text-slate-700">No tables configured</p>
+                                                    <p className="text-slate-500 mb-2">Configure tables in settings first.</p>
+                                                    <a 
+                                                        href="/court/settings/tables" 
+                                                        className="text-primary hover:underline font-bold text-xs inline-flex items-center gap-1"
+                                                    >
+                                                        Manage Tables &rarr;
+                                                    </a>
+                                                </div>
+                                            ) : (
+                                                <p className="font-semibold text-slate-500">All tables have been placed.</p>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-2">
+                                            {availableTables.map((table) => {
+                                                const type = mapShapeToType(table.shape);
+                                                return (
+                                                    <div
+                                                        key={table.id}
+                                                        draggable
+                                                        onDragStart={(e) => handleDragStartTable(e, table.id!)}
+                                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
+                                                    >
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <span>Table #{table.number}</span>
+                                                            <span className="text-[9px] text-muted-foreground font-normal">
+                                                                {table.occupacy} Seats • {table.shape}
+                                                            </span>
+                                                        </div>
+                                                        {type === "table_square" && (
+                                                            <div className="w-5 h-5 border-2 border-slate-700 bg-slate-100 rounded" />
+                                                        )}
+                                                        {type === "table_rectangle" && (
+                                                            <div className="w-7 h-4 border-2 border-slate-700 bg-slate-100 rounded" />
+                                                        )}
+                                                        {type === "table_round" && (
+                                                            <div className="w-5 h-5 border-2 border-slate-700 bg-slate-100 rounded-full" />
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Infrastructure Category */}
@@ -667,7 +516,7 @@ const Tables = () => {
                                     <div
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, "bar")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs"
+                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
                                     >
                                         <span>Bar Counter</span>
                                         <div className="w-8 h-3.5 border-2 border-slate-700 bg-slate-400 rounded-sm" />
@@ -677,7 +526,7 @@ const Tables = () => {
                                     <div
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, "kitchen")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs"
+                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
                                     >
                                         <span>Kitchen Zone</span>
                                         <div className="w-8 h-5.5 border-2 border-dashed border-orange-500 bg-orange-50 rounded-sm" />
@@ -687,7 +536,7 @@ const Tables = () => {
                                     <div
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, "gate")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs"
+                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
                                     >
                                         <span>Entrance Gate</span>
                                         <div className="w-7 h-4 border-2 border-dashed border-emerald-500 bg-emerald-50 rounded-sm" />
@@ -697,7 +546,7 @@ const Tables = () => {
                                     <div
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, "shop")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs"
+                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
                                     >
                                         <span>Shop Stall</span>
                                         <div className="w-6 h-5.5 border-2 border-indigo-500 bg-indigo-50 rounded-sm flex flex-col justify-between overflow-hidden">
@@ -707,7 +556,7 @@ const Tables = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-center py-6 px-3 border-2 border-dashed border-muted-foreground/10 rounded-lg text-muted-foreground text-xs leading-relaxed">
+                            <div className="text-center py-6 px-3 border-2 border-dashed border-muted-foreground/10 rounded-lg text-muted-foreground text-xs leading-relaxed bg-muted/5">
                                 Wall sketching active. Click and drag on the canvas to draw walls.
                             </div>
                         )}
@@ -739,19 +588,20 @@ const Tables = () => {
                     </div>
 
                     {/* Canvas Area Container */}
-                    <div className="flex-1 h-[550px] border-2 border-dashed border-muted rounded-xl shadow-sm relative overflow-hidden bg-muted/5">
-                        <canvas
+                    <div className="flex-1 h-[550px] relative">
+                        <TableLayoutMap
                             ref={canvasRef}
-                            width={canvasSize.width}
-                            height={canvasSize.height}
+                            placedItems={placedItems}
+                            lines={lines}
+                            selectedItemId={selectedItemId}
+                            drawingStart={drawingStart}
+                            currentMousePos={currentMousePos}
                             onDragOver={handleDragOver}
                             onDrop={handleDrop}
                             onMouseDown={handleMouseDown}
                             onMouseMove={handleMouseMove}
                             onMouseUp={handleMouseUp}
-                            className={`w-full h-full block ${
-                                toolMode === "draw" ? "cursor-crosshair" : draggedItemId ? "cursor-grabbing" : "cursor-default"
-                            }`}
+                            className={toolMode === "draw" ? "cursor-crosshair" : draggedItemId ? "cursor-grabbing" : "cursor-default"}
                         />
 
                         {/* Contextual Toolbar Overlay for Selected Items */}
