@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, ShoppingCart } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -25,6 +25,8 @@ import { Elements } from "@stripe/react-stripe-js";
 import { useSearchParams } from "next/navigation";
 import { CheckoutForm } from "@/components/public/CheckoutForm";
 import { Spinner } from "@/components/ui/spinner";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Menu } from "@/types";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
@@ -36,6 +38,23 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
   const searchParams = useSearchParams();
   const tableIdFromUrl = searchParams.get("tableId");
 
+  const [filterMenu, setFilterMenu] = useState<Menu[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setFilterMenu(menus);
+    } else {
+      const query = searchQuery.toLowerCase();
+      const filtered = menus.filter(
+        (menu) =>
+          menu.itemName.toLowerCase().includes(query) ||
+          (menu.description && menu.description.toLowerCase().includes(query))
+      );
+      setFilterMenu(filtered);
+    }
+  }, [menus, searchQuery]);
+  
   const itemsMap = useCartStore((state) => state.items);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const addItem = useCartStore((state) => state.addItem);
@@ -55,7 +74,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
   );
 
   const groupedMenus = React.useMemo(() => {
-    return menus.reduce(
+    return filterMenu.reduce(
       (acc, menu) => {
         if (!menu.category) return acc;
         const category = menu.category;
@@ -65,9 +84,9 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
         acc[category].push(menu);
         return acc;
       },
-      {} as Record<string, typeof menus>,
+      {} as Record<string, typeof filterMenu>,
     );
-  }, [menus]);
+  }, [filterMenu]);
 
   return (
     <>
@@ -83,7 +102,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
                 </span>
               </div>
             </SheetTrigger>
-            <SheetContent className="flex flex-col h-full">
+            <SheetContent className="flex flex-col h-full w-full max-w-md">
               {/* 1. Header */}
               <SheetHeader>
                 <SheetTitle>Your Cart</SheetTitle>
@@ -145,14 +164,17 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
           </Sheet>
         </section>
 
-        <section className="w-full">
+        <section className="w-full flex items-center gap-2">
           <div className="flex w-full items-center gap-2 border border-border/40 px-3 py-3 rounded-xl bg-black/20">
             <Search size={18} className="text-muted-foreground" />
             <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 border-none bg-transparent shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 px-0 text-white placeholder:text-muted-foreground"
               placeholder="Search the menu.."
             />
           </div>
+          <ThemeToggle />
         </section>
       </div>
 
@@ -160,6 +182,10 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
         {isMenusLoading ? (
           <div className="flex justify-center items-center py-20 w-full">
             <Spinner className="size-8 text-primary" />
+          </div>
+        ) : Object.keys(groupedMenus).length === 0 ? (
+          <div className="text-center py-20 text-muted-foreground">
+            No items found matching your search.
           </div>
         ) : (
           Object.entries(groupedMenus).map(([category, items], index) => (

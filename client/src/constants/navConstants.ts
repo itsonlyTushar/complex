@@ -1,4 +1,4 @@
-import { LayoutDashboard, PlusCircle, Activity } from "lucide-react";
+import { LayoutDashboard, PlusCircle, Activity, CreditCard } from "lucide-react";
 
 export interface NavItem {
   title: string;
@@ -44,5 +44,8 @@ export const SUP_NAV_DATA = [
   },
   {
     href: '/sp/activity', label: 'Activity', icon: Activity
+  },
+  {
+    href: '/sp/payments', label: 'Payments', icon: CreditCard
   }
 ];

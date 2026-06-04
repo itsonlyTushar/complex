@@ -64,6 +64,7 @@ model Restaurant {
   razorpaySecret      String?
   stripeAccountId     String?
   onBoradingCompleted Boolean    @default(false)
+  commissionRate      Float      @default(5.0)
 }
 
 model User {

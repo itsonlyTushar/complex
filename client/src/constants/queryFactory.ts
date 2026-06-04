@@ -13,5 +13,6 @@ export const TABLE_KEYS = {
 }
 
 export const SP_KEYS = {
-    courts: () => ['courts']
+    courts: () => ['courts'],
+    restaurantsCommission: () => ['restaurantsCommission']
 }

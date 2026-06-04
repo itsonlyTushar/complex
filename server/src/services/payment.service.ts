@@ -90,17 +90,20 @@ export const createPaymentIntent = async (data: Payments, restaurantId: number) 
         throw new Error("Restaurant does not have a Stripe account onboarded");
     }
 
+    const commissionRate = restaurant.commissionRate ?? 5.0;
+    const computedFee = Math.round(amount * (commissionRate / 100));
+
     const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount),
         currency,
-        application_fee_amount,
+        application_fee_amount: computedFee,
         transfer_data: {
             destination: restaurant.stripeAccountId,
         },
         metadata: {
             restaurantId: restaurantId.toString(),
             orderId: orderId ? orderId.toString() : "",
-            commissionAmount: commissionAmount ? commissionAmount.toString() : "",
+            commissionAmount: computedFee.toString(),
         }
     });
 
@@ -156,4 +159,54 @@ export const refundPayment = async (restaurantId: number, orderId: number) => {
     });
 
     return refund;
+};
+
+
+export const handleStripeWebhook = async (rawBody: Buffer, signature: string) => {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+
+    if(!webhookSecret) {
+        throw new Error("STRIPE_WEBHOK_SECRET is not configured")
+    }
+
+    const event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret)
+
+    if(event.type === "payment_intent.succeeded") {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+
+        const orderId = paymentIntent.metadata.orderId
+
+        if(orderId) {
+            await prisma.order.update({
+                where: {id: parseInt(orderId)},
+                data: {
+                    status: "PREPARING",
+                    paymentIntentId: paymentIntent.id
+                },
+            })
+        }
+    }
+    return event
+}
+
+export const getRestaurantsCommission = async () => {
+    return await prisma.restaurant.findMany({
+        include: {
+            foodCourt: {
+                select: {
+                    name: true,
+                },
+            },
+        },
+        orderBy: {
+            name: "asc",
+        },
+    });
+};
+
+export const updateRestaurantCommission = async (id: number, commissionRate: number) => {
+    return await prisma.restaurant.update({
+        where: { id },
+        data: { commissionRate },
+    });
 };

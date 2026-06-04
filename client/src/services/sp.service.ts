@@ -1,4 +1,5 @@
 import { FoodCourtItem } from "@/types/sp.types";
+import { getAuth } from "@/app/actions/auth";
 
 export const fetchFoodCourts = async (): Promise<FoodCourtItem[]> => {
     const response = await fetch("http://localhost:5000/api/auth/courts", {
@@ -39,6 +40,39 @@ export const deleteFoodCourt = async (id: number): Promise<any> => {
     if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.message || "Failed to delete food court");
+    }
+    return response.json();
+};
+
+export const fetchRestaurantsCommission = async (): Promise<any[]> => {
+    const token = await getAuth();
+    const response = await fetch("http://localhost:5000/api/payments/restaurants-commission", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        }
+    });
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to fetch restaurant commissions");
+    }
+    return response.json();
+};
+
+export const updateRestaurantCommission = async ({ id, commissionRate }: { id: number; commissionRate: number }): Promise<any> => {
+    const token = await getAuth();
+    const response = await fetch(`http://localhost:5000/api/payments/restaurants-commission/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify({ commissionRate }),
+    });
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to update restaurant commission");
     }
     return response.json();
 };

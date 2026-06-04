@@ -6,6 +6,7 @@ import courtRoutes from "./routes/court.routes.js"
 import tableRoutes from "./routes/tables.routes.js"
 import orderRoutes from "./routes/order.routes.js"
 import paymentsRoutes from "./routes/payments.routes.js"
+import { stripeWebhookController } from "./controllers/payments/payments.controller.js"
 
 const app = express();
 
@@ -26,6 +27,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// Stripe Webhook (MUST be registered before express.json() for raw body verification)
+app.post("/api/payments/webhook", express.raw({
+    type: "application/json"
+}), stripeWebhookController)
+
 app.use(express.json({ limit: "10mb" }));
 app.use("/api/auth", authRoutes)
 app.use("/api", userRoutes)
@@ -34,5 +40,6 @@ app.use("/api/court", courtRoutes)
 app.use("/api", tableRoutes)
 app.use("/api", orderRoutes)
 app.use("/api/payments", paymentsRoutes)
+
 
 export default app;
