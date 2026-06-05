@@ -5,6 +5,7 @@ import {
   fetchOrdersForTable,
   updateOrderService,
   updateOrderStatusService,
+  fetchPaymentDetailsForRestaurant,
 } from "../../services/order.service.js";
 import { refundPayment } from "../../services/payment.service.js";
 import { restoreInventory } from "../../services/menu.service.js";
@@ -122,5 +123,21 @@ export const fetchPublicOrdersController = async (req: Request, res: Response) =
     });
   } catch (error: any) {
     res.status(400).json({ error: "Failed to fetch orders" });
+  }
+};
+
+export const fetchPaymentDetailsController = async (req: Request, res: Response) => {
+  try {
+    const restaurantId = (req as any).user?.restaurantId;
+
+    if (!restaurantId) {
+      return res.status(403).json({ error: "No restaurant ID found for this user." });
+    }
+
+    const data = await fetchPaymentDetailsForRestaurant(restaurantId);
+
+    res.status(200).json(data);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message || "Failed to fetch payment details." });
   }
 };

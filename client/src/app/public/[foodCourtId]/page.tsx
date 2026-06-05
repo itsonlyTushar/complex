@@ -102,7 +102,7 @@ function PublicFoodCourtContent() {
 
             <section className="py-12 px-6">
                 {
-                    restaurants.map((restaurant) => {
+                    restaurants.filter((r: any) => !r.isClosed).map((restaurant) => {
                         const logoUrl = restaurant?.logo || "";
                         const description = restaurant?.description || 'Lorem ipsum, dolor sit amet consectetur';
 

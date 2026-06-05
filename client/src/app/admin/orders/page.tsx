@@ -14,6 +14,7 @@ import { useGetOrders } from "@/hooks/queries/useOrderQuery";
 import { Check, X } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useState } from "react";
+import { PunchOrderDialog } from "@/components/admin/PunchOrderDialog";
 
 export default function OrdersPage() {
   const { data, isLoading: isOrderLoading } = useGetOrders();
@@ -53,11 +54,14 @@ export default function OrdersPage() {
 
   return (
     <>
-      <section className="my-4 text-3xl">
-        <h1>Orders</h1>
-        <p className="text-sm mt-2 text-left">
-          Orders for your restaurant will appear here
-        </p>
+      <section className="my-4 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl">Orders</h1>
+          <p className="text-sm mt-2 text-left">
+            Orders for your restaurant will appear here
+          </p>
+        </div>
+        <PunchOrderDialog />
       </section>
 
       {/* Map the orders cards here (only on-goings)  */}

@@ -20,3 +20,7 @@ export const SP_KEYS = {
 export const ORDER_KEYS = {
     orders: (params?: { restaurantId?: string; tableNumber?: number }) => ['orders', params]
 }
+
+export const PAYMENT_KEYS = {
+    details: () => ['paymentDetails']
+}

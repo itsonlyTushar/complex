@@ -134,3 +134,76 @@ export const updateOrderStatusService = async (id: number, status: Order['status
 
     return updatedOrder;
 }
+
+export const fetchPaymentDetailsForRestaurant = async (restaurantId: string) => {
+    // Fetch restaurant commission rate
+    const restaurant = await prisma.restaurant.findUnique({
+        where: { id: restaurantId },
+        select: { commissionRate: true }
+    });
+
+    const commissionRate = restaurant?.commissionRate ?? 5.0;
+
+    // Fetch all orders (excluding cancelled) with items and menu cost
+    const orders = await prisma.order.findMany({
+        where: {
+            restaurantId,
+            status: { not: 'CANCELLED' }
+        },
+        include: {
+            items: {
+                include: {
+                    menu: {
+                        select: { cost: true, itemName: true }
+                    }
+                }
+            }
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+
+    const paymentDetails = orders.map((order) => {
+        const totalAmount = order.totalAmount;
+        const commissionAmount = parseFloat(((totalAmount * commissionRate) / 100).toFixed(2));
+        const netAmount = parseFloat((totalAmount - commissionAmount).toFixed(2));
+
+        const costOfGoods = order.items.reduce((sum, item) => {
+            const menuCost = item.menu?.cost ?? 0;
+            return sum + (item.quantity * menuCost);
+        }, 0);
+
+        const realProfit = parseFloat((netAmount - costOfGoods).toFixed(2));
+
+        return {
+            orderId: order.id,
+            createdAt: order.createdAt,
+            customerName: order.customerName,
+            tableNumber: order.tableNumber,
+            status: order.status,
+            totalAmount,
+            commissionRate,
+            commissionAmount,
+            netAmount,
+            costOfGoods,
+            realProfit,
+            items: order.items.map((item) => ({
+                itemName: item.menu?.itemName ?? `Item #${item.menuId}`,
+                quantity: item.quantity,
+                price: item.price,
+                cost: item.menu?.cost ?? 0,
+            })),
+        };
+    });
+
+    // Summary totals
+    const summary = {
+        totalRevenue: paymentDetails.reduce((s, p) => s + p.totalAmount, 0),
+        totalCommission: parseFloat(paymentDetails.reduce((s, p) => s + p.commissionAmount, 0).toFixed(2)),
+        totalNet: parseFloat(paymentDetails.reduce((s, p) => s + p.netAmount, 0).toFixed(2)),
+        totalCost: paymentDetails.reduce((s, p) => s + p.costOfGoods, 0),
+        totalProfit: parseFloat(paymentDetails.reduce((s, p) => s + p.realProfit, 0).toFixed(2)),
+        orderCount: paymentDetails.length,
+    };
+
+    return { payments: paymentDetails, summary };
+}

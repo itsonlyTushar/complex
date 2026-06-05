@@ -3,8 +3,12 @@ import { addOrder, cancelOrder, updateOrderStatus } from "@/services/order.servi
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useAddOrder = () => {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: addOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ORDER_KEYS.orders()})
+    }
   });
 };
 

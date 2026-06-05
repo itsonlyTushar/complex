@@ -81,3 +81,20 @@ export const updateOrderStatus = async ({ orderId, status }: { orderId: number; 
     }
     return response.json();
 };
+
+export const fetchPaymentDetails = async () => {
+    let token = await getAuth();
+
+    const response = await fetch(`http://127.0.0.1:5000/api/payment-details`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token || ""}`,
+        },
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to fetch payment details");
+    }
+    return response.json();
+};

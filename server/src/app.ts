@@ -13,8 +13,21 @@ const app = express();
 // Manual CORS middleware (cors@2.8.6 is incompatible with Express 5)
 console.log("CORS middleware registered");
 app.use((req, res, next) => {
-    console.log(`[CORS] ${req.method} ${req.url}`);
-    res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL || "http://localhost:3000");
+    const origin = req.headers.origin;
+    const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        process.env.CLIENT_URL
+    ].filter(Boolean);
+
+    console.log(`[CORS] ${req.method} ${req.url} - Origin: ${origin}`);
+    if (origin && allowedOrigins.includes(origin)) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+    } else {
+        res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL || "http://localhost:3000");
+    }
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.setHeader("Access-Control-Allow-Credentials", "true");

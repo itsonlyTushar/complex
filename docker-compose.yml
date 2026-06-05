@@ -4,17 +4,13 @@ services:
     build: ./client
     ports:
       - "3000:3000"
-    volumes:
-      - ./client:/app
-      - /app/node_modules
 
   server:
     build: ./server
     ports:
       - "5000:5000"
-    volumes:
-      - ./server:/app
-      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://postgres:tushar537@db:5432/complex
     depends_on:
       - db
 
@@ -22,8 +18,8 @@ services:
     image: postgres:17
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: appdb
+      POSTGRES_PASSWORD: tushar537
+      POSTGRES_DB: complex
     ports:
       - "5432:5432"
     volumes:
