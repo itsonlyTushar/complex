@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { toast } from "@/lib/toast";
 import { CheckCircle2, AlertCircle, Loader2, CreditCard, ArrowRight, ExternalLink } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-const Payment = () => {
+const PaymentContent = () => {
   const { data: user, isLoading: isUserLoading, refetch: refetchUser } = useGetMe();
   const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateRestaurantStatus();
   const { mutate: onboard, isPending: isOnboarding } = useOnboardRestaurant();
@@ -189,5 +189,16 @@ const Payment = () => {
     </>
   );
 };
+
+const Payment = () => (
+  <Suspense fallback={
+    <section className="bg-card rounded-xl border shadow-sm p-6 h-full flex flex-col justify-center items-center py-20 min-h-[300px]">
+      <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+      <p className="text-muted-foreground text-sm font-medium">Loading payment settings...</p>
+    </section>
+  }>
+    <PaymentContent />
+  </Suspense>
+);
 
 export default Payment;
