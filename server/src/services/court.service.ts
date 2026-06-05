@@ -90,3 +90,10 @@ export const fetchPublicFoodCourtService = async (foodCourtId: string, tableNumb
 
     return { foodCourt, restaurants };
 }
+
+export const fetchPublicRestaurantById = async (restaurantId: string) => {
+    const restaurant = await prisma.restaurant.findUnique({
+        where: { id: restaurantId }
+    });
+    return restaurant;
+}

@@ -66,4 +66,17 @@ export const editRestaurant = async (id: string, data: any) => {
         throw new Error(result.message || "Failed to edit restaurant")
     }
     return response.json();
+}
+
+export const fetchPublicRestaurantDetails = async (id: string) => {
+    const response = await fetch(`http://localhost:5000/api/court/public/restaurant/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    if(!response.ok) {
+        throw new Error("failed to fetch restaurant details");
+    }
+    return response.json();
 }

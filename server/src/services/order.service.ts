@@ -70,7 +70,29 @@ export const fetchOrdersForRestaurant = async (restaurantId: string) => {
             createdAt: 'desc'
         }
     });
+    return orders;
+}
 
+export const fetchOrdersForTable = async (restaurantId: string, tableNumber: number) => {
+    const orders = await prisma.order.findMany({
+        where: {
+            restaurantId: restaurantId,
+            tableNumber: tableNumber,
+            status: {
+                notIn: ['CANCELLED', 'COMPLETED']
+            }
+        },
+        include: {
+            items: {
+                include: {
+                    menu: true
+                }
+            }
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
     return orders;
 }
 

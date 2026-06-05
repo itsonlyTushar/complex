@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import {
   addOrder,
   fetchOrdersForRestaurant,
+  fetchOrdersForTable,
   updateOrderService,
   updateOrderStatusService,
 } from "../../services/order.service.js";
@@ -83,5 +84,43 @@ export const cancelOrderController = async (req: Request, res: Response) => {
     res
       .status(400)
       .json({ error: error.message || "Failed to cancel order! try again please." });
+  }
+};
+
+export const updateOrderStausController = async (req: Request, res: Response) => {
+  try {
+    const {id, status} = req.body
+
+    const updateOrder = await updateOrderStatusService(id, status)
+
+    res.status(200).json({
+      message: 'Order Updated Successfully!',
+      order: updateOrder,
+    });
+  } catch(error:any) {
+    res.status(400).json({error: error.message})
+  }
+}
+
+export const fetchPublicOrdersController = async (req: Request, res: Response) => {
+  try {
+    const { restaurantId, tableNumber } = req.query;
+
+    if (!restaurantId || !tableNumber) {
+      return res.status(400).json({ error: "restaurantId and tableNumber are required." });
+    }
+
+    const parsedTableNumber = parseInt(tableNumber as string, 10);
+    if (isNaN(parsedTableNumber)) {
+      return res.status(400).json({ error: "Invalid tableNumber." });
+    }
+
+    const fetchOrders = await fetchOrdersForTable(restaurantId as string, parsedTableNumber);
+
+    res.status(200).json({
+      orders: fetchOrders,
+    });
+  } catch (error: any) {
+    res.status(400).json({ error: "Failed to fetch orders" });
   }
 };

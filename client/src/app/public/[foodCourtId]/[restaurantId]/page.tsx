@@ -1,6 +1,7 @@
 "use client";
 
-import { Search, ShoppingCart } from "lucide-react";
+import { PiCookingPot } from "react-icons/pi";
+import { Search, ShoppingCart, X } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import {
   Sheet,
@@ -27,6 +28,10 @@ import { CheckoutForm } from "@/components/public/CheckoutForm";
 import { Spinner } from "@/components/ui/spinner";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Menu } from "@/types";
+import { Drawer, DrawerContent, DrawerTitle, DrawerHeader, DrawerTrigger } from "@/components/ui/drawer";
+import Stepper, { Step } from "@/components/Stepper";
+import { useGetOrders } from "@/hooks/queries/useOrderQuery";
+import { useGetRestaurantDetails } from "@/hooks/queries/useCourtQuery";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
@@ -34,12 +39,42 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
   const { restaurantId } = React.use(params);
 
   const { data: menus = [], isLoading: isMenusLoading } = useGetMenus(restaurantId);
+  const { data: restaurantDetails } = useGetRestaurantDetails(restaurantId);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const searchParams = useSearchParams();
   const tableIdFromUrl = searchParams.get("tableId");
+  const parsedTableId = tableIdFromUrl && !isNaN(parseInt(tableIdFromUrl, 10)) 
+    ? parseInt(tableIdFromUrl, 10) 
+    : undefined;
+
+  const {data, isLoading : isOrderLoading} = useGetOrders({
+    restaurantId,
+    tableNumber: parsedTableId
+  });
+
+  const orders = data?.orders || []; 
+  console.log(orders)
+
+  const activeOrder = orders.find(
+    (order) => order.status === "PENDING" || order.status === "PREPARING" || order.status === "COMPLETED"
+  ) || orders[0];
+
+  const getStepFromStatus = (orderStatus?: string): number => {
+    if (!orderStatus) return 1;
+    const statusMap: Record<string, number> = {
+      PENDING: 1,
+      PREPARING: 2,
+      READY: 3,
+      COMPLETED: 4,
+    };
+    return statusMap[orderStatus.toUpperCase()] || 1;
+  };
+
+  const initialStep = getStepFromStatus(activeOrder?.status);
 
   const [filterMenu, setFilterMenu] = useState<Menu[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [status, setStatus] = useState(['Pending', 'Preparing', 'Ready', 'Completed'])
 
   useEffect(() => {
     if (!searchQuery) {
@@ -90,14 +125,15 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
 
   return (
     <>
-      <div className="rounded-b-[2rem] px-2 py-4 h-34 rounded-b bg-accent flex flex-col justify-between">
+      <div className="relative rounded-b-[2rem] px-2 py-4 h-34 bg-accent flex flex-col justify-between">
         <section className="flex justify-between items-center">
-          <h1 className="text-4xl font-semibold leading-none">{restaurantId}</h1>
+          <h1 className="text-3xl font-extrabold
+           leading-none">{restaurantDetails?.name || restaurantId}</h1>
           <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
             <SheetTrigger asChild>
-              <div className="flex min-w-[4.5rem] justify-center gap-2 items-center bg-primary text-black px-3 py-1.5 rounded-lg cursor-pointer transition-all">
-                <ShoppingCart size={18} />
-                <span className="text-sm font-extrabold text-center min-w-[1.25rem]">
+              <div className="flex min-w-18 justify-center gap-2 items-center bg-primary text-black px-3 py-1.5 rounded-lg cursor-pointer transition-all">
+                <ShoppingCart size={18} className="text-primary-foreground"/>
+                <span className="text-sm text-primary-foreground font-bold text-center min-w-5">
                   {totalItems}
                 </span>
               </div>
@@ -192,8 +228,8 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
             <div key={category}>
               <Accordion type="single" defaultValue={category} collapsible>
                 <AccordionItem value={category}>
-                  <AccordionTrigger className="text-xl font-extrabold uppercase">
-                    {category}
+                  <AccordionTrigger className="text-2xl font-extrabold ">
+                    <h1>{category}</h1>
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="flex flex-col gap-4">
@@ -271,6 +307,84 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
             </div>
           ))
         )}
+
+
+      <footer className="fixed z-50 bottom-6 right-6">
+        
+      {!isOrderLoading && orders.length < 0 && (
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button className="h-12 w-12 rounded-2xl flex items-center justify-center p-0 transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary/95">
+              <PiCookingPot size={26} />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <div className="overflow-y-auto max-h-[85vh] w-full">
+              <DrawerHeader>
+                <DrawerTitle className="text-center text-3xl font-extrabold tracking-tight">
+                  {activeOrder?.status 
+                    ? activeOrder.status.charAt(0) + activeOrder.status.slice(1).toLowerCase() 
+                    : "It's Cooking"}
+                </DrawerTitle>
+              </DrawerHeader>
+              <Stepper 
+                key={activeOrder?.id ? `${activeOrder.id}-${initialStep}` : "no-order"}
+                initialStep={initialStep}
+                disableStepIndicators={true}
+                hideFooter={true}
+                onStepChange={(step) => {
+                  console.log(step)
+                }}
+                onFinalStepCompleted={() => console.log('All steps completed!')}
+              >
+                {status.map((stepName) => (
+                  <Step key={stepName}>
+                    <p className="text-center hidden rounded-xl max-w-sm w-full border border-emerald-500/20 bg-emerald-500/10 text-md font-semibold py-1.5 px-3">
+                      {stepName}
+                    </p>
+                  </Step>
+                ))}
+              </Stepper>
+
+              <div className="min-h-37.5 max-h-[45vh] overflow-y-auto pr-1">
+                              
+              {activeOrder ? (
+                
+                orders.filter((statuses) => statuses?.status !== 'CANCELLED' && 'COMPLETED').map((order) => (
+                  <div className="mx-auto w-full max-w-md px-6 pb-8 space-y-5">
+                  <p className="text-sm text-muted-foreground">For {order.customerName}</p>
+    
+                  <div className="space-y-3">
+
+                    <div className="bg-card border border-border/20 rounded-xl p-4 divide-y divide-border/20">
+                      {order.items?.map((item) => (
+                        <div key={item.id} className="flex justify-between items-center py-2.5 first:pt-0 last:pb-0">
+                          <div>
+                            <p className="font-medium text-sm">{item.menu?.itemName || `Item #${item.menuID}`}</p>
+                            <p className="text-xs text-muted-foreground">${item.price} each</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold">x{item.quantity}</p>
+                            <p className="text-xs font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No active orders found.
+                </div>
+              )}
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+      </footer>
+
       </section>
     </>
   );
