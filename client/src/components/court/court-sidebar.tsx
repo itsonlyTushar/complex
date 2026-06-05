@@ -31,9 +31,14 @@ export const CourtSidebar = ({
 }: React.ComponentProps<typeof Sidebar>) => {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-4 py-2 font-bold text-xl">
-          <span>Court</span>
+      <SidebarHeader className="h-16 px-4 group-data-[collapsible=icon]:px-2 flex flex-row items-center gap-3 group-data-[collapsible=icon]:justify-center border-b border-border/50">
+        <div className="size-11 group-data-[collapsible=icon]:size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-lg group-data-[collapsible=icon]:text-sm flex-shrink-0 border border-border">
+          C
+        </div>
+        <div className="flex flex-col truncate group-data-[collapsible=icon]:hidden">
+          <span className="font-bold text-xl leading-none">
+            Court
+          </span>
         </div>
       </SidebarHeader>
 

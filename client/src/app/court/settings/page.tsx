@@ -1,4 +1,5 @@
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
 export default function AdminSettingsPage() {
@@ -6,6 +7,7 @@ export default function AdminSettingsPage() {
     <section className="bg-card rounded-xl border shadow-sm p-6 h-full">
       <h1 className="text-3xl font-bold tracking-tight mb-8">General</h1>
 
+      <Separator className="my-6 bg-border/60" />
       {/* Close store switches   */}
       <div className="flex gap-2">
         <div className="flex items-center gap-4 p-4 rounded-lg bg-accent/30 border border-border/50 max-w-md">

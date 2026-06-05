@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useGetMe } from "@/hooks/queries/useUserQuery";
 import { useUpdateRestaurantStatus } from "@/hooks/mutations/useUserMutation";
+import { Separator } from "@/components/ui/separator";
 
 export default function AdminSettingsPage() {
   const { data: user, isLoading } = useGetMe();
@@ -17,7 +18,11 @@ export default function AdminSettingsPage() {
 
   return (
     <section className="bg-card rounded-xl border shadow-sm p-6 h-full">
-      <h1 className="text-3xl font-bold tracking-tight mb-8">General</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
+        General
+      </h1>
+
+      <Separator className="my-6 bg-border/60" />
 
       {/* Close store switches   */}
       <div className="flex gap-2">
@@ -60,4 +65,3 @@ export default function AdminSettingsPage() {
     </section>
   );
 }
-

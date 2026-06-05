@@ -36,11 +36,11 @@ export function AdminSidebar({
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="p-4 flex flex-row items-center gap-3 border-b border-border/50">
+      <SidebarHeader className="h-16 px-4 group-data-[collapsible=icon]:px-2 flex flex-row items-center gap-3 group-data-[collapsible=icon]:justify-center border-b border-border/50">
         {isLoading ? (
-          <div className="size-11 bg-muted animate-pulse rounded-lg flex-shrink-0" />
+          <div className="size-11 group-data-[collapsible=icon]:size-8 bg-muted animate-pulse rounded-lg flex-shrink-0" />
         ) : user?.restaurant?.logo ? (
-          <div className="relative size-11 rounded-lg overflow-hidden border border-border bg-background shadow-sm flex-shrink-0">
+          <div className="relative size-11 group-data-[collapsible=icon]:size-8 rounded-lg overflow-hidden border border-border bg-background shadow-sm flex-shrink-0">
             <Image 
               src={user.restaurant.logo} 
               alt="logo" 
@@ -50,7 +50,7 @@ export function AdminSidebar({
             />
           </div>
         ) : (
-          <div className="size-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-lg flex-shrink-0 border border-border">
+          <div className="size-11 group-data-[collapsible=icon]:size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-lg group-data-[collapsible=icon]:text-sm flex-shrink-0 border border-border">
             {user?.name?.[0]?.toUpperCase() || "A"}
           </div>
         )}

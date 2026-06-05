@@ -20,7 +20,8 @@ export const userService = async (userId: number) => {
                         stripeAccountId: true,
                         onBoradingCompleted: true,
                         logo: true,
-                        description: true
+                        description: true,
+                        commissionRate: true
                     }
                 }
             }

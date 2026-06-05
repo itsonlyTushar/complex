@@ -1,4 +1,5 @@
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import React from "react";
 
@@ -11,6 +12,8 @@ export default function page() {
           <h1 className="text-3xl font-bold tracking-tight mb-2">Payments</h1>
         </div>
       </div>
+
+      <Separator className="mb-10 bg-border/60" />
 
       <section className="flex gap-5 justify-around">
 

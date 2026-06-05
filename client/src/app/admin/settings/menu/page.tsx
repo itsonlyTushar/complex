@@ -111,9 +111,6 @@ export default function MenuSettingsPage() {
 
   return (
     <section className="bg-card/70 backdrop-blur-lg rounded-2xl border border-border/80 shadow-xl p-8 relative overflow-hidden transition-all duration-300">
-      {/* Decorative Gradient Background Highlights */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full filter blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/5 rounded-full filter blur-3xl pointer-events-none -z-10" />
 
       {/* Header Info */}
       <div className="flex items-start justify-between mb-8">
@@ -121,24 +118,14 @@ export default function MenuSettingsPage() {
           <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
             Category Management
           </h1>
-          <p className="text-sm mt-2 text-muted-foreground max-w-lg leading-relaxed">
-            Organize your menu items by defining categories.
-          </p>
         </div>
       </div>
-
       <Separator className="my-6 bg-border/60" />
-
-
       {/* Create Category Form */}
-      <div className="bg-muted/30 dark:bg-muted/10 border border-border/40 rounded-xl p-6 mb-8 shadow-inner">
-        <h2 className="text-lg font-semibold mb-4 text-foreground/90 flex items-center gap-2">
-          <FolderPlus className="w-5 h-5 text-primary" />
-          Create New Category
-        </h2>
+      <div className="bg-muted/30 dark:bg-muted/10 border border-border/40 rounded-xl p-6 mb-8">
         <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-3 items-end">
           <div className="flex-1 w-full space-y-2">
-            <Label htmlFor="category-input" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <Label htmlFor="category-input" className="text-xs font-semibold tracking-wider text-muted-foreground">
               Category Name
             </Label>
             <div className="relative">
@@ -152,15 +139,12 @@ export default function MenuSettingsPage() {
                 disabled={submitting}
                 className="w-full bg-background/50 border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 rounded-lg pl-3 pr-10 transition-all duration-300"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40">
-                <Hash className="w-4 h-4" />
-              </span>
             </div>
           </div>
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full sm:w-auto px-6 py-2 h-10 font-medium bg-primary hover:bg-primary/95 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 shrink-0"
+            className="w-full sm:w-auto px-6 py-2 h-10 font-medium bg-primary hover:bg-primary/95 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-300 active:scale-95 shrink-0"
           >
             {submitting ? (
               <>

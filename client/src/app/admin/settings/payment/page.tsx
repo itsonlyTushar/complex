@@ -10,6 +10,7 @@ import { useOnboardRestaurant, useVerifyOnboarding } from "@/hooks/mutations/use
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
 import { CheckCircle2, AlertCircle, Loader2, CreditCard, ArrowRight, ExternalLink } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 const Payment = () => {
   const { data: user, isLoading: isUserLoading, refetch: refetchUser } = useGetMe();
@@ -83,20 +84,26 @@ const Payment = () => {
     <>
       <section className="bg-card rounded-xl border shadow-sm p-6 h-full flex flex-col gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Payments</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your payment gateway, merchant accounts, and payouts.
-          </p>
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
+            Payments
+          </h1>
         </div>
 
+        <Separator className="my-6 bg-border/60" />
+
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Card 1: Accept Online Payments (Configuration) */}
-          <div className="flex flex-col justify-between p-5 rounded-2xl bg-accent/20 border border-border/40 backdrop-blur-md">
+          {/* FOR SWITCH  */}
+          <div className="flex flex-col justify-between p-5 rounded-xl bg-muted/30 dark:bg-muted/10 border border-border/40 p-6 mb-8">
             <div className="flex items-start gap-4 mb-6">
               <div className="grid gap-1">
                 <Label htmlFor="online-payments" className="text-lg font-bold leading-none cursor-pointer">
                   Accept Online Payments
                 </Label>
+
+                  <div className="flex items-center gap-2">
+                  <p className="font-extrabold border border-emerald-500/20 max-w-sm w-[60px] text-center rounded-xl text-xs bg-emerald-500/10 text-emerald-500">{restaurant?.commissionRate}%</p>
+                  <span className="text-xs text-mutated">fee is charged per order.</span>
+                  </div>
               </div>
             </div>
 
@@ -113,8 +120,8 @@ const Payment = () => {
             </div>
           </div>
 
-          {/* Card 2: Stripe Connect Integration status */}
-          <div className="flex flex-col justify-between p-5 rounded-2xl bg-accent/20 border border-border/40 backdrop-blur-md">
+          {/* FOR ACTIVATTION  */}
+          <div className="flex flex-col justify-between p-5 rounded-xl bg-muted/30 dark:bg-muted/10 border border-border/40 p-6 mb-8">
             <div>
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex flex-col gap-1">
@@ -149,8 +156,7 @@ const Payment = () => {
                 <Button
                   onClick={handleConnectStripe}
                   disabled={isOnboarding}
-                  variant="outline"
-                  className="w-full rounded-xl flex items-center justify-center gap-2 border-border/50 hover:bg-accent/40"
+                  className="w-full rounded-xl flex items-center justify-center gap-2"
                 >
                   {isOnboarding ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
