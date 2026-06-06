@@ -1,7 +1,8 @@
 {
   "scripts": {
+    "build": "npx prisma generate && tsc",
     "dev": "tsx watch src/server.ts",
-    "start": "node list/server.js"
+    "start": "node dist/server.js"
   },
   "type": "module",
   "dependencies": {
