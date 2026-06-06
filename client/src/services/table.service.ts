@@ -17,7 +17,7 @@ export interface GetLayoutResponse {
 
 export const addTable = async (data: Table): Promise<Table> => {
     let token = await getAuth()
-    const response = await fetch(`http://127.0.0.1:5000/api/add-table`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/add-table`, {
         method: "POST",
         headers: {
             "Content-Type" : "application/json",
@@ -36,7 +36,7 @@ export const addTable = async (data: Table): Promise<Table> => {
 
 export const getTables = async (): Promise<Table[]> => {
     let token = await getAuth()
-    const response = await fetch(`http://127.0.0.1:5000/api/get-tables`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/get-tables`, {
         method: "GET",
         headers: {
             "Content-Type" : "application/json",
@@ -53,7 +53,7 @@ export const getTables = async (): Promise<Table[]> => {
 
 export const saveLayout = async (payload: SaveLayoutPayload): Promise<{ message: string }> => {
     let token = await getAuth()
-    const response = await fetch(`http://127.0.0.1:5000/api/save-layout`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/save-layout`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export const saveLayout = async (payload: SaveLayoutPayload): Promise<{ message:
 
 export const getLayout = async (): Promise<GetLayoutResponse> => {
     let token = await getAuth()
-    const response = await fetch(`http://127.0.0.1:5000/api/get-layout`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/get-layout`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

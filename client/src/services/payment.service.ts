@@ -2,7 +2,7 @@ import { PaymentIntentPayload, PaymentIntentResponse } from "@/types/payment.typ
 import { getAuth } from "@/app/actions/auth";
 
 export const createPaymentIntent = async (data: PaymentIntentPayload): Promise<PaymentIntentResponse> => {
-    const response = await fetch(`http://127.0.0.1:5000/api/payments/create-payment`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/payments/create-payment`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export const createPaymentIntent = async (data: PaymentIntentPayload): Promise<P
 
 export const onboardRestaurant = async (): Promise<{ stripeAccountId: string; onboardingUrl: string }> => {
     let token = await getAuth();
-    const response = await fetch(`http://127.0.0.1:5000/api/payments/onboard-restaurant`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/payments/onboard-restaurant`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -38,7 +38,7 @@ export const onboardRestaurant = async (): Promise<{ stripeAccountId: string; on
 
 export const verifyOnboarding = async (): Promise<{ completed: boolean }> => {
     let token = await getAuth();
-    const response = await fetch(`http://127.0.0.1:5000/api/payments/verify-onboarding`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/payments/verify-onboarding`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

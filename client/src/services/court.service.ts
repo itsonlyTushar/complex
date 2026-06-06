@@ -2,7 +2,7 @@ import { getAuth } from "@/app/actions/auth"
 
 export const fetchRestaurants = async () => {
     let token = await getAuth()
-    const response = await fetch(`http://localhost:5000/api/court/restaurants`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/court/restaurants`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -17,7 +17,7 @@ export const fetchRestaurants = async () => {
 
 export const onboardRestaurant = async (data: any) => {
     let token = await getAuth()
-    const response = await fetch(`http://localhost:5000/api/auth/signup`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/signup`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -35,7 +35,7 @@ export const onboardRestaurant = async (data: any) => {
 
 export const deleteRestaurant = async (id: string) => {
     let token = await getAuth()
-    const response = await fetch(`http://localhost:5000/api/court/restaurants/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/court/restaurants/${id}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export const deleteRestaurant = async (id: string) => {
 
 export const editRestaurant = async (id: string, data: any) => {
     let token = await getAuth()
-    const response = await fetch(`http://localhost:5000/api/court/restaurants/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/court/restaurants/${id}`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -69,7 +69,7 @@ export const editRestaurant = async (id: string, data: any) => {
 }
 
 export const fetchPublicRestaurantDetails = async (id: string) => {
-    const response = await fetch(`http://localhost:5000/api/court/public/restaurant/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/court/public/restaurant/${id}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"

@@ -21,7 +21,7 @@ function PublicFoodCourtContent() {
 
         const fetchRestaurants = async () => {
             try {
-                const url = new URL(`http://localhost:5000/api/court/public/${foodCourtId}/restaurants`);
+                const url = new URL(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/court/public/${foodCourtId}/restaurants`);
                 if (tableId) {
                     url.searchParams.append("tableId", tableId);
                 }
