@@ -8,6 +8,10 @@ RUN npm install
 
 COPY . .
 
+# Build Next.js
+RUN npm run build
+
 EXPOSE 3000
 
-CMD ["npm","run","dev"]
+# Run production server
+CMD ["npm", "run", "start"]
