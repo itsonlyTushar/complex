@@ -2,9 +2,22 @@ import Stripe from "stripe";
 import { prisma } from "../config/db.js";
 import type { Payments } from "../types/payment.types.js";
 
-const stripe = new Stripe((process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY)!, {
-    apiVersion: '2022-11-15' as any
-})
+const stripeKey = process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY;
+if (!stripeKey) {
+    console.warn("[WARNING] STRIPE_SECRET or STRIPE_SECRET_KEY is not defined in environment variables. Stripe integration will be disabled.");
+}
+
+const stripe = new Proxy({} as Stripe, {
+    get(target, prop) {
+        if (!stripeKey) {
+            throw new Error("Stripe Client is not initialized. Please configure STRIPE_SECRET in your environment variables.");
+        }
+        const stripeInstance = new Stripe(stripeKey, {
+            apiVersion: '2022-11-15' as any
+        });
+        return Reflect.get(stripeInstance, prop);
+    }
+});
 
 export const onboardRestaurantStripe = async (restaurantId: string) => {
     const restaurant = await prisma.restaurant.findUnique({
