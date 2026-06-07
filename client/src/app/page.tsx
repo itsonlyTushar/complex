@@ -30,7 +30,7 @@ export default function Home() {
             padding: "0 1rem",
           }}
         >
-          MVP is live to use
+          Complex is live to use
         </motion.h1>
 
         <motion.div
