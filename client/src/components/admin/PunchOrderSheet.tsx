@@ -152,8 +152,7 @@ export function PunchOrderSheet() {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-5 pr-1 py-4 px-2">
-          {/* Customer Info */}
+        <div className="flex-1 overflow-y-auto space-y-5 pr-1 py-4 px-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="punch-customer-name" className="text-sm font-semibold">
@@ -185,7 +184,6 @@ export function PunchOrderSheet() {
             </div>
           </div>
 
-          {/* Menu Search */}
           <div>
             <Label className="text-sm font-semibold mb-1.5 block">Add Items</Label>
             <Input
@@ -321,7 +319,7 @@ export function PunchOrderSheet() {
             disabled={isSubmitting || cart.length === 0}
             className="rounded-xl gap-2 font-semibold"
           >
-            {isSubmitting ? "Placing..." : `Place Order — $${cartTotal.toFixed(2)}`}
+            {isSubmitting ? "Placing..." : `Place Order $${cartTotal.toFixed(2)}`}
           </Button>
         </SheetFooter>
       </SheetContent>

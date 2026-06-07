@@ -15,6 +15,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -96,6 +97,30 @@ export default function LoginPage() {
         <Button type="submit" className="w-full mt-2" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </Button>
+
+        <div className="mt-6 pt-6 border-t border-border w-full">
+          <p className="text-xs text-muted-foreground mb-3 text-left">Or use the demo credentials:</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setValue("email", "demo@login.com");
+              setValue("password", "demo123");
+            }}
+            className="w-full flex flex-col items-start gap-1 py-3 px-4 h-auto rounded-xl border-dashed border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-all text-left group"
+          >
+            <div className="flex items-center justify-between w-full">
+              <span className="text-sm font-semibold text-primary">Demo Account</span>
+              <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                Use Login
+              </span>
+            </div>
+            <div className="text-xs text-muted-foreground space-y-1 mt-1">
+              <div>Email: <code className="bg-muted px-1.5 py-0.5 rounded text-[11px] text-foreground font-mono">demo@login.com</code></div>
+              <div>Password: <code className="bg-muted px-1.5 py-0.5 rounded text-[11px] text-foreground font-mono">demo123</code></div>
+            </div>
+          </Button>
+        </div>
       </div>
     </form>
   );
