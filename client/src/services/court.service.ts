@@ -79,4 +79,19 @@ export const fetchPublicRestaurantDetails = async (id: string) => {
         throw new Error("failed to fetch restaurant details");
     }
     return response.json();
+}
+
+export const fetchMyCourtId = async () => {
+    let token = await getAuth()
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/court/my-id`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        }
+    });
+    if(!response.ok) {
+        throw new Error("failed to fetch food court ID");
+    }
+    return response.json();
 }

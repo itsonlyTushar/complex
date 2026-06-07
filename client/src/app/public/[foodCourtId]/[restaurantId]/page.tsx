@@ -128,7 +128,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
       <div className="relative rounded-b-[2rem] px-2 py-4 h-34 bg-accent flex flex-col justify-between">
         <section className="flex justify-between items-center">
           <h1 className="text-3xl font-extrabold
-           leading-none">{restaurantDetails?.name || restaurantId}</h1>
+           leading-none">{restaurantDetails?.name}</h1>
           <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
             <SheetTrigger asChild>
               <div className="flex min-w-18 justify-center gap-2 items-center bg-primary text-black px-3 py-1.5 rounded-lg cursor-pointer transition-all">

@@ -1,8 +1,8 @@
 "use client"
 
-import React from 'react'
 import { useAddTable } from "@/hooks/mutations/useTableMutation"
 import { useGetTables } from "@/hooks/queries/useTableQuery"
+import { useCourt } from "@/hooks/queries/useCourtQuery"
 import { newTableSchema, TableInput } from "@/lib/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
@@ -10,7 +10,9 @@ import { toast } from "@/lib/toast"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Armchair, Users, Plus, Loader2, Sparkles } from "lucide-react"
+import { Armchair, Users, Plus, Loader2 } from "lucide-react"
+import Link from 'next/link'
+import QR from '@/components/shared/QR'
 
 function Tables() {
     const { handleSubmit, register, reset, control, formState: { errors } } = useForm<TableInput>({
@@ -20,13 +22,15 @@ function Tables() {
     const { data: tables, isLoading: isTablesLoading } = useGetTables()
     const { mutateAsync: addTable, isPending: isAdding } = useAddTable()
 
+    const { foodCourtId, isLoading: isCourtLoading } = useCourt()
+
     const handleAddNewTable = handleSubmit(async (data) => {
         try {
             await addTable({
                 number: String(data.number),
                 occupacy: Number(data.occupacy),
                 shape: String(data.shape),
-                foodCourtId: "" 
+                foodCourtId: foodCourtId || ""
             })
             toast.success(`Table ${data.number} added successfully!`)
             reset()
@@ -34,6 +38,7 @@ function Tables() {
             toast.error(error.message || "Failed to add table")
         }
     })
+
 
     return (
         <section className="bg-card rounded-xl border shadow-sm p-6 h-full flex flex-col">
@@ -109,8 +114,8 @@ function Tables() {
                             )}
                         </div>
 
-                        <Button 
-                            type="submit" 
+                        <Button
+                            type="submit"
                             disabled={isAdding}
                             className="w-full flex items-center justify-center gap-2 mt-2 transition-transform hover:scale-[1.01]"
                         >
@@ -124,13 +129,13 @@ function Tables() {
                     </form>
                 </div>
 
-                {/* Right Side: Tables Grid List */}
+                {/* Tables Grid List */}
                 <div className="flex-1 border min-h-[200px] my-4 p-5 rounded-xl shadow-sm">
                     <div className="mb-4">
                         <h2 className="text-lg font-semibold text-foreground">Current Layout</h2>
                     </div>
 
-                    {isTablesLoading ? (
+                    {isTablesLoading || isCourtLoading ? (
                         <div className="flex w-full items-center justify-center p-12">
                             <Spinner className="h-8 w-8 text-primary" />
                         </div>
@@ -167,6 +172,11 @@ function Tables() {
                                         <Users className="h-4 w-4 text-muted-foreground/75" />
                                         <span>Max: <strong className="text-foreground">{table.occupacy} people</strong></span>
                                     </div>
+                                    <QR url={`http://localhost:3000/public/${foodCourtId}?tableId=${table.number}`} />
+
+                                    <Link 
+                                    target="_blank"
+                                    className='hover:underline text-sm font-extrabold tracking-tight text-center' href={`http://localhost:3000/public/${foodCourtId}?tableId=${table.number}`}>Table Link</Link>
                                 </div>
                             ))}
                         </div>

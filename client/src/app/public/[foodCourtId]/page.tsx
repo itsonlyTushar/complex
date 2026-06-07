@@ -1,5 +1,6 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
@@ -51,8 +52,9 @@ function PublicFoodCourtContent() {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex gap-2 justify-center items-center h-screen text-md">
+                <Spinner />
+                Wait while we load restaurants
             </div>
         );
     }

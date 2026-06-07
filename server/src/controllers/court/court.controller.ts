@@ -90,4 +90,17 @@ export const fetchPublicRestaurantDetailsController = async (req: Request, res: 
         res.status(400).json({ message: error.message });
     }
 }
+
+export const getMyFoodCourtIdController = async (req: Request, res: Response) => {
+    try {
+        const foodCourtId = (req as any).user?.foodCourtId;
+        if (!foodCourtId) {
+             res.status(404).json({ message: "No food court associated with this user" });
+             return;
+        }
+        res.status(200).json({ foodCourtId });
+    } catch(error: any) {
+        res.status(400).json({ message: error.message });
+    }
+}
 
