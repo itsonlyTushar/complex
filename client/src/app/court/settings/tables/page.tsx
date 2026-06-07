@@ -41,7 +41,7 @@ function Tables() {
 
 
     return (
-        <section className="bg-card rounded-xl border shadow-sm p-6 h-full flex flex-col">
+        <section className="bg-card  w-full rounded-xl border shadow-sm p-6 h-full flex flex-col">
             <div className="mb-6 flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight mb-2">Manage Tables</h1>
@@ -130,7 +130,7 @@ function Tables() {
                 </div>
 
                 {/* Tables Grid List */}
-                <div className="flex-1 border min-h-[200px] my-4 p-5 rounded-xl shadow-sm">
+                <div className=" flex-1 border min-h-[200px] my-4 p-5 rounded-xl shadow-sm">
                     <div className="mb-4">
                         <h2 className="text-lg font-semibold text-foreground">Current Layout</h2>
                     </div>
@@ -150,7 +150,7 @@ function Tables() {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             {tables.map((table) => (
                                 <div
                                     key={table.id}

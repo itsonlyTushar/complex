@@ -50,7 +50,7 @@ export default function SettingsLayout({
           ))}
         </nav>
       </aside>
-      <div className="flex-1 lg:max-w-2xl">{children}</div>
+      <div className="flex-1 w-full">{children}</div>
     </div>
   );
 }
