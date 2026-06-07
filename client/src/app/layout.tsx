@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import ReactQueryProvider from "@/lib/react-query";
 import { Toaster } from "@/components/ui/sonner";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,6 +42,7 @@ export default function RootLayout({
             <Toaster closeButton richColors position="top-right" />
           </ThemeProvider>
         </ReactQueryProvider>
+        <Analytics />
       </body>
     </html>
   );
