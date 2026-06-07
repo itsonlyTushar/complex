@@ -3,16 +3,11 @@
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { useGetPaymentDetails } from "@/hooks/queries/useOrderQuery";
-import { DollarSign, TrendingUp, Receipt, Wallet } from "lucide-react";
-
-const currencyFmt = (value: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 
 export default function AdminPaymentsPage() {
   const { data, isLoading, isError } = useGetPaymentDetails();
 
   const payments = data?.payments || [];
-  const summary = data?.summary;
 
   if (isLoading) {
     return (
@@ -38,44 +33,6 @@ export default function AdminPaymentsPage() {
           Complete breakdown of your restaurant&apos;s revenue, costs, and profit.
         </p>
       </section>
-
-      {/* Summary Cards */}
-      {summary && (
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <SummaryCard
-            icon={<Receipt className="size-5" />}
-            label="Total Revenue"
-            value={currencyFmt(summary.totalRevenue)}
-            subtitle={`${summary.orderCount} order${summary.orderCount !== 1 ? "s" : ""}`}
-            color="text-blue-500"
-            bg="bg-blue-500/10"
-          />
-          <SummaryCard
-            icon={<DollarSign className="size-5" />}
-            label="Commission Paid"
-            value={currencyFmt(summary.totalCommission)}
-            subtitle="Platform fees"
-            color="text-amber-500"
-            bg="bg-amber-500/10"
-          />
-          <SummaryCard
-            icon={<Wallet className="size-5" />}
-            label="Net Received"
-            value={currencyFmt(summary.totalNet)}
-            subtitle="After commission"
-            color="text-emerald-500"
-            bg="bg-emerald-500/10"
-          />
-          <SummaryCard
-            icon={<TrendingUp className="size-5" />}
-            label="Real Profit"
-            value={currencyFmt(summary.totalProfit)}
-            subtitle={`Cost of goods: ${currencyFmt(summary.totalCost)}`}
-            color={summary.totalProfit >= 0 ? "text-emerald-500" : "text-rose-500"}
-            bg={summary.totalProfit >= 0 ? "bg-emerald-500/10" : "bg-rose-500/10"}
-          />
-        </section>
-      )}
 
       <section>
         <DataTable columns={columns} data={payments} />

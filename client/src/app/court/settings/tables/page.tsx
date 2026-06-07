@@ -10,7 +10,7 @@ import { toast } from "@/lib/toast"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Armchair, Users, Plus, Loader2 } from "lucide-react"
+import { Armchair, Users, Plus, Loader2, Link2 } from "lucide-react"
 import Link from 'next/link'
 import QR from '@/components/shared/QR'
 
@@ -150,7 +150,7 @@ function Tables() {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             {tables.map((table) => (
                                 <div
                                     key={table.id}
@@ -176,7 +176,9 @@ function Tables() {
 
                                     <Link 
                                     target="_blank"
-                                    className='hover:underline text-sm font-extrabold tracking-tight text-center' href={`http://localhost:3000/public/${foodCourtId}?tableId=${table.number}`}>Table Link</Link>
+                                    className='flex items-center justify-center gap-2 hover:underline text-sm font-extrabold tracking-tight text-center' href={`http://localhost:3000/public/${foodCourtId}?tableId=${table.number}`}>
+                                        
+                                      <Link2 size={16} />  Table Link</Link>
                                 </div>
                             ))}
                         </div>

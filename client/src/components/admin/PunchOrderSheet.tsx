@@ -2,14 +2,14 @@
 
 import React, { useState, useMemo } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +27,7 @@ interface CartItem {
   quantity: number;
 }
 
-export function PunchOrderDialog() {
+export function PunchOrderSheet() {
   const [open, setOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [tableNumber, setTableNumber] = useState("");
@@ -137,22 +137,22 @@ export function PunchOrderDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+      <SheetTrigger asChild>
         <Button className="gap-2 rounded-xl font-semibold shadow-sm">
           <Plus className="size-4" />
           Punch Order
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Punch New Order</DialogTitle>
-          <DialogDescription>
+      </SheetTrigger>
+      <SheetContent side="right" className="sm:max-w-xl w-full h-full overflow-hidden flex flex-col">
+        <SheetHeader>
+          <SheetTitle className="text-xl font-bold">Punch New Order</SheetTitle>
+          <SheetDescription>
             Manually create an order for a walk-in or cash customer.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-5 pr-1">
+        <div className="flex-1 overflow-y-auto space-y-5 pr-1 py-4 px-2">
           {/* Customer Info */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
@@ -194,7 +194,7 @@ export function PunchOrderDialog() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="rounded-xl mb-3"
             />
-            <div className="max-h-[200px] overflow-y-auto border rounded-xl divide-y">
+            <div className="max-h-[250px] overflow-y-auto border rounded-xl divide-y">
               {isMenuLoading ? (
                 <p className="text-sm text-muted-foreground p-4 text-center animate-pulse">
                   Loading menu...
@@ -307,7 +307,7 @@ export function PunchOrderDialog() {
           )}
         </div>
 
-        <DialogFooter className="pt-4 border-t">
+        <SheetFooter className="pt-4 border-t flex-row items-center justify-end gap-2">
           <Button
             variant="outline"
             onClick={() => { resetForm(); setOpen(false); }}
@@ -323,8 +323,8 @@ export function PunchOrderDialog() {
           >
             {isSubmitting ? "Placing..." : `Place Order — $${cartTotal.toFixed(2)}`}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

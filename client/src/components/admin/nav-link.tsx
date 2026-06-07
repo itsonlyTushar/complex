@@ -28,7 +28,7 @@ export function NavLink({ title, url, iconName }: NavLinkProps) {
 
   return (
     <SidebarMenuButton asChild tooltip={title} isActive={isActive}>
-      <Link href={url} className="flex items-center gap-2">
+      <Link href={url} className="flex items-center gap-2 mt-1">
         <Icon className="size-4" />
         <span>{title}</span>
       </Link>

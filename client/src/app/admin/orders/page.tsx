@@ -14,7 +14,7 @@ import { useGetOrders } from "@/hooks/queries/useOrderQuery";
 import { Check, X } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useState } from "react";
-import { PunchOrderDialog } from "@/components/admin/PunchOrderDialog";
+import { PunchOrderSheet } from "@/components/admin/PunchOrderSheet";
 
 export default function OrdersPage() {
   const { data, isLoading: isOrderLoading } = useGetOrders();
@@ -61,7 +61,7 @@ export default function OrdersPage() {
             Orders for your restaurant will appear here
           </p>
         </div>
-        <PunchOrderDialog />
+        <PunchOrderSheet />
       </section>
 
       {/* Map the orders cards here (only on-goings)  */}
