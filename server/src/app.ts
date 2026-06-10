@@ -10,11 +10,6 @@ import { stripeWebhookController } from "./controllers/payments/payments.control
 
 const app = express();
 
-// Add this RIGHT HERE - outside everything
-console.log("CLIENT_URL on startup:", process.env.CLIENT_URL);
-
-// Manual CORS middleware (cors@2.8.6 is incompatible with Express 5)
-console.log("CORS middleware registered");
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, "") : "";
@@ -26,7 +21,6 @@ app.use((req, res, next) => {
         clientUrl
     ].filter(Boolean);
 
-    console.log(`[CORS] ${req.method} ${req.url} - Origin: ${origin}`);
     if (origin && allowedOrigins.includes(origin)) {
         res.setHeader("Access-Control-Allow-Origin", origin);
     } else {
@@ -45,7 +39,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Stripe Webhook (MUST be registered before express.json() for raw body verification)
 app.post("/api/payments/webhook", express.raw({
     type: "application/json"
 }), stripeWebhookController)
