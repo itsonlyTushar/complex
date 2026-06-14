@@ -21,7 +21,7 @@ export default function AdminPage() {
         <div className="flex items-center gap-4">
           <div className="flex flex-col gap-1 p-5 min-w-[240px] bg-card text-card-foreground border border-border rounded-xl h-28">
             <span className="text-[12px] font-semibold tracking-wider text-muted-foreground">
-              Top Sales
+              Today's Sales
             </span>
             <h3 className="text-4xl font-bold text-foreground font-heading">
               73
@@ -30,7 +30,7 @@ export default function AdminPage() {
 
           <div className="flex flex-col gap-1 p-5 min-w-[240px] bg-card text-card-foreground border border-border rounded-xl h-28">
             <span className="text-[12px] font-semibold tracking-wider text-muted-foreground">
-              Top Sales
+              Pending
             </span>
             <h3 className="text-4xl font-bold text-foreground font-heading">
               73
@@ -38,12 +38,21 @@ export default function AdminPage() {
           </div>
           <div className="flex flex-col gap-1 p-5 min-w-[240px] bg-card text-card-foreground border border-border rounded-xl h-28">
             <span className="text-[12px] font-semibold tracking-wider text-muted-foreground">
-              Top Sales
+              Completed
             </span>
             <h3 className="text-4xl font-bold text-foreground font-heading">
               73
             </h3>
           </div>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-[7fr_3fr] gap-10">
+        <div className="w-full bg-accent rounded-xl">
+          <h1>Charts</h1>
+        </div>
+        <div className="bg-accent rounded-xl">
+          <h2>Recent Orders</h2>
         </div>
       </section>
     </>
