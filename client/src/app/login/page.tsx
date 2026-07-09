@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/lib/toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "@/lib/schemas";
+import Logo from "@/components/ui/logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -65,7 +66,7 @@ export default function LoginPage() {
     >
       <div className="border max-w-md w-full px-6 rounded-xl shadow-sm py-10 bg-card flex flex-col items-center">
         <div className="py-5">
-          <span className="text-2xl font-bold">Logo Holder</span>
+          <Logo />
         </div>
 
         <div className="flex flex-col gap-4 my-4 w-full text-left">
