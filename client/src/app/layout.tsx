@@ -18,7 +18,7 @@ const playfair = Playfair_Display({
 
 const defaultUrl = process.env.NEXT_PUBLIC_APP_URL
   ? process.env.NEXT_PUBLIC_APP_URL
-  : "https://complex.app";
+  : "https://complexapp.food";
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
