@@ -9,7 +9,7 @@ function Navbar() {
         <nav className="w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative z-50">
             <div className="flex items-center">
                 <Link href="/" className="transition-opacity hover:opacity-90">
-                    <Logo className="h-10 w-auto object-contain" />
+                    <Logo className="h-11 md:h-12 w-auto object-contain" />
                 </Link>
             </div>  
             <div className="flex items-center gap-6">
