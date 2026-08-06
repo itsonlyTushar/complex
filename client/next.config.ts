@@ -18,3 +18,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+// Updated local environment configuration
+

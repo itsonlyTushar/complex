@@ -1,83 +1,64 @@
-import Link from "next/link";
+"use client";
+
+import React from "react";
+import Navbar from "@/components/ui/navbar";
+import { Footer } from "@/components/home/footer";
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-6 py-12 lg:px-10">
-        <div className="space-y-3">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Legal</p>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl">Terms and Conditions</h1>
-          <p className="max-w-3xl text-base text-muted-foreground md:text-lg">
-            These terms govern your use of the Complex platform, including food court administration,
-            restaurant vendor dashboards, and customer ordering services.
-          </p>
-        </div>
+    <div className="relative min-h-screen w-full flex flex-col justify-between bg-[#f0ebe3] text-[#114236] font-body light">
+      <Navbar />
 
-        <article className="rounded-3xl border border-border bg-card p-6 shadow-sm md:p-8">
-          <div className="space-y-6 text-sm md:text-base">
-            <section className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">1. Acceptance of Terms</h2>
-              <p className="text-muted-foreground">
-                By accessing or using Complex, you agree to be bound by these Terms and Conditions.
-                If you do not agree, please do not use the service.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">2. Use of the Service</h2>
-              <p className="text-muted-foreground">
-                You may use Complex only for lawful purposes. You must not attempt to interfere with the
-                platform, bypass access controls, or misuse payment or ordering functionality.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">3. Accounts and Responsibilities</h2>
-              <p className="text-muted-foreground">
-                You are responsible for maintaining the confidentiality of your account credentials and
-                for all activity performed through your account.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">4. Payments and Orders</h2>
-              <p className="text-muted-foreground">
-                All payments made through Complex are subject to the payment processor&apos;s terms.
-                Orders placed through the platform are subject to the applicable restaurant policies and
-                availability.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">5. Intellectual Property</h2>
-              <p className="text-muted-foreground">
-                The platform, its design, and its content remain the property of Complex unless otherwise
-                stated. You may not copy, redistribute, or repurpose the platform without permission.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">6. Limitation of Liability</h2>
-              <p className="text-muted-foreground">
-                Complex is provided as-is. We are not liable for indirect, incidental, or consequential
-                damages arising from your use of the service, except where prohibited by law.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">7. Changes to These Terms</h2>
-              <p className="text-muted-foreground">
-                We may update these Terms and Conditions from time to time. Continued use of the service
-                after changes are posted means you accept the revised terms.
-              </p>
-            </section>
+      <main className="w-full flex-1 py-12 sm:py-16">
+        <section className="mx-auto w-full max-w-4xl px-6 lg:px-10 space-y-8">
+          <div className="space-y-3">
+            <p className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#114236]/70">LEGAL & AGREEMENTS</p>
+            <h1 className="text-4xl font-heading font-extrabold text-[#114236] sm:text-5xl">Terms and Conditions</h1>
+            <p className="max-w-3xl text-base text-[#114236]/80">
+              These terms govern your access to and use of the Complex sports facility and court management platform.
+            </p>
           </div>
-        </article>
 
-        <p className="text-sm text-muted-foreground">
-          Need help? Return to the <Link href="/" className="text-primary underline underline-offset-4">homepage</Link>.
-        </p>
-      </section>
-    </main>
+          <article className="rounded-2xl border border-[#114236]/15 bg-white p-6 sm:p-10 shadow-sm space-y-8 text-sm sm:text-base leading-relaxed text-[#114236]/90">
+            <section className="space-y-2">
+              <h2 className="text-xl font-bold text-[#114236]">1. Acceptance of Terms</h2>
+              <p>
+                By accessing or using Complex, you agree to be bound by these Terms and Conditions. If you do not agree, please do not access or use the platform.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h2 className="text-xl font-bold text-[#114236]">2. Use of Service & Court Reservations</h2>
+              <p>
+                You may use Complex only for authorized sports venue scheduling and facility administration. Misuse, unbilled slot bypass, or interference with IoT access locks is strictly prohibited.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h2 className="text-xl font-bold text-[#114236]">3. Account Responsibilities</h2>
+              <p>
+                Venue operators and administrators are responsible for maintaining account credential confidentiality and for all booking activity conducted under their venue profile.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h2 className="text-xl font-bold text-[#114236]">4. Payments & Stripe Settlements</h2>
+              <p>
+                All online slot fees processed through Complex are subject to Stripe Connect terms. Automated payouts settle directly into venue operating accounts according to configured schedules.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h2 className="text-xl font-bold text-[#114236]">5. Termination & SLA</h2>
+              <p>
+                We reserve the right to suspend or terminate accounts that violate operating policies or attempt security breaches. Enterprise accounts are backed by our 99.99% system uptime SLA.
+              </p>
+            </section>
+          </article>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
   );
 }
