@@ -27,12 +27,11 @@ const defaultUrl = process.env.NEXT_PUBLIC_APP_URL
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: {
-    default: "Complex - Sports Booking & Management Made Easy",
+    default: "Complex - Order Management Made Easy",
     template: "%s | Complex",
   },
   description: "Seamless sports court reservations, facility scheduling, and management application built with ease.",
   keywords: [
-    "sports booking",
     "court reservation",
     "sports management",
     "facility scheduling",
@@ -52,12 +51,12 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: defaultUrl,
     siteName: "Complex",
-    title: "Complex - Sports Booking & Management Made Easy",
+    title: "Complex - Order Management Made Easy",
     description: "Seamless sports court reservations, facility scheduling, and management application built with ease.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Complex - Sports Booking & Management Made Easy",
+    title: "Complex - Order Management Made Easy",
     description: "Seamless sports court reservations, facility scheduling, and management application built with ease.",
   },
   robots: {
@@ -73,6 +72,10 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "googled1924988dfb7311c",
+  },
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png" }],
   },
 };
 

@@ -2,23 +2,40 @@ import React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import logoImage from "@/assets/logo.png";
+import faviconImage from "@/assets/favicon.png";
 
 interface LogoProps {
   className?: string;
-  /** Hide the wordmark and show only the monogram (collapsed rails, tight bars). */
+  /** Show only the square mark (favicon) instead of the full wordmark. Use for collapsed rails/tight spaces. */
   markOnly?: boolean;
+  /** Rendered height in pixels; width follows the source image's aspect ratio. */
+  size?: number;
 }
 
-export function Logo({ className, markOnly = false }: LogoProps) {
-  return (
-    <span className={cn("inline-flex items-center", className)}>
+export function Logo({ className, markOnly = false, size }: LogoProps) {
+  if (markOnly) {
+    const px = size ?? 28;
+    return (
       <Image
-        src={logoImage}
+        src={faviconImage}
         alt="Complex"
-        className={cn("h-7 w-auto", markOnly && "object-cover object-left")}
+        width={px}
+        height={px}
+        className={cn("shrink-0 rounded-md", className)}
         priority
       />
-    </span>
+    );
+  }
+
+  const height = size ?? 28;
+  return (
+    <Image
+      src={logoImage}
+      alt="Complex"
+      style={{ height, width: "auto" }}
+      className={cn("shrink-0", className)}
+      priority
+    />
   );
 }
 

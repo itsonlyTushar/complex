@@ -12,6 +12,7 @@ import {
 } from "../ui/sidebar";
 import { COURT_NAV_DATA } from "@/constants/navConstants";
 import { NavLink } from "../court/nav-link";
+import { Logo } from "../ui/logo";
 import { LogOut } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import {
@@ -32,9 +33,8 @@ export const CourtSidebar = ({
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="h-12 flex-row items-center gap-2.5 border-b px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
-        <span className="grid size-6 shrink-0 place-items-center rounded-md bg-primary text-[13px] font-semibold leading-none text-primary-foreground">
-          C
-        </span>
+        <Logo markOnly size={28} className="hidden group-data-[collapsible=icon]:block" />
+        <Logo size={22} className="group-data-[collapsible=icon]:hidden" />
         <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
           <span className="truncate text-body font-medium leading-tight">
             Complex

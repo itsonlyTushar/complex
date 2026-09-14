@@ -7,6 +7,7 @@ import { SUP_NAV_DATA } from "@/constants/navConstants";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { logout } from "../actions/auth";
+import { Logo } from "@/components/ui/logo";
 
 const SuperAdminLayout = ({ children }: { children: React.ReactNode }) => {
     const pathName = usePathname()
@@ -16,8 +17,11 @@ const SuperAdminLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="min-h-screen bg-background text-foreground">
                 <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
                     <nav className="flex h-14 items-center justify-between px-6 max-w-7xl mx-auto">
-                        <div className="font-semibold text-lg tracking-tight">
-                            Super Admin Panel
+                        <div className="flex items-center gap-2">
+                            <Logo size={22} />
+                            <span className="hidden text-sm font-medium text-muted-foreground sm:inline">
+                                Super Admin
+                            </span>
                         </div>
 
                         <div className="flex items-center gap-6">
