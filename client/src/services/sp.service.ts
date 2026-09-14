@@ -1,8 +1,9 @@
 import { FoodCourtItem } from "@/types/sp.types";
 import { getAuth } from "@/app/actions/auth";
+import { API_URL } from "@/lib/api";
 
 export const fetchFoodCourts = async (): Promise<FoodCourtItem[]> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/courts`, {
+    const response = await fetch(`${API_URL}/api/auth/courts`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -16,7 +17,7 @@ export const fetchFoodCourts = async (): Promise<FoodCourtItem[]> => {
 };
 
 export const editFoodCourt = async ({ id, data }: { id: number; data: any }): Promise<any> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/courts/${id}`, {
+    const response = await fetch(`${API_URL}/api/auth/courts/${id}`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -31,7 +32,7 @@ export const editFoodCourt = async ({ id, data }: { id: number; data: any }): Pr
 };
 
 export const deleteFoodCourt = async (id: number): Promise<any> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/courts/${id}`, {
+    const response = await fetch(`${API_URL}/api/auth/courts/${id}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
@@ -46,7 +47,7 @@ export const deleteFoodCourt = async (id: number): Promise<any> => {
 
 export const fetchRestaurantsCommission = async (): Promise<any[]> => {
     const token = await getAuth();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/payments/restaurants-commission`, {
+    const response = await fetch(`${API_URL}/api/payments/restaurants-commission`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -62,7 +63,7 @@ export const fetchRestaurantsCommission = async (): Promise<any[]> => {
 
 export const updateRestaurantCommission = async ({ id, commissionRate }: { id: number; commissionRate: number }): Promise<any> => {
     const token = await getAuth();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/payments/restaurants-commission/${id}`, {
+    const response = await fetch(`${API_URL}/api/payments/restaurants-commission/${id}`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",

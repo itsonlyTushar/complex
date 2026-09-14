@@ -1,9 +1,11 @@
 import React from "react";
 import { SiteNav } from "@/components/marketing/site-nav";
+import { SmoothScroll } from "@/components/marketing/smooth-scroll";
 import { SiteFooter } from "@/components/marketing/site-footer";
 
 export default function TermsPage() {
   return (
+    <SmoothScroll>
     <div className="relative min-h-screen w-full flex flex-col justify-between bg-background text-foreground">
       <SiteNav />
 
@@ -58,5 +60,6 @@ export default function TermsPage() {
 
       <SiteFooter />
     </div>
+    </SmoothScroll>
   );
 }

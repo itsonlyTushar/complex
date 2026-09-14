@@ -84,7 +84,11 @@ export function SiteNav() {
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[min(20rem,85vw)]">
+            <SheetContent
+              side="right"
+              className="w-[min(20rem,85vw)]"
+              data-lenis-prevent
+            >
               <SheetHeader>
                 <SheetTitle className="text-left">Menu</SheetTitle>
               </SheetHeader>

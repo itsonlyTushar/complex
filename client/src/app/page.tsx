@@ -2,6 +2,7 @@ import Link from "next/link";
 import { QrCode, Split, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteNav } from "@/components/marketing/site-nav";
+import { SmoothScroll } from "@/components/marketing/smooth-scroll";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SplitTicket } from "@/components/marketing/split-ticket";
 import { VenueSwitcher } from "@/components/marketing/venue-switcher";
@@ -75,8 +76,9 @@ const FAQ_ITEMS = [
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <SiteNav />
+    <SmoothScroll>
+      <div className="flex min-h-screen flex-col bg-background">
+        <SiteNav />
 
       <main className="flex-1">
         <section className="mx-auto w-full max-w-[1200px] px-4 pt-14 pb-16 sm:px-6 sm:pt-20 sm:pb-24">
@@ -270,7 +272,8 @@ export default function Home() {
         <CtaBand />
       </main>
 
-      <SiteFooter />
-    </div>
+        <SiteFooter />
+      </div>
+    </SmoothScroll>
   );
 }

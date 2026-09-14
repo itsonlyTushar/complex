@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, Suspense } from "react";
+import { API_URL } from "@/lib/api";
 
 function PublicFoodCourtContent() {
     const params = useParams();
@@ -22,7 +23,7 @@ function PublicFoodCourtContent() {
 
         const fetchRestaurants = async () => {
             try {
-                const url = new URL(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/court/public/${foodCourtId}/restaurants`);
+                const url = new URL(`${API_URL}/api/court/public/${foodCourtId}/restaurants`);
                 if (tableId) {
                     url.searchParams.append("tableId", tableId);
                 }

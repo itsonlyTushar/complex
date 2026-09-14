@@ -1,10 +1,11 @@
 import { Order, CreateOrderPayload } from "@/types/order.types";
 import { getAuth } from "@/app/actions/auth";
+import { API_URL } from "@/lib/api";
 
 export const addOrder = async (
     data: CreateOrderPayload,
 ): Promise<{ message: string; order: Order }> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/add-order`, {
+    const response = await fetch(`${API_URL}/api/add-order`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -26,13 +27,13 @@ export const fetchOrders = async (params?: {
 }): Promise<{ orders: Order[] }> => {
     let token = await getAuth();
 
-    let url = `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/orders`;
+    let url = `${API_URL}/api/orders`;
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
     };
 
     if (params?.restaurantId && params?.tableNumber !== undefined) {
-        url = `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/public/orders?restaurantId=${params.restaurantId}&tableNumber=${params.tableNumber}`;
+        url = `${API_URL}/api/public/orders?restaurantId=${params.restaurantId}&tableNumber=${params.tableNumber}`;
     } else {
         headers["Authorization"] = `Bearer ${token || ""}`;
     }
@@ -49,7 +50,7 @@ export const fetchOrders = async (params?: {
 
 export const cancelOrder = async (orderId: number) => {
     let token = await getAuth();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/cancel-order`, {
+    const response = await fetch(`${API_URL}/api/cancel-order`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -67,7 +68,7 @@ export const cancelOrder = async (orderId: number) => {
 export const updateOrderStatus = async ({ orderId, status }: { orderId: number; status: string }) => {
     let token = await getAuth();
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/status-update`, {
+    const response = await fetch(`${API_URL}/api/status-update`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -85,7 +86,7 @@ export const updateOrderStatus = async ({ orderId, status }: { orderId: number; 
 export const fetchPaymentDetails = async () => {
     let token = await getAuth();
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/payment-details`, {
+    const response = await fetch(`${API_URL}/api/payment-details`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

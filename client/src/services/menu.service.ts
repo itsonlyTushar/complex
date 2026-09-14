@@ -1,9 +1,10 @@
 import { getAuth } from "@/app/actions/auth"
 import { Category, Menu } from "@/types/menu.types"
+import { API_URL } from "@/lib/api"
 
 export const fetchCategories = async (): Promise<Category[]> => {
     let token = await getAuth()
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/categories`, {
+    const response = await fetch(`${API_URL}/api/categories`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -18,7 +19,7 @@ export const fetchCategories = async (): Promise<Category[]> => {
 
 export const addCategory = async (data: { name: string }): Promise<Category> => {
     let token = await getAuth()
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/add-category`, {
+    const response = await fetch(`${API_URL}/api/add-category`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -37,7 +38,7 @@ export const addCategory = async (data: { name: string }): Promise<Category> => 
 export const updateCategory = async(data: Category): Promise<Category> => {
     let token = await getAuth()
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/update-category`, {
+    const response = await fetch(`${API_URL}/api/update-category`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -56,7 +57,7 @@ export const updateCategory = async(data: Category): Promise<Category> => {
 
 export const deleteCategory = async (data: { id: number }): Promise<Category> => {
     let token = await getAuth()
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/delete-category`, {
+    const response = await fetch(`${API_URL}/api/delete-category`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
@@ -75,8 +76,8 @@ export const deleteCategory = async (data: { id: number }): Promise<Category> =>
 export const fetchMenus = async (restaurantId?: string): Promise<Menu[]> => {
     let token = await getAuth()
     const url = restaurantId
-        ? `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/menus?restaurantId=${restaurantId}`
-        : `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/menus`;
+        ? `${API_URL}/api/menus?restaurantId=${restaurantId}`
+        : `${API_URL}/api/menus`;
     const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -92,7 +93,7 @@ export const fetchMenus = async (restaurantId?: string): Promise<Menu[]> => {
 
 export const addMenu = async (data: Omit<Menu, 'id'>): Promise<Menu> => {
     let token = await getAuth()
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/add-menu`, {
+    const response = await fetch(`${API_URL}/api/add-menu`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -110,7 +111,7 @@ export const addMenu = async (data: Omit<Menu, 'id'>): Promise<Menu> => {
 
 export const updateMenu = async (data: Menu): Promise<Menu> => {
     let token = await getAuth()
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/update-menu`, {
+    const response = await fetch(`${API_URL}/api/update-menu`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -128,7 +129,7 @@ export const updateMenu = async (data: Menu): Promise<Menu> => {
 
 export const deleteMenu = async (data: { id: number }): Promise<{ id: number }> => {
     let token = await getAuth()
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/delete-menu`, {
+    const response = await fetch(`${API_URL}/api/delete-menu`, {
         method: "DELETE",
         headers: {
             "Content-Type" : "application/json",

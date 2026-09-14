@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formFields } from "@/constants/formFields"
 import { toast } from "@/lib/toast"
+import { API_URL } from "@/lib/api"
 
 const CourtOnboard = () => {
   const [data, setData] = useState<FoodCourt[]>([]);
@@ -27,7 +28,7 @@ const CourtOnboard = () => {
   const onBoardFoodCourt = async (value: FoodCourtSignUp) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000"}/api/auth/new-court`, {
+      const response = await fetch(`${API_URL}/api/auth/new-court`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

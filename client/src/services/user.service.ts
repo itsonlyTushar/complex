@@ -1,6 +1,7 @@
 import { getAuth } from "@/app/actions/auth"
+import { API_URL as BASE_API_URL } from "@/lib/api"
 
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api`
+const API_URL = `${BASE_API_URL}/api`
 
 export const fetchMe = async () => {
     let token = await getAuth()

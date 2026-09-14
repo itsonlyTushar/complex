@@ -3,6 +3,7 @@
 import { Fragment, useState } from "react";
 import { Check, Minus } from "lucide-react";
 import { SiteNav } from "@/components/marketing/site-nav";
+import { SmoothScroll } from "@/components/marketing/smooth-scroll";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { Faq } from "@/components/marketing/faq";
@@ -114,8 +115,9 @@ export default function PricingPage() {
   const [cycle, setCycle] = useState<BillingCycle>("annual");
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <SiteNav />
+    <SmoothScroll>
+      <div className="flex min-h-screen flex-col bg-background">
+        <SiteNav />
 
       <main className="flex-1">
         <section className="mx-auto w-full max-w-[1200px] px-4 pt-14 pb-16 sm:px-6 sm:pt-20 sm:pb-20">
@@ -228,7 +230,8 @@ export default function PricingPage() {
         />
       </main>
 
-      <SiteFooter />
-    </div>
+        <SiteFooter />
+      </div>
+    </SmoothScroll>
   );
 }
