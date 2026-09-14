@@ -185,6 +185,16 @@ CLOUDINARY_API_SECRET=...
 CLIENT_URL=http://localhost:3000
 ```
 
+### Deploy the Server on Render
+
+The repository includes `render.yaml`, which creates a Render PostgreSQL database and connects it to the server through `DATABASE_URL`.
+
+1. In Render, create a new Blueprint and select this repository.
+2. Enter the values for the variables marked `sync: false` in `render.yaml`.
+3. Do not set `DATABASE_URL` to a `localhost` address. Render supplies it from the managed database.
+
+For an existing Render web service, use the `server` directory as the root directory, use Docker with `server/Dockerfile`, and remove any build command that runs `prisma migrate deploy`. The image builds with `npm run build`; migrations run when the service starts.
+
 ### Local Development (without Docker)
 
 ```bash
