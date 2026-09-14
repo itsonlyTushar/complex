@@ -6,6 +6,7 @@ import courtRoutes from "./routes/court.routes.js"
 import tableRoutes from "./routes/tables.routes.js"
 import orderRoutes from "./routes/order.routes.js"
 import paymentsRoutes from "./routes/payments.routes.js"
+import dashboardRoutes from "./routes/dashboard.routes.js"
 import { stripeWebhookController } from "./controllers/payments/payments.controller.js"
 
 const app = express();
@@ -55,6 +56,7 @@ app.use("/api/court", courtRoutes)
 app.use("/api", tableRoutes)
 app.use("/api", orderRoutes)
 app.use("/api/payments", paymentsRoutes)
+app.use("/api/dashboard", dashboardRoutes)
 
 
 export default app;

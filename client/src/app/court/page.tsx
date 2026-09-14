@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetRestaurants } from "@/hooks/queries/useCourtQuery";
+import { useGetCourtDashboard } from "@/hooks/queries/useDashboardQuery";
 import type { Restaurants } from "@/types/restaurant.types";
 
 function RosterSkeleton() {
@@ -29,6 +30,7 @@ function formatJoined(value: string) {
 export default function CourtPage() {
   const { data, isLoading, isError, refetch, isRefetching } =
     useGetRestaurants();
+  const { data: metrics, isLoading: isMetricsLoading } = useGetCourtDashboard();
 
   const vendors: Restaurants[] = Array.isArray(data) ? data : [];
   const trading = vendors.filter((v) => v.status).length;
@@ -118,6 +120,24 @@ export default function CourtPage() {
               <span className="text-micro text-fg-tertiary">not trading</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="flex flex-wrap items-center gap-x-8 gap-y-4 rounded-xl border bg-card px-4 py-3.5">
+        <div className="flex flex-col gap-0.5">
+          <span className="eyebrow">Revenue today</span>
+          <span className="text-h1 leading-none" data-numeric>
+            {isMetricsLoading ? "—" : `$${(metrics?.revenueToday ?? 0).toFixed(2)}`}
+          </span>
+        </div>
+
+        <div className="hidden h-8 w-px bg-border sm:block" />
+
+        <div className="flex flex-col gap-0.5">
+          <span className="eyebrow">Orders today</span>
+          <span className="text-lead font-medium leading-none" data-numeric>
+            {isMetricsLoading ? "—" : metrics?.ordersToday ?? 0}
+          </span>
         </div>
       </section>
 

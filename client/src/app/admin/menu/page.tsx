@@ -145,10 +145,10 @@ export default function AdminMenuPage() {
 
   return (
     <>
-      <section className="my-4 text-3xl flex items-center justify-between">
+      <section className="my-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1>Menu</h1>
-          <p className="text-sm mt-2 text-left text-muted-foreground">
+          <h1 className="text-h2">Menu</h1>
+          <p className="mt-0.5 text-caption text-fg-tertiary">
             Manage Menu and Stock from here
           </p>
         </div>

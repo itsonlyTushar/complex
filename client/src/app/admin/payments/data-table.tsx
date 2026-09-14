@@ -40,7 +40,7 @@ export function DataTable<TData, TValue>({
                 return (
                   <TableHead
                     key={header.id}
-                    className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80"
+                    className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 sm:px-4"
                   >
                     {header.isPlaceholder
                       ? null
@@ -63,7 +63,7 @@ export function DataTable<TData, TValue>({
                 className="group border-b last:border-0 hover:bg-muted/30 transition-colors"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="px-4 text-sm">
+                  <TableCell key={cell.id} className="px-3 text-sm sm:px-4">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

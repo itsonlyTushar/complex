@@ -163,6 +163,14 @@ export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "id",
     header: "ID",
+    cell: ({ row }) => {
+      const id = row.original.id as string;
+      return (
+        <span className="font-mono text-xs text-muted-foreground" title={id}>
+          {id.slice(0, 8)}…
+        </span>
+      );
+    },
   },
   {
     accessorKey: "name",
@@ -194,10 +202,8 @@ export const columns: ColumnDef<any>[] = [
       const isClosed = row.original.isClosed;
       return (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide ${isClosed
-              ? "bg-state-late text-state-late border border-state-late/30"
-              : "bg-state-ready text-state-ready border border-state-ready/30"
-            }`}
+          className="state-chip rounded-full font-semibold tracking-wide"
+          data-state={isClosed ? "late" : "ready"}
         >
           {isClosed ? "Closed" : "Active"}
         </span>
