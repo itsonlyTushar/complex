@@ -55,7 +55,7 @@ const CourtOnboard = () => {
     <>
       <div className='p-6 max-w-xl mx-auto'>
         <main className="mb-6">
-          <h1 className='text-3xl font-bold tracking-tight'>New Court</h1>
+          <h1 className='text-3xl font-semibold tracking-tight'>New Court</h1>
           <p className='text-sm text-muted-foreground mt-1'>
             Fill in the details below to register and onboard a new food court.
           </p>

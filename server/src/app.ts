@@ -10,6 +10,10 @@ import { stripeWebhookController } from "./controllers/payments/payments.control
 
 const app = express();
 
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok" });
+});
+
 app.use((req, res, next) => {
     const origin = req.headers.origin;
     const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, "") : "";

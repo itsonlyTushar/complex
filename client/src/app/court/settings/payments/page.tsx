@@ -8,7 +8,7 @@ export default function page() {
     <section className="bg-card rounded-xl border shadow-sm p-6 h-full flex flex-col">
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Payments</h1>
+          <h1 className="text-3xl font-semibold tracking-tight mb-2">Payments</h1>
         </div>
       </div>
 

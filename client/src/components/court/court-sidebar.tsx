@@ -31,14 +31,15 @@ export const CourtSidebar = ({
 }: React.ComponentProps<typeof Sidebar>) => {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="h-16 px-4 group-data-[collapsible=icon]:px-2 flex flex-row items-center gap-3 group-data-[collapsible=icon]:justify-center border-b border-border/50">
-        <div className="size-11 group-data-[collapsible=icon]:size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-lg group-data-[collapsible=icon]:text-sm flex-shrink-0 border border-border">
+      <SidebarHeader className="h-12 flex-row items-center gap-2.5 border-b px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
+        <span className="grid size-6 shrink-0 place-items-center rounded-md bg-primary text-[13px] font-semibold leading-none text-primary-foreground">
           C
-        </div>
-        <div className="flex flex-col truncate group-data-[collapsible=icon]:hidden">
-          <span className="font-bold text-xl leading-none">
-            Court
+        </span>
+        <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
+          <span className="truncate text-body font-medium leading-tight">
+            Complex
           </span>
+          <span className="eyebrow truncate">Food court</span>
         </div>
       </SidebarHeader>
 
@@ -57,16 +58,16 @@ export const CourtSidebar = ({
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
+        <SidebarMenu className="px-2">
           <SidebarMenuItem>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <SidebarMenuButton
-                  tooltip={"Logout"}
-                  className="text-destructive hover:text-destructive cursor-pointer"
+                  tooltip="Log out"
+                  className="cursor-pointer hover:bg-state-late-bg hover:text-state-late"
                 >
                   <LogOut className="size-4" />
-                  <span>Logout</span>
+                  <span>Log out</span>
                 </SidebarMenuButton>
               </AlertDialogTrigger>
               <AlertDialogContent>

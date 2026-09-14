@@ -31,24 +31,33 @@ export default function SettingsLayout({
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0 p-6 lg:items-start">
-      <aside className="lg:w-1/5 border px-2 py-4 rounded-xl shadow">
-        <nav className="flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
-          {settingsNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium hover:bg-accent",
-                pathname === item.href ? "bg-accent" : "transparen",
-              )}
-            >
-              {item.title}
-            </Link>
-          ))}
+    <div className="flex flex-col gap-6 py-4 lg:flex-row lg:items-start lg:gap-8">
+      <aside className="lg:w-56 lg:shrink-0">
+        <nav
+          aria-label="Settings"
+          className="flex gap-1 overflow-x-auto lg:sticky lg:top-16 lg:flex-col lg:overflow-visible"
+        >
+          {settingsNavItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "rounded-md px-3 py-2 text-body whitespace-nowrap transition-colors duration-[140ms] ease-(--ease-out)",
+                  isActive
+                    ? "bg-accent font-medium text-accent-foreground"
+                    : "text-fg-secondary hover:bg-accent hover:text-accent-foreground",
+                )}
+              >
+                {item.title}
+              </Link>
+            );
+          })}
         </nav>
       </aside>
-      <div className="flex-1 lg:max-w-2xl">{children}</div>
+      <div className="w-full min-w-0 flex-1 lg:max-w-2xl">{children}</div>
     </div>
   );
 }

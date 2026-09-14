@@ -44,7 +44,7 @@ function Tables() {
         <section className="bg-card  w-full rounded-xl border shadow-sm p-6 h-full flex flex-col">
             <div className="mb-6 flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight mb-2">Manage Tables</h1>
+                    <h1 className="text-3xl font-semibold tracking-tight mb-2">Manage Tables</h1>
 
                 </div>
             </div>
@@ -161,7 +161,7 @@ function Tables() {
                                             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                                                 {table.shape}
                                             </span>
-                                            <h3 className="text-2xl font-bold text-foreground mt-1.5 font-sans">
+                                            <h3 className="text-2xl font-semibold text-foreground mt-1.5 font-sans">
                                                 Table #{table.number}
                                             </h3>
                                         </div>
@@ -176,7 +176,7 @@ function Tables() {
 
                                     <Link 
                                     target="_blank"
-                                    className='flex items-center justify-center gap-2 hover:underline text-sm font-extrabold tracking-tight text-center' href={`http://localhost:3000/public/${foodCourtId}?tableId=${table.number}`}>
+                                    className='flex items-center justify-center gap-2 hover:underline text-sm font-semibold tracking-tight text-center' href={`http://localhost:3000/public/${foodCourtId}?tableId=${table.number}`}>
                                         
                                       <Link2 size={16} />  Table Link</Link>
                                 </div>

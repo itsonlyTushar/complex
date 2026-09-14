@@ -84,7 +84,7 @@ const PaymentContent = () => {
     <>
       <section className="bg-card rounded-xl border shadow-sm p-6 h-full flex flex-col gap-6">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
             Payments
           </h1>
         </div>
@@ -96,12 +96,12 @@ const PaymentContent = () => {
           <div className="flex flex-col justify-between p-5 rounded-xl bg-muted/30 dark:bg-muted/10 border border-border/40 p-6 mb-8">
             <div className="flex items-start gap-4 mb-6">
               <div className="grid gap-1">
-                <Label htmlFor="online-payments" className="text-lg font-bold leading-none cursor-pointer">
+                <Label htmlFor="online-payments" className="text-lg font-semibold leading-none cursor-pointer">
                   Accept Online Payments
                 </Label>
 
                   <div className="flex items-center gap-2">
-                  <p className="font-extrabold border border-emerald-500/20 max-w-sm w-[60px] text-center rounded-xl text-xs bg-emerald-500/10 text-emerald-500">{restaurant?.commissionRate}%</p>
+                  <p className="font-semibold border border-state-ready/30 max-w-sm w-[60px] text-center rounded-xl text-xs bg-state-ready-bg text-state-ready">{restaurant?.commissionRate}%</p>
                   <span className="text-xs text-mutated">fee is charged per order.</span>
                   </div>
               </div>
@@ -125,18 +125,18 @@ const PaymentContent = () => {
             <div>
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex flex-col gap-1">
-                  <h3 className="text-lg font-bold">Stripe Connect</h3>
+                  <h3 className="text-lg font-semibold">Stripe Connect</h3>
                 </div>
                 {onBoradingCompleted ? (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold bg-state-ready-bg text-state-ready border border-state-ready/30">
                     <CheckCircle2 className="h-3 w-3" /> Connected
                   </span>
                 ) : stripeAccountId ? (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold bg-state-aging-bg text-state-aging border border-state-aging/30">
                     <AlertCircle className="h-3 w-3" /> Pending Onboarding
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold bg-zinc-500/10 text-zinc-400 border border-zinc-500/20">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold bg-foreground text-fg-tertiary border border-border-strong">
                     Not Connected
                   </span>
                 )}

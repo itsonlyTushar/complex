@@ -24,7 +24,7 @@ export const columns: ColumnDef<PaymentRow>[] = [
     accessorKey: "orderId",
     header: "Order",
     cell: ({ row }) => (
-      <span className="font-mono text-xs font-bold">
+      <span className="font-mono text-xs font-semibold">
         #{row.getValue("orderId")}
       </span>
     ),
@@ -70,14 +70,14 @@ export const columns: ColumnDef<PaymentRow>[] = [
     cell: ({ row }) => {
       const status = String(row.getValue("status") || "PENDING");
       const colors: Record<string, string> = {
-        PENDING: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-        PREPARING: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-        READY: "bg-violet-500/10 text-violet-500 border-violet-500/20",
-        COMPLETED: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+        PENDING: "bg-state-aging-bg text-state-aging border-state-aging/30",
+        PREPARING: "bg-primary/10 text-primary border-primary/20",
+        READY: "bg-primary/10 text-primary border-primary/20",
+        COMPLETED: "bg-state-ready-bg text-state-ready border-state-ready/30",
       };
       return (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide border ${colors[status] || "bg-gray-500/10 text-gray-500 border-gray-500/20"}`}
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide border ${colors[status] || "bg-foreground text-fg-secondary border-border-strong"}`}
         >
           {status.charAt(0) + status.slice(1).toLowerCase()}
         </span>
@@ -88,7 +88,7 @@ export const columns: ColumnDef<PaymentRow>[] = [
     accessorKey: "totalAmount",
     header: "Total Amount",
     cell: ({ row }) => (
-      <span className="font-bold text-sm">
+      <span className="font-semibold text-sm">
         {currencyFmt(row.getValue("totalAmount"))}
       </span>
     ),
@@ -103,7 +103,7 @@ export const columns: ColumnDef<PaymentRow>[] = [
     ),
     cell: ({ row }) => (
       <div>
-        <span className="font-bold text-sm text-emerald-600 dark:text-emerald-400">
+        <span className="font-semibold text-sm text-state-ready">
           {currencyFmt(row.getValue("netAmount"))}
         </span>
         <p className="text-[10px] text-muted-foreground">
@@ -125,7 +125,7 @@ export const columns: ColumnDef<PaymentRow>[] = [
       const isPositive = profit >= 0;
       return (
         <div>
-          <span className={`font-bold text-sm ${isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+          <span className={`font-semibold text-sm ${isPositive ? "text-state-ready" : "text-state-late"}`}>
             {currencyFmt(profit)}
           </span>
           <p className="text-[10px] text-muted-foreground">

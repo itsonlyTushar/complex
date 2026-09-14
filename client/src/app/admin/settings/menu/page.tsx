@@ -115,7 +115,7 @@ export default function MenuSettingsPage() {
       {/* Header Info */}
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
             Category Management
           </h1>
         </div>

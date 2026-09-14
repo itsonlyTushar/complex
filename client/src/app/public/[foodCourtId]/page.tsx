@@ -61,12 +61,12 @@ function PublicFoodCourtContent() {
 
     if (error) {
         return (
-            <div className="flex flex-col justify-center items-center h-screen bg-gray-50 p-6">
-                <div className="bg-red-50 text-red-600 p-8 rounded-3xl shadow-sm text-center max-w-md border border-red-100">
-                    <svg className="w-16 h-16 mx-auto mb-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex flex-col justify-center items-center h-screen bg-accent p-6">
+                <div className="bg-state-late text-state-late p-8 rounded-3xl shadow-sm text-center max-w-md border border-state-late/30">
+                    <svg className="w-16 h-16 mx-auto mb-4 text-state-late" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <h2 className="text-3xl font-bold mb-2">Oops!</h2>
+                    <h2 className="text-3xl font-semibold mb-2">Oops!</h2>
                     <p className="text-lg font-medium">{error}</p>
                 </div>
             </div>
@@ -76,7 +76,7 @@ function PublicFoodCourtContent() {
     return (
         <>
             <main>
-                <section className="relative h-screen w-full overflow-hidden bg-gray-900 rounded-b-[2.5rem] shadow-md">
+                <section className="relative h-screen w-full overflow-hidden bg-foreground rounded-b-[2.5rem] shadow-md">
                     <Image
                         fill
                         className="object-cover scale-[1.15]"
@@ -86,15 +86,15 @@ function PublicFoodCourtContent() {
                         }
                     />
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 text-center text-white drop-shadow-md w-full">
-                        <h1 className="text-7xl font-extrabold tracking-tight">Welcome</h1>
-                        <p className="text-lg italic font-bold">to</p>
+                        <h1 className="text-7xl font-semibold tracking-tight">Welcome</h1>
+                        <p className="text-lg italic font-semibold">to</p>
                         <span className="text-3xl font-semibold">
                             {foodCourtName}
                         </span>
                         {tableId && (
                             <div className="mt-6 block">
-                                <div className="inline-block bg-white/20 backdrop-blur-md px-6 py-2 rounded-full border border-white/30 shadow-lg">
-                                    <p className="text-xl font-medium tracking-wide">Table <span className="font-bold text-white">{tableId}</span></p>
+                                <div className="inline-block bg-card/20 backdrop-blur-md px-6 py-2 rounded-full border border-border shadow-lg">
+                                    <p className="text-xl font-medium tracking-wide">Table <span className="font-semibold text-white">{tableId}</span></p>
                                 </div>
                             </div>
                         )}
@@ -119,8 +119,8 @@ function PublicFoodCourtContent() {
                                     <div className="w-[70px] h-[70px] shrink-0"></div>
                                 )}
                                 <div className="ml-2">
-                                    <h1 className="text-2xl font-bold">{restaurant?.name}</h1>
-                                    <p className="text-gray-600 text-sm text-mutated">{description}</p>
+                                    <h1 className="text-2xl font-semibold">{restaurant?.name}</h1>
+                                    <p className="text-fg-secondary text-sm text-mutated">{description}</p>
                                 </div>
                             </div>
                             </Link>
@@ -135,8 +135,8 @@ function PublicFoodCourtContent() {
 export default function PublicFoodCourtPage() {
     return (
         <Suspense fallback={
-            <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex justify-center items-center h-screen bg-accent">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
         }>
             <PublicFoodCourtContent />

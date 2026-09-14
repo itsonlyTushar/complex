@@ -2,192 +2,281 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { useCancelOrder, useUpdateOrderStatus } from "@/hooks/mutations/useOrderMutation";
+  useCancelOrder,
+  useUpdateOrderStatus,
+} from "@/hooks/mutations/useOrderMutation";
 import { useGetOrders } from "@/hooks/queries/useOrderQuery";
 import { Check, X } from "lucide-react";
 import { toast } from "@/lib/toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PunchOrderSheet } from "@/components/admin/PunchOrderSheet";
 
-export default function OrdersPage() {
-  const { data, isLoading: isOrderLoading } = useGetOrders();
+const FLOW = ["PENDING", "PREPARING", "READY", "COMPLETED"] as const;
 
+const LANES = [
+  { status: "PENDING", label: "Pending", note: "Accept to start the ticket" },
+  { status: "PREPARING", label: "Preparing", note: "On the line" },
+  { status: "READY", label: "Ready", note: "Waiting on the pass" },
+] as const;
+
+/* A ticket's age is the number that actually runs a service line, so it drives
+   the visual pressure rather than sitting in a corner as metadata. */
+function ticketState(minutes: number) {
+  if (minutes >= 12) return "late" as const;
+  if (minutes >= 6) return "aging" as const;
+  return "idle" as const;
+}
+
+function formatAge(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function getNextStatus(currentStatus: string): string | null {
+  const idx = FLOW.indexOf(currentStatus?.toUpperCase() as (typeof FLOW)[number]);
+  if (idx !== -1 && idx < FLOW.length - 1) return FLOW[idx + 1];
+  return null;
+}
+
+function TicketSkeleton() {
+  return (
+    <div className="flex items-stretch gap-3 rounded-xl border bg-card p-3">
+      <div className="w-[3px] shrink-0 rounded-none bg-border" />
+      <div className="flex-1 space-y-2.5">
+        <div className="h-3.5 w-24 rounded-sm bg-muted" />
+        <div className="h-3 w-full rounded-sm bg-muted" />
+        <div className="h-3 w-2/3 rounded-sm bg-muted" />
+      </div>
+    </div>
+  );
+}
+
+export default function OrdersPage() {
+  const {
+    data,
+    isLoading: isOrderLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useGetOrders();
   const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateOrderStatus();
 
+  /* Ages are only useful if they keep moving while the screen sits open. */
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 15000);
+    return () => clearInterval(id);
+  }, []);
+
   const orders = data?.orders || [];
-
-  const statuses = ["PENDING", "PREPARING", "READY", "COMPLETED"];
-
-  const [status, setStatus] = useState("PENDING");
-
-  const handleChangeStatus = () => {
-    const currantIndex = statuses.indexOf(status);
-
-    if (currantIndex < statuses.length - 1) {
-      setStatus(statuses[currantIndex + 1]);
-    }
-  };
-
-  const getNextStatus = (currentStatus: string): string | null => {
-    const idx = statuses.indexOf(currentStatus.toUpperCase());
-    if (idx !== -1 && idx < statuses.length - 1) {
-      return statuses[idx + 1];
-    }
-    return null;
-  };
-
-  if (isOrderLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-50">
-        <p className="text-muted-foreground animate-pulse">Loading orders...</p>
-      </div>
-    );
-  }
+  const liveOrders = orders.filter((order) =>
+    ["PENDING", "PREPARING", "READY"].includes(order.status?.toUpperCase()),
+  );
 
   return (
-    <>
-      <section className="my-4 flex items-start justify-between">
+    <div className="flex flex-col gap-5 py-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl">Orders</h1>
-          <p className="text-sm mt-2 text-left">
-            Orders for your restaurant will appear here
+          <h1 className="text-h2">Orders</h1>
+          <p className="mt-0.5 text-caption text-fg-tertiary">
+            {isOrderLoading ? (
+              "Loading the rail…"
+            ) : (
+              <>
+                <span data-numeric>{liveOrders.length}</span> open{" "}
+                {liveOrders.length === 1 ? "ticket" : "tickets"} on the rail
+              </>
+            )}
           </p>
         </div>
         <PunchOrderSheet />
-      </section>
+      </div>
 
-      {/* Map the orders cards here (only on-goings)  */}
+      {/* An empty rail and an unreachable rail look identical to a vendor mid
+          service, so a failed fetch has to say so rather than read as "quiet". */}
+      {isError && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-state-late/30 bg-state-late-bg px-4 py-3"
+        >
+          <div>
+            <p className="text-body font-medium text-state-late">
+              Can&apos;t reach the order service
+            </p>
+            <p className="mt-0.5 text-caption text-fg-secondary">
+              Tickets below may be out of date. Check the connection and retry.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+          >
+            {isRefetching ? "Retrying…" : "Retry"}
+          </Button>
+        </div>
+      )}
 
-      <section className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {orders.length === 0 ? (
-          <p className="text-muted-foreground col-span-full">
-            No orders found.
-          </p>
-        ) : (
-          orders.map((order) => (
-            <Card
-              key={order.id}
-              className="max-w-xs flex flex-col justify-between"
-            >
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span>
-                    <span className="font-extrabold">#</span>
-                    {order.id}
-                  </span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                    Table {order.tableNumber}
-                  </span>
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  {new Date(order.createdAt).toLocaleString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                    hour: "numeric",
-                    minute: "numeric",
-                  })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground">
-                      Customer
-                    </p>
-                    <p className="text-sm font-medium">{order.customerName}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground">
-                      Items
-                    </p>
-                    <ul className="text-xs space-y-1 mt-1">
-                      {order.items?.map((item) => (
-                        <li
-                          key={item.id}
-                          className="flex justify-between text-muted-foreground"
-                        >
-                          <span className="">
-                            {item.menu?.itemName || `Item #${item.menuID}`}
-                          </span>
-                          <span className="italic font-extrabold gap-2">
-                            x {item.quantity}
-                          </span>
-                          <span className="underline">
-                            ${(item.price * item.quantity).toFixed(2)}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-              <div className="px-6 py-2 bg-muted/20 border-t flex justify-between items-center text-sm">
-                <span className="font-medium">Total</span>
-                <span className="font-bold">
-                  ${order.totalAmount.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-center items-center">
-                <p className="text-center font-extrabold border border-emerald-500/20 max-w-sm w-[90px] rounded-xl text-[11px] bg-emerald-500/10 text-emerald-500">
-                  {order?.status.slice(0, 1)}
-                  <span className="lowercase">{order?.status.slice(1)}</span>
-                </p>
-              </div>
-              {order?.status === "CANCELLED" ? (
-                <div> </div>
-              ) : (
-                <CardFooter className="flex gap-2 pt-2">
-                  <Button
-                    onClick={() => {
-                      cancelOrder(order.id, {
-                        onSuccess: () => {
-                          toast.success("Order cancelled successfully!");
-                        },
-                        onError: (error: any) => {
-                          toast.error(
-                            error.message || "Failed to cancel order.",
-                          );
-                        },
-                      });
-                    }}
-                    disabled={isCancelling || order.status === "COMPLETED"}
-                    variant="outline"
-                    className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+      <div className="grid gap-4 lg:grid-cols-3">
+        {LANES.map((lane) => {
+          const laneOrders = orders.filter(
+            (order) => order.status?.toUpperCase() === lane.status,
+          );
+
+          return (
+            <section key={lane.status} className="flex min-w-0 flex-col gap-2.5">
+              <div className="flex items-baseline justify-between gap-2 border-b pb-2">
+                <div className="flex items-baseline gap-2">
+                  <h2 className="text-body font-medium">{lane.label}</h2>
+                  <span
+                    className="text-caption text-fg-tertiary"
+                    data-numeric
                   >
-                    <X className="size-4 mr-1" />
-                  </Button>
-                  <Button 
-                    onClick={() => {
-                      const nextStatus = getNextStatus(order.status);
-                      if (nextStatus) {
-                        updateStatus({ orderId: order.id, status: nextStatus }, {
-                          onSuccess: () => {
-                            toast.success(`Order status updated to ${nextStatus}!`);
-                          },
-                          onError: (error: any) => {
-                            toast.error(error.message || "Failed to update order status.");
-                          }
-                        });
-                      }
-                    }}
-                    className="flex-1" disabled={isCancelling || isUpdating || !getNextStatus(order.status)}>
-                    <Check className="size-4 mr-1" />
-                  </Button>
-                </CardFooter>
+                    {laneOrders.length}
+                  </span>
+                </div>
+                <span className="eyebrow">{lane.note}</span>
+              </div>
+
+              {isOrderLoading ? (
+                <div className="flex animate-pulse flex-col gap-2.5">
+                  <TicketSkeleton />
+                  <TicketSkeleton />
+                </div>
+              ) : laneOrders.length === 0 ? (
+                <div className="rounded-xl border border-dashed px-3 py-8 text-center">
+                  <p className="text-caption text-fg-tertiary">
+                    {isError
+                      ? "Unavailable"
+                      : `Nothing ${lane.label.toLowerCase()}`}
+                  </p>
+                </div>
+              ) : (
+                laneOrders.map((order) => {
+                  const createdAt = new Date(order.createdAt).getTime();
+                  const elapsed = now - createdAt;
+                  const state = ticketState(elapsed / 60000);
+                  const nextStatus = getNextStatus(order.status);
+
+                  return (
+                    <article
+                      key={order.id}
+                      className="flex items-stretch gap-3 rounded-xl border bg-card p-3 transition-colors duration-[140ms] ease-(--ease-out) hover:border-border-strong"
+                    >
+                      <span className="state-rail" data-state={state} />
+
+                      <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="text-body font-medium" data-numeric>
+                            #{order.id}
+                          </span>
+                          <span className="state-chip" data-state={state}>
+                            {formatAge(elapsed)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 text-caption text-fg-tertiary">
+                          <span>
+                            Table <span data-numeric>{order.tableNumber}</span>
+                          </span>
+                          {order.customerName ? (
+                            <>
+                              <span aria-hidden="true">·</span>
+                              <span className="truncate">
+                                {order.customerName}
+                              </span>
+                            </>
+                          ) : null}
+                        </div>
+
+                        <ul className="flex flex-col gap-1 border-t pt-2.5">
+                          {order.items?.map((item) => (
+                            <li
+                              key={item.id}
+                              className="flex items-baseline justify-between gap-2 text-caption"
+                            >
+                              <span className="min-w-0 truncate text-fg-secondary">
+                                <span data-numeric>{item.quantity}</span>
+                                {"× "}
+                                {item.menu?.itemName || `Item #${item.menuID}`}
+                              </span>
+                              <span data-numeric className="text-fg-tertiary">
+                                {(item.price * item.quantity).toFixed(2)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        <div className="flex items-baseline justify-between gap-2 border-t pt-2.5">
+                          <span className="eyebrow">Total</span>
+                          <span className="text-body font-medium" data-numeric>
+                            ${order.totalAmount.toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 hover:border-state-late/40 hover:bg-state-late-bg hover:text-state-late"
+                            disabled={isCancelling}
+                            onClick={() =>
+                              cancelOrder(order.id, {
+                                onSuccess: () =>
+                                  toast.success("Order cancelled."),
+                                onError: (error: any) =>
+                                  toast.error(
+                                    error.message || "Failed to cancel order.",
+                                  ),
+                              })
+                            }
+                          >
+                            <X className="size-4" />
+                            Cancel
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            disabled={isCancelling || isUpdating || !nextStatus}
+                            onClick={() => {
+                              if (!nextStatus) return;
+                              updateStatus(
+                                { orderId: order.id, status: nextStatus },
+                                {
+                                  onSuccess: () =>
+                                    toast.success(
+                                      `Moved to ${nextStatus.toLowerCase()}.`,
+                                    ),
+                                  onError: (error: any) =>
+                                    toast.error(
+                                      error.message ||
+                                        "Failed to update order status.",
+                                    ),
+                                },
+                              );
+                            }}
+                          >
+                            <Check className="size-4" />
+                            {nextStatus
+                              ? nextStatus.charAt(0) +
+                                nextStatus.slice(1).toLowerCase()
+                              : "Done"}
+                          </Button>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })
               )}
-            </Card>
-          ))
-        )}
-      </section>
-    </>
+            </section>
+          );
+        })}
+      </div>
+    </div>
   );
 }

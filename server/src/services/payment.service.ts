@@ -13,7 +13,7 @@ const stripe = new Proxy({} as Stripe, {
             throw new Error("Stripe Client is not initialized. Please configure STRIPE_SECRET in your environment variables.");
         }
         const stripeInstance = new Stripe(stripeKey, {
-            apiVersion: '2022-11-15' as any
+            apiVersion: '2026-05-27.dahlia'
         });
         return Reflect.get(stripeInstance, prop);
     }

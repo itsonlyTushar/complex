@@ -6,6 +6,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { PortalTitle } from "@/components/shared/portal-title";
 import React from "react";
 
 export const CourtLayout = ({ children }: { children: React.ReactNode }) => {
@@ -18,19 +19,17 @@ export const CourtLayout = ({ children }: { children: React.ReactNode }) => {
       }
     >
       <CourtSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 justify-between">
-          <div className="flex items-center">
+      <SidebarInset className="bg-background">
+        <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center justify-between gap-2 border-b bg-background/85 px-3 backdrop-blur-sm">
+          <div className="flex items-center gap-1">
             <SidebarTrigger className="-ml-1" />
-            <Separator className="mr-2 h-4" orientation="vertical" />
-            <h1 className="font-semibold">Food Court / Mall Name</h1>
+            <Separator className="mr-1 h-4" orientation="vertical" />
+            <PortalTitle />
           </div>
 
-          <div>
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </header>
-        <div className="flex flex-1 flex-col gap-4">{children}</div>
+        <div className="flex flex-1 flex-col px-4 pb-8">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

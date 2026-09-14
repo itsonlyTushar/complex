@@ -146,7 +146,7 @@ export function PunchOrderSheet() {
       </SheetTrigger>
       <SheetContent side="right" className="sm:max-w-xl w-full h-full overflow-hidden flex flex-col">
         <SheetHeader>
-          <SheetTitle className="text-xl font-bold">Punch New Order</SheetTitle>
+          <SheetTitle className="text-xl font-semibold">Punch New Order</SheetTitle>
           <SheetDescription>
             Manually create an order for a walk-in or cash customer.
           </SheetDescription>
@@ -229,7 +229,7 @@ export function PunchOrderSheet() {
                           >
                             <Minus className="size-3" />
                           </Button>
-                          <span className="text-sm font-bold w-6 text-center">
+                          <span className="text-sm font-semibold w-6 text-center">
                             {inCart.quantity}
                           </span>
                           <Button
@@ -266,7 +266,7 @@ export function PunchOrderSheet() {
             <div className="border rounded-xl p-4 bg-muted/20">
               <div className="flex items-center gap-2 mb-3">
                 <ShoppingCart className="size-4 text-primary" />
-                <span className="text-sm font-bold">
+                <span className="text-sm font-semibold">
                   Order Summary ({cart.length} item{cart.length > 1 ? "s" : ""})
                 </span>
               </div>
@@ -298,8 +298,8 @@ export function PunchOrderSheet() {
                 ))}
               </div>
               <div className="flex justify-between items-center mt-3 pt-3 border-t border-border/40">
-                <span className="font-bold">Total</span>
-                <span className="font-bold text-lg">${cartTotal.toFixed(2)}</span>
+                <span className="font-semibold">Total</span>
+                <span className="font-semibold text-lg">${cartTotal.toFixed(2)}</span>
               </div>
             </div>
           )}

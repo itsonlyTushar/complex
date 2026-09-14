@@ -40,7 +40,7 @@ export function DataTable<TData, TValue>({
                 return (
                   <TableHead
                     key={header.id}
-                    className="px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground/80"
+                    className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80"
                   >
                     {header.isPlaceholder
                       ? null

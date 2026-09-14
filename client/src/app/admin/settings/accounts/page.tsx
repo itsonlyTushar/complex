@@ -54,7 +54,7 @@ const AccountSettings = () => {
   return (
     <section className="bg-card rounded-xl border shadow-sm p-6 h-full">
       <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
             Account Settings
           </h1>
         

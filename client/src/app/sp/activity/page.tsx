@@ -60,7 +60,7 @@ const Activity = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <main className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Court Activity</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Court Activity</h1>
         <p className="text-sm text-muted-foreground mt-1">
           View, edit, and delete existing food courts.
         </p>

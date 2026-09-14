@@ -390,7 +390,7 @@ const Tables = () => {
         <>
             <section className="py-6 px-5">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold tracking-tight">Table Map View</h1>
+                    <h1 className="text-3xl font-semibold tracking-tight">Table Map View</h1>
 
                     {/* Mode Toggle Controls */}
                     <div className="flex gap-4 items-center">
@@ -454,7 +454,7 @@ const Tables = () => {
                             <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-5">
                                 {/* Tables Category */}
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground/80">
+                                    <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground/80">
                                         Configured Tables
                                     </span>
                                     
@@ -462,17 +462,17 @@ const Tables = () => {
                                         <div className="p-3 text-center border border-dashed rounded-lg text-muted-foreground text-xs bg-muted/20">
                                             {layoutData?.tables?.length === 0 ? (
                                                 <div>
-                                                    <p className="font-semibold mb-1 text-slate-700">No tables configured</p>
-                                                    <p className="text-slate-500 mb-2">Configure tables in settings first.</p>
+                                                    <p className="font-semibold mb-1 text-foreground">No tables configured</p>
+                                                    <p className="text-fg-secondary mb-2">Configure tables in settings first.</p>
                                                     <a 
                                                         href="/court/settings/tables" 
-                                                        className="text-primary hover:underline font-bold text-xs inline-flex items-center gap-1"
+                                                        className="text-primary hover:underline font-semibold text-xs inline-flex items-center gap-1"
                                                     >
                                                         Manage Tables &rarr;
                                                     </a>
                                                 </div>
                                             ) : (
-                                                <p className="font-semibold text-slate-500">All tables have been placed.</p>
+                                                <p className="font-semibold text-fg-secondary">All tables have been placed.</p>
                                             )}
                                         </div>
                                     ) : (
@@ -484,7 +484,7 @@ const Tables = () => {
                                                         key={table.id}
                                                         draggable
                                                         onDragStart={(e) => handleDragStartTable(e, table.id!)}
-                                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
+                                                        className="px-3 py-2 bg-card hover:bg-accent border border-border text-foreground cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-border-strong"
                                                     >
                                                         <div className="flex flex-col gap-0.5">
                                                             <span>Table #{table.number}</span>
@@ -493,13 +493,13 @@ const Tables = () => {
                                                             </span>
                                                         </div>
                                                         {type === "table_square" && (
-                                                            <div className="w-5 h-5 border-2 border-slate-700 bg-slate-100 rounded" />
+                                                            <div className="w-5 h-5 border-2 border-border-strong bg-accent rounded" />
                                                         )}
                                                         {type === "table_rectangle" && (
-                                                            <div className="w-7 h-4 border-2 border-slate-700 bg-slate-100 rounded" />
+                                                            <div className="w-7 h-4 border-2 border-border-strong bg-accent rounded" />
                                                         )}
                                                         {type === "table_round" && (
-                                                            <div className="w-5 h-5 border-2 border-slate-700 bg-slate-100 rounded-full" />
+                                                            <div className="w-5 h-5 border-2 border-border-strong bg-accent rounded-full" />
                                                         )}
                                                     </div>
                                                 );
@@ -510,23 +510,23 @@ const Tables = () => {
 
                                 {/* Infrastructure Category */}
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground/80">Infrastructure</span>
+                                    <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground/80">Infrastructure</span>
                                     
                                     {/* Bar Counter */}
                                     <div
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, "bar")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
+                                        className="px-3 py-2 bg-card hover:bg-accent border border-border text-foreground cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-border-strong"
                                     >
                                         <span>Bar Counter</span>
-                                        <div className="w-8 h-3.5 border-2 border-slate-700 bg-slate-400 rounded-sm" />
+                                        <div className="w-8 h-3.5 border-2 border-border-strong bg-foreground rounded-sm" />
                                     </div>
 
                                     {/* Kitchen Zone */}
                                     <div
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, "kitchen")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
+                                        className="px-3 py-2 bg-card hover:bg-accent border border-border text-foreground cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-border-strong"
                                     >
                                         <span>Kitchen Zone</span>
                                         <div className="w-8 h-5.5 border-2 border-dashed border-orange-500 bg-orange-50 rounded-sm" />
@@ -536,21 +536,21 @@ const Tables = () => {
                                     <div
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, "gate")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
+                                        className="px-3 py-2 bg-card hover:bg-accent border border-border text-foreground cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-border-strong"
                                     >
                                         <span>Entrance Gate</span>
-                                        <div className="w-7 h-4 border-2 border-dashed border-emerald-500 bg-emerald-50 rounded-sm" />
+                                        <div className="w-7 h-4 border-2 border-dashed border-state-ready/30 bg-state-ready rounded-sm" />
                                     </div>
 
                                     {/* Shop Stall */}
                                     <div
                                         draggable
                                         onDragStart={(e) => handleDragStart(e, "shop")}
-                                        className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-slate-300"
+                                        className="px-3 py-2 bg-card hover:bg-accent border border-border text-foreground cursor-grab rounded-lg flex items-center justify-between select-none font-semibold transition-all shadow-sm active:cursor-grabbing group text-xs hover:border-border-strong"
                                     >
                                         <span>Shop Stall</span>
-                                        <div className="w-6 h-5.5 border-2 border-indigo-500 bg-indigo-50 rounded-sm flex flex-col justify-between overflow-hidden">
-                                            <div className="h-1.5 bg-indigo-500 w-full" />
+                                        <div className="w-6 h-5.5 border-2 border-primary bg-primary rounded-sm flex flex-col justify-between overflow-hidden">
+                                            <div className="h-1.5 bg-primary w-full" />
                                         </div>
                                     </div>
                                 </div>
@@ -607,7 +607,7 @@ const Tables = () => {
                         {/* Contextual Toolbar Overlay for Selected Items */}
                         {toolMode === "select" && selectedItem && (
                             <div 
-                                className="absolute bg-white border border-slate-200 shadow-lg rounded-lg flex items-center gap-1.5 p-1 select-none animate-in fade-in zoom-in-95 duration-100 z-10"
+                                className="absolute bg-card border border-border shadow-lg rounded-lg flex items-center gap-1.5 p-1 select-none animate-in fade-in zoom-in-95 duration-100 z-10"
                                 style={{
                                     left: `${selectedItem.x}px`,
                                     top: `${selectedItem.y - Math.max(selectedItem.width, selectedItem.height) / 2 - 38}px`,
@@ -616,16 +616,16 @@ const Tables = () => {
                             >
                                 <button
                                     onClick={() => handleRotateItem(selectedItem.id)}
-                                    className="flex items-center justify-center p-1.5 hover:bg-slate-100 text-xs font-semibold rounded transition-all text-slate-700 hover:text-slate-900 gap-1.5"
+                                    className="flex items-center justify-center p-1.5 hover:bg-accent text-xs font-semibold rounded transition-all text-foreground hover:text-foreground gap-1.5"
                                     title="Rotate 45°"
                                 >
                                     <RotateCw className="w-3.5 h-3.5" />
                                     <span className="text-[10px]">Rotate 45°</span>
                                 </button>
-                                <div className="w-[1px] h-4 bg-slate-200" />
+                                <div className="w-[1px] h-4 bg-muted" />
                                 <button
                                     onClick={() => handleDeleteItem(selectedItem.id)}
-                                    className="flex items-center justify-center p-1.5 hover:bg-red-50 text-red-600 hover:text-red-700 text-xs font-semibold rounded transition-all gap-1.5"
+                                    className="flex items-center justify-center p-1.5 hover:bg-state-late text-state-late hover:text-state-late text-xs font-semibold rounded transition-all gap-1.5"
                                     title="Delete Item"
                                 >
                                     <Trash2 className="w-3.5 h-3.5" />

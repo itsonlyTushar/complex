@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import ReactQueryProvider from "@/lib/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/react";
 
-const inter = Inter({
-  variable: "--font-inter",
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 const defaultUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -80,7 +84,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${playfair.variable} antialiased`}
+        className={`${plexSans.variable} ${plexMono.variable} antialiased`}
       >
         <ReactQueryProvider>
           <ThemeProvider

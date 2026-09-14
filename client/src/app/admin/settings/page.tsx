@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useGetMe } from "@/hooks/queries/useUserQuery";
 import { useUpdateRestaurantStatus } from "@/hooks/mutations/useUserMutation";
-import { Separator } from "@/components/ui/separator";
 
 export default function AdminSettingsPage() {
   const { data: user, isLoading } = useGetMe();
@@ -12,54 +11,59 @@ export default function AdminSettingsPage() {
 
   const isClosed = user?.restaurant?.isClosed ?? false;
 
-  const handleToggle = (checked: boolean) => {
-    updateStatus(checked);
-  };
-
   return (
-    <section className="bg-card rounded-xl border shadow-sm p-6 h-full">
-      <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
-        General
-      </h1>
+    <section className="flex flex-col gap-5">
+      <div>
+        <h1 className="text-h2">General</h1>
+        <p className="mt-0.5 text-caption text-fg-tertiary">
+          Controls for your stall
+        </p>
+      </div>
 
-      <Separator className="my-6 bg-border/60" />
-
-      {/* Close store switches   */}
-      <div className="flex gap-2">
-        <div className="flex items-center gap-4 p-4 rounded-lg bg-accent/30 border border-border/50 max-w-md">
-          <Switch
-            id="close-store"
-            checked={isClosed}
-            onCheckedChange={handleToggle}
-            disabled={isLoading || isPending}
-          />
-          <div className="grid gap-1.5 leading-none">
+      <div className="divide-y divide-border rounded-xl border bg-card">
+        <div className="flex items-start justify-between gap-6 p-4">
+          <div className="min-w-0">
             <Label
               htmlFor="close-store"
-              className="text-base font-semibold leading-none cursor-pointer"
+              className="cursor-pointer text-body font-medium"
             >
-              Close Store
+              Close store
             </Label>
-            <p className="text-sm text-muted-foreground">
-              Temporarily disable orders from your store.
+            <p className="mt-0.5 text-caption text-fg-tertiary">
+              Stop accepting new table orders. Tickets already on the rail are
+              unaffected.
             </p>
+            {isClosed && (
+              <span className="state-chip mt-2" data-state="late">
+                Closed to new orders
+              </span>
+            )}
           </div>
+          <Switch
+            id="close-store"
+            className="mt-0.5 shrink-0"
+            checked={isClosed}
+            onCheckedChange={(checked) => updateStatus(checked)}
+            disabled={isLoading || isPending}
+          />
         </div>
 
-        {/* Notification settings  */}
-        <div className="flex items-center gap-4 p-4 rounded-lg bg-accent/30 border border-border/50 max-w-md opacity-60">
-          <Switch id="notifications" disabled />
-          <div className="grid gap-1.5 leading-none">
+        <div className="flex items-start justify-between gap-6 p-4">
+          <div className="min-w-0">
             <Label
               htmlFor="notifications"
-              className="text-base font-semibold leading-none cursor-not-allowed"
+              className="text-body font-medium text-fg-tertiary"
             >
               Notifications
             </Label>
-            <p className="text-sm text-muted-foreground">
-              Change the notifications settings.
+            <p className="mt-0.5 text-caption text-fg-tertiary">
+              Alerts for tickets ageing past their threshold.
             </p>
+            <span className="state-chip mt-2" data-state="idle">
+              Coming soon
+            </span>
           </div>
+          <Switch id="notifications" className="mt-0.5 shrink-0" disabled />
         </div>
       </div>
     </section>

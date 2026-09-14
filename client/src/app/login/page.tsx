@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/lib/toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "@/lib/schemas";
-import Logo from "@/components/ui/logo";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Logo } from "@/components/ui/logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -60,46 +61,73 @@ export default function LoginPage() {
   }
 
   return (
-    <form
-      className="min-h-screen flex items-center justify-center text-center"
-      onSubmit={handleSubmit(handleLogin)}
-    >
-      <div className="border max-w-md w-full px-6 rounded-xl shadow-sm py-10 bg-card flex flex-col items-center">
-        <div className="py-5">
-          <Logo />
-        </div>
+    <main className="flex min-h-screen flex-col bg-background">
+      <header className="flex items-center justify-between px-4 py-3">
+        <Logo />
+        <ThemeToggle />
+      </header>
 
-        <div className="flex flex-col gap-4 my-4 w-full text-left">
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Email"
-              aria-invalid={!!errors.email}
-              {...register("email")}
-            />
-            {errors.email && <FieldError>{errors.email.message}</FieldError>}
-          </Field>
+      <div className="flex flex-1 items-center justify-center px-4 pb-16">
+        <form
+          onSubmit={handleSubmit(handleLogin)}
+          className="w-full max-w-[380px]"
+          noValidate
+        >
+          <div className="mb-5">
+            <h1 className="mt-1.5 text-h2">Log in to Complex</h1>
+            <p className="mt-1 text-caption text-fg-tertiary">
+              One sign-in for operators, vendors and platform admins. You land in
+              the right portal automatically.
+            </p>
+          </div>
 
-          <Field>
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Password"
-              aria-invalid={!!errors.password}
-              {...register("password")}
-            />
-            {errors.password && <FieldError>{errors.password.message}</FieldError>}
-          </Field>
-        </div>
+          <div className="flex flex-col gap-4 rounded-xl border bg-card p-4">
+            <Field>
+              <FieldLabel htmlFor="email">Work email</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@venue.com"
+                autoComplete="email"
+                autoFocus
+                aria-invalid={!!errors.email}
+                {...register("email")}
+              />
+              {errors.email && <FieldError>{errors.email.message}</FieldError>}
+            </Field>
 
-        <Button type="submit" className="w-full mt-2" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </Button>
+            <Field>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                aria-invalid={!!errors.password}
+                {...register("password")}
+              />
+              {errors.password && (
+                <FieldError>{errors.password.message}</FieldError>
+              )}
+            </Field>
+
+            <Button type="submit" className="mt-1 w-full" disabled={loading}>
+              {loading ? "Signing in…" : "Log in"}
+            </Button>
+          </div>
+
+          <p className="mt-4 text-caption text-fg-tertiary">
+            Vendors are invited by their food court operator. Need access?{" "}
+            <a
+              href="/#operators"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Talk to your operator
+            </a>
+          </p>
+        </form>
       </div>
-    </form>
+    </main>
   );
 }
 

@@ -7,232 +7,397 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-geist-mono);
-  
-  --font-heading: var(--font-playfair);
-  --font-body: var(--font-inter);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-fg-tertiary: var(--fg-tertiary);
 
-  --text-h1: clamp(2.4rem, 4vw, 3.6rem);
-  --text-h1--line-height: 1.1;
-  --text-h1--letter-spacing: -0.025em;
-  --text-h1--font-weight: 700;
-
-  --text-h2: clamp(1.8rem, 3vw, 2.6rem);
-  --text-h2--line-height: 1.15;
-  --text-h2--letter-spacing: -0.02em;
-  --text-h2--font-weight: 700;
-
-  --text-h3: 1.15rem;
-  --text-h3--line-height: 1.3;
-  --text-h3--letter-spacing: -0.01em;
-  --text-h3--font-weight: 700;
-
-  --text-body-lg: 1rem;
-  --text-body-lg--line-height: 1.75;
-
-  --text-body-sm: 0.875rem;
-  --text-body-sm--line-height: 1.6;
-
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-card: 12px;
-  --radius-btn: 6px;
-  --radius-badge: 100px;
-  --radius-icon: 10px;
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-control: var(--control);
+  --color-control-border: var(--control-border);
+
+  --color-state-ready: var(--state-ready);
+  --color-state-ready-bg: var(--state-ready-bg);
+  --color-state-aging: var(--state-aging);
+  --color-state-aging-bg: var(--state-aging-bg);
+  --color-state-late: var(--state-late);
+  --color-state-late-bg: var(--state-late-bg);
+  --color-state-idle: var(--state-idle);
+  --color-state-idle-bg: var(--state-idle-bg);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1.27;
+  --text-micro--letter-spacing: 0.02em;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.34;
+
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.5;
+
+  --text-lead: 1rem;
+  --text-lead--line-height: 1.55;
+
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.35;
+  --text-h3--letter-spacing: -0.008em;
+  --text-h3--font-weight: 600;
+
+  --text-h2: 1.375rem;
+  --text-h2--line-height: 1.27;
+  --text-h2--letter-spacing: -0.014em;
+  --text-h2--font-weight: 600;
+
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 1.2;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h1--font-weight: 600;
+
+  --text-display: 2.25rem;
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.026em;
+  --text-display--font-weight: 600;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 14px;
+
+  --shadow-raise: var(--elevation-raise);
+  --shadow-overlay: var(--elevation-overlay);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
+/*
+  Steel and signal — office mode.
+  Cool stainless neutrals carry structure. The blue is the only brand hue and
+  is reserved for action, selection and focus. Green, amber and red are spoken
+  for by order state and must never be used decoratively.
+*/
 :root {
-  --radius: 0.625rem;
+  --radius: 8px;
 
-  /* Page background: #f0ebe3 (warm beige, matches sidebar) */
-  --background: #f0ebe3;
-  /* Typography: #114236 */
-  --foreground: #114236;
+  --background: #f6f7f8;
+  --foreground: #16191c;
+  --fg-secondary: #4a525a;
+  --fg-tertiary: #6b747d;
 
-  /* Card background: #ffffff */
+  --surface-raised: #ffffff;
+  --surface-overlay: #ffffff;
+  --surface-sunken: #eef0f2;
+
   --card: #ffffff;
-  --card-foreground: #114236;
-
-  /* Popover inherits card */
+  --card-foreground: #16191c;
   --popover: #ffffff;
-  --popover-foreground: #114236;
+  --popover-foreground: #16191c;
 
-  /* Primary button: bg #114236, text white */
-  --primary: #114236;
+  --primary: #2f62e8;
   --primary-foreground: #ffffff;
 
-  /* Secondary: lighter warm tone */
-  --secondary: #f0ebe3;
-  --secondary-foreground: #114236;
+  --secondary: #eef0f2;
+  --secondary-foreground: #16191c;
 
-  /* Muted text: opacity 0.65 on #114236 */
-  --muted: #f0ebe3;
-  --muted-foreground: rgba(17, 66, 54, 0.65);
+  --muted: #eef0f2;
+  --muted-foreground: #6b747d;
 
-  /* Accent / Highlights: subtle version of #114236 */
-  --accent: rgba(17, 66, 54, 0.08);
-  --accent-foreground: #114236;
+  --accent: rgba(47, 98, 232, 0.08);
+  --accent-foreground: #234fc4;
 
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: #c93b32;
+  --destructive-foreground: #ffffff;
 
-  /* Borders / Badges: #114236 */
-  --border: rgba(17, 66, 54, 0.12);
-  --input: rgba(17, 66, 54, 0.2);
-  --ring: #114236;
+  --border: rgba(16, 20, 24, 0.1);
+  --border-strong: rgba(16, 20, 24, 0.17);
+  --input: rgba(16, 20, 24, 0.18);
+  --ring: #2f62e8;
 
-  /* Chart colors — nature palette */
-  --chart-1: #114236;
-  --chart-2: #c6e366;
-  --chart-3: #2a7a5e;
-  --chart-4: #a3d154;
-  --chart-5: #3da87a;
+  --control: #ffffff;
+  --control-border: rgba(16, 20, 24, 0.18);
 
-  /* Sidebar */
-  --sidebar: #f0ebe3;
-  --sidebar-foreground: #114236;
-  --sidebar-primary: #114236;
+  --state-ready: #1c8f5a;
+  --state-ready-bg: rgba(28, 143, 90, 0.11);
+  --state-aging: #b67608;
+  --state-aging-bg: rgba(182, 118, 8, 0.13);
+  --state-late: #c93b32;
+  --state-late-bg: rgba(201, 59, 50, 0.11);
+  --state-idle: #6b747d;
+  --state-idle-bg: rgba(16, 20, 24, 0.05);
+
+  --chart-1: #2f62e8;
+  --chart-2: #3c8ea8;
+  --chart-3: #6b7a90;
+  --chart-4: #b67608;
+  --chart-5: #5a52b5;
+
+  --sidebar: #f6f7f8;
+  --sidebar-foreground: #16191c;
+  --sidebar-primary: #2f62e8;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(17, 66, 54, 0.08);
-  --sidebar-accent-foreground: #114236;
-  --sidebar-border: rgba(17, 66, 54, 0.12);
-  --sidebar-ring: #114236;
+  --sidebar-accent: rgba(16, 20, 24, 0.05);
+  --sidebar-accent-foreground: #16191c;
+  --sidebar-border: rgba(16, 20, 24, 0.1);
+  --sidebar-ring: #2f62e8;
+
+  --elevation-raise:
+    0 0 0 1px rgba(16, 20, 24, 0.06), 0 1px 2px -1px rgba(16, 20, 24, 0.08),
+    0 2px 6px rgba(16, 20, 24, 0.04);
+  --elevation-overlay:
+    0 0 0 1px rgba(16, 20, 24, 0.07), 0 4px 8px -2px rgba(16, 20, 24, 0.08),
+    0 12px 24px -4px rgba(16, 20, 24, 0.1);
 }
 
+/*
+  Steel and signal — kitchen mode.
+  Real kitchen display systems are near-black and high contrast because they are
+  read at six feet in a hot, bright room. Shadows do not read on dark, so
+  elevation collapses to rings and a lightness step of a few percent per level.
+*/
 .dark {
-  /* Page background: #0c1f1b */
-  --background: #0c1f1b;
-  /* Typography: #e8e2d9 */
-  --foreground: #e8e2d9;
+  --background: #0f1214;
+  --foreground: #e6e9ec;
+  --fg-secondary: #a7b0b8;
+  --fg-tertiary: #8a939b;
 
-  /* Card background: #152e28 */
-  --card: #152e28;
-  --card-foreground: #e8e2d9;
+  --surface-raised: #171b1f;
+  --surface-overlay: #1d2227;
+  --surface-sunken: #0c0f11;
 
-  /* Popover inherits card */
-  --popover: #152e28;
-  --popover-foreground: #e8e2d9;
+  --card: #171b1f;
+  --card-foreground: #e6e9ec;
+  --popover: #1d2227;
+  --popover-foreground: #e6e9ec;
 
-  /* Primary button: bg #c6e366, text #0c1f1b */
-  --primary: #c6e366;
-  --primary-foreground: #0c1f1b;
+  --primary: #4d7cfe;
+  --primary-foreground: #0b1220;
 
-  
+  --secondary: #242a30;
+  --secondary-foreground: #e6e9ec;
 
-  /* Secondary: slightly lighter dark teal */
-  --secondary: #1a3d35;
-  --secondary-foreground: #e8e2d9;
+  --muted: #1d2227;
+  --muted-foreground: #8a939b;
 
-  /* Muted text: opacity 0.55 on #e8e2d9 */
-  --muted: #1a3d35;
-  --muted-foreground: rgba(232, 226, 217, 0.55);
+  --accent: rgba(77, 124, 254, 0.14);
+  --accent-foreground: #a9c1ff;
 
-  /* Accent / Highlights: #152E28 */
-  --accent: #152E28;
-  --accent-foreground: #e8e2d9;
+  --destructive: #e5564d;
+  --destructive-foreground: #1a0d0c;
 
-  --destructive: oklch(0.704 0.191 22.216);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #4d7cfe;
 
-  /* Borders: #c6e366 / rgba(198,227,102,0.3) */
-  --border: #1F3322;
-  --input: rgba(198, 227, 102, 0.3);
-  --ring: #c6e366;
+  --control: #0c0f11;
+  --control-border: rgba(255, 255, 255, 0.12);
 
-  /* Chart colors — dark mode nature palette */
-  --chart-1: #c6e366;
-  --chart-2: #3da87a;
-  --chart-3: #a3d154;
-  --chart-4: #2a7a5e;
-  --chart-5: #5ec98e;
+  --state-ready: #3fb57a;
+  --state-ready-bg: rgba(63, 181, 122, 0.15);
+  --state-aging: #e0a03a;
+  --state-aging-bg: rgba(224, 160, 58, 0.15);
+  --state-late: #e5564d;
+  --state-late-bg: rgba(229, 86, 77, 0.15);
+  --state-idle: #8a939b;
+  --state-idle-bg: rgba(255, 255, 255, 0.06);
 
-  /* Sidebar */
-  --sidebar: #0c1f1b;
-  --sidebar-foreground: #e8e2d9;
-  --sidebar-primary: #c6e366;
-  --sidebar-primary-foreground: #0c1f1b;
-  --sidebar-accent: #152E28;
-  --sidebar-accent-foreground: #e8e2d9;
-  --sidebar-border: #1F3322;
-  --sidebar-ring: #c6e366;
+  --chart-1: #4d7cfe;
+  --chart-2: #4aa6c4;
+  --chart-3: #8a939b;
+  --chart-4: #e0a03a;
+  --chart-5: #8b83e0;
+
+  --sidebar: #0f1214;
+  --sidebar-foreground: #e6e9ec;
+  --sidebar-primary: #4d7cfe;
+  --sidebar-primary-foreground: #0b1220;
+  --sidebar-accent: rgba(255, 255, 255, 0.06);
+  --sidebar-accent-foreground: #e6e9ec;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #4d7cfe;
+
+  --elevation-raise: 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --elevation-overlay:
+    0 0 0 1px rgba(255, 255, 255, 0.09), 0 16px 32px -8px rgba(0, 0, 0, 0.6);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  html, body {
+
+  html,
+  body {
     overflow-x: hidden;
     max-width: 100vw;
   }
-  body {
-    @apply bg-background text-foreground font-body;
-  }
-  h1,
-  h2 {
-    @apply font-heading font-bold;
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
+  body {
+    @apply bg-background text-foreground font-sans text-body;
+  }
+
+  h1,
+  h2,
   h3,
   h4,
   h5,
   h6 {
-    @apply font-body font-semibold;
+    @apply font-sans font-semibold text-balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /*
+    Identifiers, money, timers and counts never reflow as they tick.
+    This references --font-plex-mono directly: the @theme token is inlined into
+    utilities and is not available as a runtime variable here.
+  */
+  [data-numeric],
+  time {
+    font-family: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
 }
 
-/* ── Lenis Smooth Scroll & Custom Scrollbar Rules ────────────── */
-html.lenis, html.lenis body {
-  height: auto;
+@layer components {
+  /*
+    The state rail — the leading edge of any row or card that carries an order
+    state. Three steps of escalating pressure keyed to how long a ticket has
+    been alive, which is the number that actually matters on a service line.
+  */
+  .state-rail {
+    @apply w-[3px] shrink-0 self-stretch rounded-none;
+  }
+  .state-rail[data-state="idle"] {
+    background: var(--state-idle);
+  }
+  .state-rail[data-state="ready"] {
+    background: var(--state-ready);
+  }
+  .state-rail[data-state="aging"] {
+    background: var(--state-aging);
+  }
+  .state-rail[data-state="late"] {
+    background: var(--state-late);
+  }
+
+  .state-chip {
+    @apply inline-flex items-center gap-1.5 rounded-sm px-2 py-0.5
+           text-micro font-medium;
+  }
+  .state-chip[data-state="idle"] {
+    background: var(--state-idle-bg);
+    color: var(--state-idle);
+  }
+  .state-chip[data-state="ready"] {
+    background: var(--state-ready-bg);
+    color: var(--state-ready);
+  }
+  .state-chip[data-state="aging"] {
+    background: var(--state-aging-bg);
+    color: var(--state-aging);
+  }
+  .state-chip[data-state="late"] {
+    background: var(--state-late-bg);
+    color: var(--state-late);
+  }
+
+  .surface-raise {
+    background: var(--surface-raised);
+    box-shadow: var(--elevation-raise);
+  }
+
+  .surface-overlay {
+    background: var(--surface-overlay);
+    box-shadow: var(--elevation-overlay);
+  }
+
+  /* Section label above a group of controls or a data block. */
+  .eyebrow {
+    @apply text-micro font-medium uppercase tracking-[0.07em] text-fg-tertiary;
+  }
+}
+
+/*
+  Recharts paints most parts through SVG presentation attributes, which do not
+  resolve CSS custom properties in any current browser. Styling its parts by
+  class instead is what keeps charts reactive to the light/dark switch.
+*/
+.recharts-cartesian-axis-tick text {
+  fill: var(--fg-tertiary);
+}
+.recharts-tooltip-cursor {
+  fill: var(--accent);
+}
+.recharts-cartesian-grid line {
+  stroke: var(--border);
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(17, 66, 54, 0.2);
+  background: var(--border-strong);
   border-radius: 9999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(17, 66, 54, 0.4);
+  background: var(--fg-tertiary);
+  background-clip: content-box;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -243,44 +408,13 @@ html.lenis, html.lenis body {
   scrollbar-width: none;
 }
 
-@layer components {
-  /* ── Buttons ─────────────────────────────────────────── */
-  .btn-primary {
-    @apply inline-flex items-center justify-center
-           bg-primary text-primary-foreground
-           px-[30px] py-[14px]
-           rounded-btn font-body text-[0.9rem] font-semibold
-           transition-all duration-150
-           hover:-translate-y-0.5;
-  }
-
-  .btn-outline-light {
-    @apply inline-flex items-center justify-center
-           bg-transparent text-white
-           border border-[1.5px] border-white/35
-           px-[28px] py-[13px]
-           rounded-btn font-body text-[0.875rem] font-semibold
-           transition-colors duration-150
-           hover:bg-white/10;
-  }
-
-  /* ── Badges ──────────────────────────────────────────── */
-  .badge {
-    @apply inline-flex items-center gap-2
-           border border-white/20 rounded-badge
-           px-3.5 py-1
-           font-body text-[0.75rem] font-semibold uppercase tracking-[0.08em]
-           text-white/80 bg-white/5 backdrop-blur-sm;
-  }
-
-  /* ── Accent underline on headings ────────────────────── */
-  .accent-underline {
-    @apply relative inline-block;
-  }
-
-  .accent-underline::after {
-    content: "";
-    @apply absolute left-0 bottom-[3px]
-           w-full h-[4px] bg-accent rounded-sm -z-10;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

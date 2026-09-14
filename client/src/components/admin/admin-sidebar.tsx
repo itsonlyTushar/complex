@@ -14,7 +14,6 @@ import {
 import { LogOut } from "lucide-react";
 import { NavLink } from "./nav-link";
 import { useGetMe } from "@/hooks/queries/useUserQuery";
-import Image from "next/image";
 import { logout } from "@/app/actions/auth";
 import {
   AlertDialog,
@@ -36,13 +35,16 @@ export function AdminSidebar({
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="h-16 px-4 group-data-[collapsible=icon]:px-2 flex flex-row items-center gap-3 group-data-[collapsible=icon]:justify-center border-b border-border/50">
-        <div className="flex flex-col truncate group-data-[collapsible=icon]:hidden">
-          <span className="font-semibold text-sm leading-tight truncate">
-            {user?.name || "Admin"}
+      <SidebarHeader className="h-12 flex-row items-center gap-2.5 border-b px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
+        <span className="grid size-6 shrink-0 place-items-center rounded-md bg-primary text-[13px] font-semibold leading-none text-primary-foreground">
+          C
+        </span>
+        <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
+          <span className="truncate text-body font-medium leading-tight">
+            {isLoading ? " " : user?.name || "Complex"}
           </span>
-          <span className="text-[10px] text-muted-foreground truncate uppercase tracking-wider font-semibold mt-0.5">
-            {user?.role?.replace(/_/g, ' ') || "Dashboard"}
+          <span className="eyebrow truncate">
+            {user?.role?.replace(/_/g, " ") || "Vendor"}
           </span>
         </div>
       </SidebarHeader>
@@ -63,11 +65,11 @@ export function AdminSidebar({
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <SidebarMenuButton
-                  tooltip="Logout"
-                  className="text-destructive hover:text-destructive cursor-pointer"
+                  tooltip="Log out"
+                  className="cursor-pointer hover:bg-state-late-bg hover:text-state-late"
                 >
                   <LogOut className="size-4" />
-                  <span>Logout</span>
+                  <span>Log out</span>
                 </SidebarMenuButton>
               </AlertDialogTrigger>
               <AlertDialogContent>

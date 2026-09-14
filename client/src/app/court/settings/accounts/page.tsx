@@ -30,7 +30,7 @@ export default function AccountsPage() {
   return (
     <section className="bg-card rounded-xl border shadow-sm p-6 h-full">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Account Settings</h1>
         
         <Dialog>
           <DialogTrigger asChild>

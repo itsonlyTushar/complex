@@ -28,7 +28,7 @@ export default function AdminPaymentsPage() {
   return (
     <div className="flex flex-col gap-6 py-6">
       <section>
-        <h1 className="text-3xl font-bold tracking-tight">Payments</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Payments</h1>
         <p className="text-muted-foreground mt-1">
           Complete breakdown of your restaurant&apos;s revenue, costs, and profit.
         </p>
@@ -65,7 +65,7 @@ function SummaryCard({
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {label}
         </p>
-        <p className="text-xl font-bold tracking-tight mt-0.5">{value}</p>
+        <p className="text-xl font-semibold tracking-tight mt-0.5">{value}</p>
         <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
     </div>

@@ -93,7 +93,7 @@ export default function PaymentsPage() {
       {/* Header section */}
       <main className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">
+          <h1 className="text-3xl font-semibold tracking-tight">
             Payments
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -142,17 +142,17 @@ export default function PaymentsPage() {
                     </td>
                     <td className="p-4">
                       {res.onBoradingCompleted ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-state-ready-bg text-state-ready border border-state-ready/30">
                           Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-state-aging-bg text-state-aging border border-state-aging/30">
                           Pending
                         </span>
                       )}
                     </td>
                     <td className="p-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-extrabold bg-primary/10 text-primary border border-primary/20">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-semibold bg-primary/10 text-primary border border-primary/20">
                         {res.commissionRate ?? 5.0}%
                       </span>
                     </td>
@@ -178,7 +178,7 @@ export default function PaymentsPage() {
       <Dialog open={editingRestaurant !== null} onOpenChange={(open) => !open && setEditingRestaurant(null)}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <DialogTitle className="text-xl font-semibold flex items-center gap-2">
               <Percent className="w-5 h-5 text-primary" /> Adjust Commission Rate
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
@@ -213,25 +213,25 @@ export default function PaymentsPage() {
 
                 {/* Simulated Order Split Preview */}
                 <div className="bg-accent/40 rounded-xl p-4 border border-border/20 space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Simulated Payout Split (On $100 Order)</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Simulated Payout Split (On $100 Order)</h4>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground flex items-center gap-1.5">
                       <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                       Platform (App Fee)
                     </span>
-                    <span className="font-extrabold text-foreground">${simulatedSplit.platform}</span>
+                    <span className="font-semibold text-foreground">${simulatedSplit.platform}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-state-ready" />
                       Restaurant (Vendor Payout)
                     </span>
-                    <span className="font-extrabold text-foreground">${simulatedSplit.vendor}</span>
+                    <span className="font-semibold text-foreground">${simulatedSplit.vendor}</span>
                   </div>
                 </div>
 
                 {!editingRestaurant.onBoradingCompleted && (
-                  <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20 text-xs flex gap-2.5 items-start">
+                  <div className="p-3 bg-state-aging-bg text-state-aging rounded-xl border border-state-aging/30 text-xs flex gap-2.5 items-start">
                     <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
                     <span>
                       This restaurant has not onboarded Stripe yet. Adjusting the rate will apply to future transactions once Stripe is fully connected.
@@ -252,7 +252,7 @@ export default function PaymentsPage() {
                 </Button>
                 <Button
                   type="submit"
-                  className="rounded-xl font-bold bg-primary text-black hover:bg-primary/95"
+                  className="rounded-xl font-semibold bg-primary text-black hover:bg-primary/95"
                   disabled={isSaving}
                 >
                   {isSaving ? "Saving..." : "Save Rate"}

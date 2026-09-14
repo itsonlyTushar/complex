@@ -127,13 +127,13 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
     <>
       <div className="relative rounded-b-[2rem] px-2 py-4 h-34 bg-accent flex flex-col justify-between">
         <section className="flex justify-between items-center">
-          <h1 className="text-3xl font-extrabold
+          <h1 className="text-3xl font-semibold
            leading-none">{restaurantDetails?.name}</h1>
           <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
             <SheetTrigger asChild>
               <div className="flex min-w-18 justify-center gap-2 items-center bg-primary text-black px-3 py-1.5 rounded-lg cursor-pointer transition-all">
                 <ShoppingCart size={18} className="text-primary-foreground"/>
-                <span className="text-sm text-primary-foreground font-bold text-center min-w-5">
+                <span className="text-sm text-primary-foreground font-semibold text-center min-w-5">
                   {totalItems}
                 </span>
               </div>
@@ -181,7 +181,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
               {/* 3. Footer / Checkout */}
               {cartItems.length > 0 && (
                 <div className="border-t pt-4 mt-auto px-2 py-2 flex flex-col gap-4">
-                  <div className="flex justify-between font-bold text-lg">
+                  <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
                     <span>${cartTotal.toFixed(2)}</span>
                   </div>
@@ -228,7 +228,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
             <div key={category}>
               <Accordion type="single" defaultValue={category} collapsible>
                 <AccordionItem value={category}>
-                  <AccordionTrigger className="text-2xl font-extrabold ">
+                  <AccordionTrigger className="text-2xl font-semibold ">
                     <h1>{category}</h1>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -249,7 +249,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
                             </div>
 
                             <div className="flex items-center justify-between mt-4">
-                              <span className="font-bold text-lg">
+                              <span className="font-semibold text-lg">
                                 ${menu.price}
                               </span>
                               <div className="flex items-center gap-2 bg-accent rounded-full p-1 border border-border/50">
@@ -321,7 +321,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
           <DrawerContent>
             <div className="overflow-y-auto max-h-[85vh] w-full">
               <DrawerHeader>
-                <DrawerTitle className="text-center text-3xl font-extrabold tracking-tight">
+                <DrawerTitle className="text-center text-3xl font-semibold tracking-tight">
                   {activeOrder?.status 
                     ? activeOrder.status.charAt(0) + activeOrder.status.slice(1).toLowerCase() 
                     : "It's Cooking"}
@@ -339,7 +339,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
               >
                 {status.map((stepName) => (
                   <Step key={stepName}>
-                    <p className="text-center hidden rounded-xl max-w-sm w-full border border-emerald-500/20 bg-emerald-500/10 text-md font-semibold py-1.5 px-3">
+                    <p className="text-center hidden rounded-xl max-w-sm w-full border border-state-ready/30 bg-state-ready-bg text-md font-semibold py-1.5 px-3">
                       {stepName}
                     </p>
                   </Step>

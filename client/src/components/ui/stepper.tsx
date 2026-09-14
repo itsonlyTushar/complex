@@ -132,8 +132,8 @@ export default function Stepper({
                   onClick={handleBack}
                   className={`duration-350 rounded px-2 py-1 transition ${
                     currentStep === 1
-                      ? 'pointer-events-none opacity-50 text-neutral-400'
-                      : 'text-neutral-400 hover:text-neutral-700'
+                      ? 'pointer-events-none opacity-50 text-fg-tertiary'
+                      : 'text-fg-tertiary hover:text-foreground'
                   }`}
                   {...backButtonProps}
                 >
@@ -142,7 +142,7 @@ export default function Stepper({
               )}
               <button
                 onClick={isLastStep ? handleComplete : handleNext}
-                className="duration-350 flex items-center justify-center rounded-full bg-green-500 py-1.5 px-3.5 font-medium tracking-tight text-white transition hover:bg-green-600 active:bg-green-700"
+                className="duration-350 flex items-center justify-center rounded-full bg-state-ready py-1.5 px-3.5 font-medium tracking-tight text-primary-foreground transition hover:bg-state-ready active:bg-state-ready"
                 {...nextButtonProps}
               >
                 {isLastStep ? 'Complete' : nextButtonText}
@@ -279,7 +279,7 @@ function StepIndicator({ step, currentStep, onClickStep, disableStepIndicators =
         {status === 'complete' ? (
           <CheckIcon className="h-4 w-4 text-black" />
         ) : status === 'active' ? (
-          <div className="h-3 w-3 rounded-full bg-[#120F17]" />
+          <div className="h-3 w-3 rounded-full bg-foreground" />
         ) : (
           <span className="text-sm">{step}</span>
         )}
@@ -299,7 +299,7 @@ function StepConnector({ isComplete }: StepConnectorProps) {
   };
 
   return (
-    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-neutral-600">
+    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-foreground">
       <motion.div
         className="absolute left-0 top-0 h-full"
         variants={lineVariants}

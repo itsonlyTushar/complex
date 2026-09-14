@@ -63,15 +63,20 @@ function RestaurantsPage() {
   };
 
   return (
-    <>
-      <section className="flex justify-between gap-2 py-6 px-5">
-        <h1 className="text-3xl">Restaurants</h1>
+    <div className="flex flex-col gap-5 py-4">
+      <section className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-h2">Restaurants</h1>
+          <p className="mt-0.5 text-caption text-fg-tertiary">
+            Stalls trading in your food court
+          </p>
+        </div>
 
         <div className="flex items-center gap-2">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="font-bold">
-                <Plus size={12} /> Onboard
+              <Button size="sm">
+                <Plus className="size-4" /> Onboard
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -121,18 +126,28 @@ function RestaurantsPage() {
         </div>
       </section>
 
-      <section className="mx-2">
+      <section>
         {isLoading ? (
-          <div className="flex w-full items-center justify-center p-12 min-h-[200px]">
-            <Spinner className="h-8 w-8 text-primary" />
+          <div className="flex min-h-[200px] w-full items-center justify-center rounded-xl border bg-card p-12">
+            <Spinner className="size-6 text-fg-tertiary" />
           </div>
         ) : isError ? (
-          <div>Error: {error?.message}</div>
+          <div
+            role="alert"
+            className="rounded-xl border border-state-late/30 bg-state-late-bg px-4 py-6 text-center"
+          >
+            <p className="text-body font-medium text-state-late">
+              Couldn&apos;t load restaurants
+            </p>
+            <p className="mx-auto mt-1 max-w-md text-caption text-fg-secondary">
+              {error?.message || "The service didn't respond."}
+            </p>
+          </div>
         ) : (
           <DataTable columns={columns} data={Restaurants || []} />
         )}
       </section>
-    </>
+    </div>
   );
 }
 
