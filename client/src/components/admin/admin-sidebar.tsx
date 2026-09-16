@@ -39,14 +39,6 @@ export function AdminSidebar({
       <SidebarHeader className="h-12 flex-row items-center gap-2.5 border-b px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
         <Logo markOnly size={28} className="hidden group-data-[collapsible=icon]:block" />
         <Logo size={22} className="group-data-[collapsible=icon]:hidden" />
-        <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
-          <span className="truncate text-body font-medium leading-tight">
-            {isLoading ? " " : user?.name || "Complex"}
-          </span>
-          <span className="eyebrow truncate">
-            {user?.role?.replace(/_/g, " ") || "Vendor"}
-          </span>
-        </div>
       </SidebarHeader>
 
       <SidebarContent>

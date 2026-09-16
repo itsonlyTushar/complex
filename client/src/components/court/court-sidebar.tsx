@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import {
@@ -33,14 +33,12 @@ export const CourtSidebar = ({
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="h-12 flex-row items-center gap-2.5 border-b px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
-        <Logo markOnly size={28} className="hidden group-data-[collapsible=icon]:block" />
+        <Logo
+          markOnly
+          size={28}
+          className="hidden group-data-[collapsible=icon]:block"
+        />
         <Logo size={22} className="group-data-[collapsible=icon]:hidden" />
-        <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
-          <span className="truncate text-body font-medium leading-tight">
-            Complex
-          </span>
-          <span className="eyebrow truncate">Food court</span>
-        </div>
       </SidebarHeader>
 
       <SidebarContent>
@@ -72,9 +70,12 @@ export const CourtSidebar = ({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    Are you sure you want to log out?
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    You will be signed out of your Food Court session. Any unsaved changes may be lost.
+                    You will be signed out of your Food Court session. Any
+                    unsaved changes may be lost.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
