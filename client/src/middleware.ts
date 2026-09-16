@@ -25,7 +25,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
 }
 
-// Config specifies which routes the middleware runs on
 export const config = {
     matcher: ["/sp/:path*", "/court/:path*", "/admin/:path*"],
 };

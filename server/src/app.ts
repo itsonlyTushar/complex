@@ -36,7 +36,6 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Credentials", "true");
 
 
-    // Handle preflight
     if (req.method === "OPTIONS") {
         res.sendStatus(204);
         return;

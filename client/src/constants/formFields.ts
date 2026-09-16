@@ -1,5 +1,4 @@
 
-// Super Admin Side : to onboard new food courts 
 export const formFields = [
     {
         name: "foodCourtName",
@@ -46,7 +45,6 @@ export const formFields = [
 ] as const;
 
 
-// Food Court Side: to onboard new restaurants
 export const restaurantFormFields = [
   {
     name: "restaurantName",

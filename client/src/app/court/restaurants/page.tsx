@@ -32,7 +32,6 @@ function RestaurantsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
 
-  // hook form configrations
   const {
     handleSubmit,
     register,
@@ -49,7 +48,6 @@ function RestaurantsPage() {
     try {
       await onboardRestaurant(value);
 
-      // Invalidate the cache to automatically refetch the updated list from the server
       queryClient.invalidateQueries({ queryKey: COURT_KEYS.restaurants() });
       reset();
       setOpen(false);

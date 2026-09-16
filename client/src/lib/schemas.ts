@@ -19,7 +19,6 @@ export const foodCourtSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters")
 })
 
-// menu fields schema 
 export const newMenuSchema = z.object({
     image: z.string().optional(),
     itemName: z.string().min(1, "Item Name is required"),
@@ -30,7 +29,6 @@ export const newMenuSchema = z.object({
     description: z.string().min(1, "Description is required"), 
 })
 
-// Table form fields schema
 export const newTableSchema = z.object({
     number: z.number().positive("Price must be greated than 0"),
     occupacy: z.number().min(0, "Add proper value"),

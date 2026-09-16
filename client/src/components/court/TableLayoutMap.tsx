@@ -37,7 +37,6 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
         const localCanvasRef = useRef<HTMLCanvasElement | null>(null);
         const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
 
-        // Sync forwarded ref with local canvas ref
         useEffect(() => {
             if (!ref) return;
             if (typeof ref === "function") {
@@ -47,7 +46,6 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
             }
         }, [ref]);
 
-        // Sync canvas resolution with the parent container dynamically
         useEffect(() => {
             const canvas = localCanvasRef.current;
             if (!canvas) return;
@@ -69,7 +67,6 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
             };
         }, []);
 
-        // Drawing Loop
         useEffect(() => {
             const canvas = localCanvasRef.current;
             if (!canvas) return;
@@ -79,12 +76,10 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw elegant designer grid lines
             ctx.strokeStyle = "rgba(0, 0, 0, 0.04)";
             ctx.lineWidth = 1;
             const gridSize = 40;
 
-            // Draw vertical lines
             for (let x = 0; x < canvas.width; x += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
@@ -92,7 +87,6 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                 ctx.stroke();
             }
 
-            // Draw horizontal lines
             for (let y = 0; y < canvas.height; y += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
@@ -100,8 +94,7 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                 ctx.stroke();
             }
 
-            // Draw all finalized sketched lines/walls
-            ctx.strokeStyle = "#475569"; // slate-600
+            ctx.strokeStyle = "#475569";
             ctx.lineWidth = 3;
             ctx.lineCap = "round";
 
@@ -112,33 +105,29 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                 ctx.stroke();
             });
 
-            // Draw live active line preview if drawing
             if (drawingStart && currentMousePos) {
                 ctx.beginPath();
                 ctx.setLineDash([6, 6]);
-                ctx.strokeStyle = "#3b82f6"; // blue-500
+                ctx.strokeStyle = "#3b82f6";
                 ctx.lineWidth = 2;
                 ctx.moveTo(drawingStart.x, drawingStart.y);
                 ctx.lineTo(currentMousePos.x, currentMousePos.y);
                 ctx.stroke();
-                ctx.setLineDash([]); // Reset line dash
+                ctx.setLineDash([]);
             }
 
-            // Draw placed elements (Square, Rectangle, and Round tables, and Infrastructure)
             placedItems.forEach((item) => {
                 const isSelectedThis = item.id === selectedItemId;
 
                 ctx.save();
-                // Move origin to item center and apply its individual rotation
                 ctx.translate(item.x, item.y);
                 ctx.rotate(((item.rotation || 0) * Math.PI) / 180);
 
                 const chairRadius = 7;
 
-                // Draw Chairs centered at (0, 0)
                 if (item.type === "table_square") {
-                    ctx.fillStyle = "#cbd5e1"; // slate-300
-                    ctx.strokeStyle = "#64748b"; // slate-500
+                    ctx.fillStyle = "#cbd5e1";
+                    ctx.strokeStyle = "#64748b";
                     ctx.lineWidth = 1.5;
 
                     const dist = item.width / 2 + 8;
@@ -194,7 +183,7 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                         ctx.stroke();
                     }
                 } else if (item.type === "bar") {
-                    ctx.fillStyle = "#94a3b8"; // slate-400
+                    ctx.fillStyle = "#94a3b8";
                     ctx.strokeStyle = "#475569";
                     ctx.lineWidth = 1.5;
                     const stools = [
@@ -211,7 +200,6 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                     });
                 }
 
-                // Draw Selected Indicator Outline Dash
                 if (isSelectedThis) {
                     ctx.save();
                     ctx.strokeStyle = "rgba(59, 130, 246, 0.45)";
@@ -223,7 +211,6 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                     ctx.restore();
                 }
 
-                // Draw Main shapes centered at (0, 0)
                 ctx.fillStyle = "#ffffff";
                 ctx.strokeStyle = isSelectedThis ? "#3b82f6" : "#1e293b";
                 ctx.lineWidth = 2.5;
@@ -301,7 +288,6 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                     ctx.fill();
                     ctx.stroke();
 
-                    // Double inner line representing counter trim
                     ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
@@ -315,15 +301,14 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                     ctx.fillText("BAR COUNTER", 0, 0);
 
                 } else if (item.type === "kitchen") {
-                    ctx.fillStyle = "rgba(249, 115, 22, 0.07)"; // Soft orange backdrop
-                    ctx.strokeStyle = "#f97316"; // Orange-500
+                    ctx.fillStyle = "rgba(249, 115, 22, 0.07)";
+                    ctx.strokeStyle = "#f97316";
                     ctx.lineWidth = 2.5;
                     ctx.beginPath();
                     ctx.roundRect(-item.width / 2, -item.height / 2, item.width, item.height, 6);
                     ctx.fill();
                     ctx.stroke();
 
-                    // Draw floor plan double-cross lines
                     ctx.strokeStyle = "rgba(249, 115, 22, 0.2)";
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
@@ -333,47 +318,44 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                     ctx.lineTo(-item.width / 2, item.height / 2);
                     ctx.stroke();
 
-                    ctx.fillStyle = "#c2410c"; // Orange-700
+                    ctx.fillStyle = "#c2410c";
                     ctx.font = "bold 12px Inter, sans-serif";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     ctx.fillText("KITCHEN ZONE", 0, 0);
 
                 } else if (item.type === "gate") {
-                    ctx.fillStyle = "rgba(16, 185, 129, 0.08)"; // Soft emerald backdrop
-                    ctx.strokeStyle = "#10b981"; // Emerald-500
+                    ctx.fillStyle = "rgba(16, 185, 129, 0.08)";
+                    ctx.strokeStyle = "#10b981";
                     ctx.lineWidth = 2;
                     ctx.setLineDash([4, 4]);
                     ctx.beginPath();
                     ctx.roundRect(-item.width / 2, -item.height / 2, item.width, item.height, 4);
                     ctx.fill();
                     ctx.stroke();
-                    ctx.setLineDash([]); // Reset dash
+                    ctx.setLineDash([]);
 
-                    // Draw swing arc
                     ctx.strokeStyle = "#10b981";
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
                     ctx.arc(-item.width / 2, item.height / 2, item.height, -Math.PI / 2, 0, false);
                     ctx.stroke();
 
-                    ctx.fillStyle = "#047857"; // Emerald-700
+                    ctx.fillStyle = "#047857";
                     ctx.font = "bold 10px Inter, sans-serif";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     ctx.fillText("🚪 ENTRANCE", 8, 0);
 
                 } else if (item.type === "shop") {
-                    // Draw Shop / Stall
-                    ctx.fillStyle = "rgba(99, 102, 241, 0.07)"; // Soft indigo backdrop
-                    ctx.strokeStyle = "#6366f1"; // Indigo-500
+                    ctx.fillStyle = "rgba(99, 102, 241, 0.07)";
+                    ctx.strokeStyle = "#6366f1";
                     ctx.lineWidth = 2.5;
                     ctx.beginPath();
                     ctx.roundRect(-item.width / 2, -item.height / 2, item.width, item.height, 6);
                     ctx.fill();
                     ctx.stroke();
 
-                    // Draw a nice striped awning pattern at the front of the shop (top edge)
                     ctx.save();
                     ctx.beginPath();
                     ctx.rect(-item.width / 2, -item.height / 2, item.width, 12);
@@ -386,14 +368,13 @@ export const TableLayoutMap = React.forwardRef<HTMLCanvasElement, TableLayoutMap
                     }
                     ctx.restore();
 
-                    // Draw outline for the awning block
-                    ctx.strokeStyle = "#4f46e5"; // Indigo-600
+                    ctx.strokeStyle = "#4f46e5";
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
                     ctx.rect(-item.width / 2, -item.height / 2, item.width, 12);
                     ctx.stroke();
 
-                    ctx.fillStyle = "#4338ca"; // Indigo-700
+                    ctx.fillStyle = "#4338ca";
                     ctx.font = "bold 11px Inter, sans-serif";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";

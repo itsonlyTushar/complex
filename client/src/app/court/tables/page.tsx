@@ -14,24 +14,19 @@ const Tables = () => {
     const [placedItems, setPlacedItems] = useState<PlacedItem[]>([]);
     const [lines, setLines] = useState<Line[]>([]);
     
-    // "select" to manage/delete/move elements, "draw" to sketch walls/lines
     const [toolMode, setToolMode] = useState<"select" | "draw">("select");
     const [drawingStart, setDrawingStart] = useState<{ x: number; y: number } | null>(null);
     const [currentMousePos, setCurrentMousePos] = useState<{ x: number; y: number } | null>(null);
 
-    // States for moving placed elements inside the canvas
     const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
     const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const [mouseDownPos, setMouseDownPos] = useState<{ x: number; y: number } | null>(null);
 
-    // State for the currently selected item to show the rotate/delete toolbar
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-    // React Query layout and table fetching / saving hooks
     const { data: layoutData, isLoading: isLayoutLoading } = useGetLayout();
     const { mutateAsync: saveLayout, isPending: isSaving } = useSaveLayout();
 
-    // Map database shape names to internal canvas layout item types
     const mapShapeToType = (shape: string) => {
         switch (shape.toLowerCase()) {
             case "square":
@@ -46,16 +41,12 @@ const Tables = () => {
         }
     };
 
-    // Populate lines and placedItems on component mount / query fetch
     useEffect(() => {
         if (layoutData) {
-            // Set walls
             setLines(layoutData.layout?.walls || []);
 
-            // Set infrastructure
             const infra = layoutData.layout?.infrastructure || [];
 
-            // Map database tables that are placed
             const placedTables = (layoutData.tables || [])
                 .filter((t) => t.isPlaced && t.x !== null && t.y !== null)
                 .map((t) => {
@@ -87,7 +78,6 @@ const Tables = () => {
         }
     }, [layoutData]);
 
-    // Keyboard listener for deleting selected elements
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!selectedItemId) return;
@@ -115,7 +105,6 @@ const Tables = () => {
         };
     }, [selectedItemId]);
 
-    // Drag and Drop Elements Handlers (Palette to Canvas)
     const handleDragStart = (e: React.DragEvent, itemType: string) => {
         e.dataTransfer.setData("itemType", itemType);
     };
@@ -142,7 +131,6 @@ const Tables = () => {
         const y = e.clientY - rect.top;
 
         if (tableIdStr) {
-            // Dragged a specific table configuration
             const tableId = Number(tableIdStr);
             const table = (layoutData?.tables || []).find((t) => t.id === tableId);
             if (!table) return;
@@ -209,7 +197,6 @@ const Tables = () => {
         setSelectedItemId(newItem.id); // Auto-select newly placed item!
     };
 
-    // Tool Actions: Rotate and Delete Selected Item
     const handleRotateItem = (itemId: string) => {
         setPlacedItems((prev) =>
             prev.map((item) =>
@@ -227,7 +214,6 @@ const Tables = () => {
         }
     };
 
-    // Interactive Mouse Handlers (Supporting both sketching and repositioning elements)
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -239,7 +225,6 @@ const Tables = () => {
         setMouseDownPos({ x, y });
 
         if (toolMode === "select") {
-            // Find if clicked inside an element boundary
             const clickedItem = placedItems.find((item) => {
                 const left = item.x - item.width / 2;
                 const right = item.x + item.width / 2;
@@ -267,7 +252,6 @@ const Tables = () => {
         const y = e.clientY - rect.top;
 
         if (toolMode === "select" && draggedItemId) {
-            // Update selected item coordinates smoothly as it is dragged
             setPlacedItems((prev) =>
                 prev.map((item) =>
                     item.id === draggedItemId
@@ -302,7 +286,6 @@ const Tables = () => {
                 }
                 setDraggedItemId(null);
             } else {
-                // Clicked on empty canvas background: deselect
                 if (mouseDownPos) {
                     const dx = x - mouseDownPos.x;
                     const dy = y - mouseDownPos.y;
@@ -334,7 +317,6 @@ const Tables = () => {
         setMouseDownPos(null);
     };
 
-    // Save Table Layout to API
     const handleSaveLayout = async () => {
         try {
             const walls = lines;
@@ -359,10 +341,8 @@ const Tables = () => {
         }
     };
 
-    // Locate coordinates to render floating contextual menu options
     const selectedItem = placedItems.find((item) => item.id === selectedItemId);
 
-    // Compute which tables are not yet placed on the canvas
     const placedTableIds = new Set(
         placedItems
             .filter((item) => item.tableId !== undefined)
@@ -372,7 +352,6 @@ const Tables = () => {
         (t) => !placedTableIds.has(t.id)
     );
 
-    // Show premium loader if fetching initial layout data
     if (isLayoutLoading) {
         return (
             <div className="flex items-center justify-center min-h-[500px]">

@@ -15,7 +15,6 @@ router.post("/signup", authMiddleware, signupController)
 router.post("/new-court", foodCourtSignUpController)
 router.post("/login", loginController)
 
-// CRUD routes for food courts (Super Admin panel)
 router.get("/courts", fetchFoodCourtsController)
 router.patch("/courts/:id", editFoodCourtController)
 router.delete("/courts/:id", deleteFoodCourtController)

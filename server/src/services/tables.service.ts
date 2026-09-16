@@ -38,7 +38,6 @@ export const saveLayout = async (
     placedTables: { id: number; x: number; y: number; rotation: number }[]
 ) => {
     return await prisma.$transaction(async (tx) => {
-        // 1. Save walls and infrastructure on the FoodCourt
         await tx.foodCourt.update({
             where: { id: foodCourtId },
             data: {
@@ -49,7 +48,6 @@ export const saveLayout = async (
             },
         });
 
-        // 2. Reset all tables of the food court to unplaced
         await tx.table.updateMany({
             where: { foodCourtId },
             data: {
@@ -60,7 +58,6 @@ export const saveLayout = async (
             },
         });
 
-        // 3. Update the placed tables with their coordinates
         for (const pt of placedTables) {
             await tx.table.update({
                 where: {

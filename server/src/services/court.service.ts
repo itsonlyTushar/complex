@@ -13,7 +13,6 @@ export const fetchRestaurantService  = async (foodCourtId: string) => {
 }
 
 export const deleteRestaurantService = async (restaurantId: string, foodCourtId: string) => {
-    // 1. Verify restaurant exists and belongs to this food court
     const restaurant = await prisma.restaurant.findUnique({
         where: { id: restaurantId }
     });
@@ -26,24 +25,19 @@ export const deleteRestaurantService = async (restaurantId: string, foodCourtId:
         throw new Error("Unauthorized to delete this restaurant");
     }
 
-    // 2. Cascade delete all related records in a transaction
     return await prisma.$transaction(async (tx) => {
-        // Delete related menus
         await tx.menu.deleteMany({
             where: { restaurantId }
         });
 
-        // Delete related categories
         await tx.category.deleteMany({
             where: { restaurantId }
         });
 
-        // Delete related users (vendors)
         await tx.user.deleteMany({
             where: { restaurantId }
         });
 
-        // Delete the restaurant itself
         return await tx.restaurant.delete({
             where: { id: restaurantId }
         });

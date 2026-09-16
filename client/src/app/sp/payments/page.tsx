@@ -28,7 +28,6 @@ export default function PaymentsPage() {
   const [editingRestaurant, setEditingRestaurant] = useState<any | null>(null)
   const [commissionRate, setCommissionRate] = useState<string>("")
 
-  // Filter restaurants
   const filteredRestaurants = useMemo(() => {
     return restaurants.filter((r: any) => {
       const nameMatch = r.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -37,7 +36,6 @@ export default function PaymentsPage() {
     })
   }, [restaurants, searchTerm])
 
-  // Stats calculation
   const stats = useMemo(() => {
     if (!restaurants.length) return { total: 0, onboarded: 0, avgRate: 0 }
     const total = restaurants.length
@@ -77,7 +75,6 @@ export default function PaymentsPage() {
 
   const isSaving = updateMutation.isPending
 
-  // Helper for simulated order split
   const simulatedSplit = useMemo(() => {
     const rate = parseFloat(commissionRate) || 0
     const platform = 100 * (rate / 100)

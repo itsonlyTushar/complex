@@ -56,7 +56,6 @@ export default function AdminMenuPage() {
   const { mutateAsync: updateMenuMutation, isPending: isUpdating } = useUpdateMenu();
   const { mutateAsync: deleteMenuMutation } = useDeleteMenu();
 
-  // React Hook Form configs
   const {
     handleSubmit,
     register,

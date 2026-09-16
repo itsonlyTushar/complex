@@ -2,15 +2,12 @@ import { prisma } from "../config/db.js";
 import type { Order, OrderItem } from "../types/order.types.js";
 import { updatePaymentIntentMetadata } from "./payment.service.js";
 
-// We omit the auto-generated fields (id, status, createdAt) for the incoming payload
 type CreateOrderPayload = Omit<Order, 'id' | 'status' | 'createdAt'>;
 
 export const addOrder = async (data: CreateOrderPayload) => {
     const { restaurantId, totalAmount, items, tableNumber, paymentIntentId, customerName } = data;
 
-    // Use a transaction to ensure both operations succeed together
     const newOrder = await prisma.$transaction(async (tx) => {
-        // 1. Create the order
         const order = await tx.order.create({
             data: {
                 restaurantId,
@@ -31,7 +28,6 @@ export const addOrder = async (data: CreateOrderPayload) => {
             }
         });
 
-        // 2. Subtract inventory for each item
         for (const item of items) {
             await tx.menu.update({
                 where: { id: item.menuID },
@@ -54,7 +50,6 @@ export const addOrder = async (data: CreateOrderPayload) => {
 }
 
 export const fetchOrdersForRestaurant = async (restaurantId: string) => {
-    // Find all orders for this restaurant
     const orders = await prisma.order.findMany({
         where: {
             restaurantId: restaurantId
@@ -136,7 +131,6 @@ export const updateOrderStatusService = async (id: number, status: Order['status
 }
 
 export const fetchPaymentDetailsForRestaurant = async (restaurantId: string) => {
-    // Fetch restaurant commission rate
     const restaurant = await prisma.restaurant.findUnique({
         where: { id: restaurantId },
         select: { commissionRate: true }
@@ -144,7 +138,6 @@ export const fetchPaymentDetailsForRestaurant = async (restaurantId: string) => 
 
     const commissionRate = restaurant?.commissionRate ?? 5.0;
 
-    // Fetch all orders (excluding cancelled) with items and menu cost
     const orders = await prisma.order.findMany({
         where: {
             restaurantId,
@@ -195,7 +188,6 @@ export const fetchPaymentDetailsForRestaurant = async (restaurantId: string) => 
         };
     });
 
-    // Summary totals
     const summary = {
         totalRevenue: paymentDetails.reduce((s, p) => s + p.totalAmount, 0),
         totalCommission: parseFloat(paymentDetails.reduce((s, p) => s + p.commissionAmount, 0).toFixed(2)),

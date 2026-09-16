@@ -3,11 +3,9 @@ import { comparePassword, hashPassword } from "../utils/hash.js";
 import type { FoodCourtSignUp, LoginInput, SignupInput } from "../types/index.js";
 import jwt from "jsonwebtoken"
 
-/* Sign up for the Restaurants */
 export const signupService = async (data: SignupInput, foodCourtId: string) => {
     const { restaurantName, location, ownerName, email, password } = data;
 
-    // 1. Check if user exists
     const existingUser = await prisma.user.findUnique({
         where: { email: email }
     });
@@ -16,10 +14,8 @@ export const signupService = async (data: SignupInput, foodCourtId: string) => {
         throw new Error("Email already exists");
     }
 
-    // 2. Hash the password
     const hashedPassword = await hashPassword(password);
 
-    // 3. Create Restaurant AND the Vendor User in one transaction!
     const newRestaurant = await prisma.restaurant.create({
         data: {
             name: restaurantName,
@@ -36,7 +32,7 @@ export const signupService = async (data: SignupInput, foodCourtId: string) => {
             }
         },
         include: {
-            vendors: true // Return the newly created user data along with the restaurant
+            vendors: true
         }
     });
 
@@ -44,7 +40,6 @@ export const signupService = async (data: SignupInput, foodCourtId: string) => {
 };
 
 
-/* SIGN-UP FOR THE FOOD COURT */
 export const signFoodCourtService = async (data: FoodCourtSignUp) => {
     const { foodCourtName, location, email, password, managementDetails, currancy, paymentSystem } = data
 
@@ -80,7 +75,6 @@ export const signFoodCourtService = async (data: FoodCourtSignUp) => {
     return newFoodCourt
 };
 
-// Login Service 
 export const loginService = async (data: LoginInput) => {
     const { email, password } = data
 

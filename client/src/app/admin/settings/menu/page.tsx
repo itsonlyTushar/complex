@@ -36,11 +36,9 @@ export default function MenuSettingsPage() {
   const { mutateAsync: addCategoryUpdate, isPending: updating } = useUpdateCategory();
   const { mutateAsync: deleteCategoryMutation } = useDeleteCategory();
 
-  // Form submission handler
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side validations
     const trimmedName = newCategoryName.trim();
     if (!trimmedName) {
       toast.warning("Category name cannot be empty.");

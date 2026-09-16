@@ -24,7 +24,6 @@ if (cleanUrl) {
     });
   }
 } else {
-  // Fallback to explicit individual environment keys if provided
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -33,15 +32,7 @@ if (cleanUrl) {
   });
 }
 
-/**
- * Uploads a base64 encoded image string to Cloudinary.
- * If the provided image is already a public HTTP/HTTPS URL, returns it as-is without uploading again.
- * 
- * @param base64Str - The image payload (can be base64 string or an existing URL)
- * @returns The secure URL pointing to the uploaded image on Cloudinary
- */
 export const uploadImageToCloudinary = async (base64Str: string): Promise<string> => {
-  // If it's already an HTTP/HTTPS URL, just return it
   if (!base64Str || base64Str.startsWith('http://') || base64Str.startsWith('https://')) {
     return base64Str;
   }

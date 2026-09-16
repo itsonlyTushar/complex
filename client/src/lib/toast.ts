@@ -1,9 +1,5 @@
 import { toast as sonnerToast } from "sonner";
 
-/**
- * A centralized, DRY toast utility wrapping `sonner`.
- * Standardizes styling, auto-dismiss timers, and error extraction.
- */
 export const toast = {
   success: (message: string, description?: string) => {
     sonnerToast.success(message, { description });
@@ -17,7 +13,6 @@ export const toast = {
     } else if (error instanceof Error) {
       message = error.message;
     } else if (error && typeof error === "object") {
-      // Handle standard API responses where the message is inside error.message or error.error
       message = error.message || error.error || fallbackMessage;
     }
 

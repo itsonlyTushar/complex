@@ -67,7 +67,6 @@ export const cancelOrderController = async (req: Request, res: Response) => {
       refund = await refundPayment(updatedOrder.restaurantId, updatedOrder.id);
     }
 
-    // Restore inventory for each item in the order
     if (updatedOrder.items && updatedOrder.items.length > 0) {
       await Promise.all(
         updatedOrder.items.map((item) =>

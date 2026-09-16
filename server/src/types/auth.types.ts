@@ -1,4 +1,3 @@
-// For Restaurant 
 export interface SignupInput {
     restaurantName: string;
     location: string;
@@ -7,7 +6,6 @@ export interface SignupInput {
     password: string;
 }
 
-// For Food Court
 export interface FoodCourtSignUp {
     foodCourtName: string
     email: string

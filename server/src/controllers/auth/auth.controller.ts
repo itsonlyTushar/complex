@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { loginService, signFoodCourtService, signupService, fetchFoodCourtsService, editFoodCourtService, deleteFoodCourtService } from "../../services/auth.service.js";
 
-// For Food Court
 export const signupController = async (req: Request, res: Response) => {
     try {
         const foodCourtId = (req as any).user?.foodCourtId;
@@ -15,7 +14,6 @@ export const signupController = async (req: Request, res: Response) => {
     }
 };
 
-// For Super Admin 
 export const foodCourtSignUpController = async (req: Request, res: Response) => {
     try {
         const user = await signFoodCourtService(req.body);

@@ -54,9 +54,8 @@ export function CheckoutForm({ restaurantId, cartItems, cartTotal, onSuccess, ta
     setIsProcessing(true);
 
     try {
-      // 1. Create Payment Intent
       const amountInCents = Math.round(cartTotal * 100);
-      const commissionInCents = Math.round(amountInCents * 0.05); // 5% platform fee
+      const commissionInCents = Math.round(amountInCents * 0.05);
       
       const paymentIntentResponse = await createPaymentIntent({
         amount: amountInCents,
@@ -73,7 +72,6 @@ export function CheckoutForm({ restaurantId, cartItems, cartTotal, onSuccess, ta
         throw new Error("Failed to initialize payment process.");
       }
 
-      // 2. Confirm Card Payment
       const cardElement = elements.getElement(CardElement);
       if (!cardElement) {
         throw new Error("Card input field not found.");
@@ -90,7 +88,6 @@ export function CheckoutForm({ restaurantId, cartItems, cartTotal, onSuccess, ta
       }
 
       if (paymentIntent?.status === "succeeded") {
-        // 3. Place Order
         await addOrder({
           restaurantId,
           totalAmount: Math.round(cartTotal),
