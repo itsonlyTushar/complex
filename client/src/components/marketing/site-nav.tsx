@@ -28,13 +28,13 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
-      <nav className="mx-auto flex h-14 w-full max-w-[1200px] items-center justify-between gap-4 px-4 sm:px-6">
+      <nav className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/"
-          className="rounded-md outline-none transition-opacity duration-[140ms] ease-(--ease-out) hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring/60"
+          className="flex items-center rounded-md outline-none transition-opacity duration-[140ms] ease-(--ease-out) hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring/60"
           aria-label="Complex home"
         >
-          <Logo />
+          <Logo size={42} />
         </Link>
 
         <ul className="hidden items-center gap-1 lg:flex">

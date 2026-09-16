@@ -14,7 +14,7 @@ interface LogoProps {
 
 export function Logo({ className, markOnly = false, size }: LogoProps) {
   if (markOnly) {
-    const px = size ?? 28;
+    const px = size ?? 32;
     return (
       <Image
         src={faviconImage}
@@ -27,13 +27,13 @@ export function Logo({ className, markOnly = false, size }: LogoProps) {
     );
   }
 
-  const height = size ?? 28;
+  const height = size ?? 40;
   return (
     <Image
       src={logoImage}
       alt="Complex"
       style={{ height, width: "auto" }}
-      className={cn("shrink-0", className)}
+      className={cn("shrink-0 object-contain", className)}
       priority
     />
   );

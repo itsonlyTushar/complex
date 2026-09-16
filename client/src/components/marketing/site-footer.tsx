@@ -34,7 +34,7 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div className="max-w-xs">
-            <Logo />
+            <Logo size={40} />
             <p className="mt-3 text-caption text-fg-secondary">
               Table ordering for multi-vendor food halls. One cart for the
               guest, separate tickets for every kitchen.

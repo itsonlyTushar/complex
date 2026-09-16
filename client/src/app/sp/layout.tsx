@@ -18,7 +18,7 @@ const SuperAdminLayout = ({ children }: { children: React.ReactNode }) => {
                 <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
                     <nav className="flex h-14 items-center justify-between px-6 max-w-7xl mx-auto">
                         <div className="flex items-center gap-2">
-                            <Logo size={22} />
+                            <Logo size={32} />
                             <span className="hidden text-sm font-medium text-muted-foreground sm:inline">
                                 Super Admin
                             </span>
