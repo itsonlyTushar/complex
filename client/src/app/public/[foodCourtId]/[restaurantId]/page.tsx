@@ -1,105 +1,62 @@
 "use client";
 
-import { PiCookingPot } from "react-icons/pi";
-import { Search, ShoppingCart, X } from "lucide-react";
-import React, { useState, useEffect } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import Image from "next/image";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Separator } from "@/components/ui/separator";
-import { useGetMenus } from "@/hooks/queries/useMenuQuery";
-import { useCartStore } from "@/stores/useCartStore";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
 import { useSearchParams } from "next/navigation";
-import { CheckoutForm } from "@/components/public/CheckoutForm";
-import { RazorpayCheckoutForm } from "@/components/public/RazorpayCheckoutForm";
-import { formatMoney } from "@/lib/utils";
-import { Spinner } from "@/components/ui/spinner";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Menu } from "@/types";
-import { Drawer, DrawerContent, DrawerTitle, DrawerHeader, DrawerTrigger } from "@/components/ui/drawer";
-import Stepper, { Step } from "@/components/Stepper";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetMenus } from "@/hooks/queries/useMenuQuery";
 import { useGetOrders } from "@/hooks/queries/useOrderQuery";
 import { useGetRestaurantDetails } from "@/hooks/queries/useCourtQuery";
+import { useCartStore } from "@/stores/useCartStore";
+import { cn, formatMoney } from "@/lib/utils";
+import type { Menu } from "@/types";
+import { CartView } from "@/components/public/order/CartView";
+import { MenuItemRow } from "@/components/public/order/MenuItemRow";
+import { OrdersView, OrderStatusStrip } from "@/components/public/order/OrderStatus";
+import { PublicShell as Shell } from "@/components/public/order/PublicShell";
+import { IdentityBar } from "@/components/public/order/IdentityBar";
+import { SearchField } from "@/components/public/order/SearchField";
+import { TicketBar } from "@/components/public/order/TicketBar";
+import { CenteredMessage } from "@/components/public/order/CenteredMessage";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
+type View = "menu" | "cart" | "orders";
+const VIEWS: readonly View[] = ["menu", "cart", "orders"];
+
+const sectionId = (index: number) => `menu-section-${index}`;
 
 function Restaurant({ params }: { params: Promise<{ foodCourtId: string; restaurantId: string }> }) {
   const { foodCourtId, restaurantId } = React.use(params);
+  const searchParams = useSearchParams();
 
-  const { data: menus = [], isLoading: isMenusLoading } = useGetMenus(restaurantId);
+  const tableIdFromUrl = searchParams.get("tableId");
+  const parsedTableId = tableIdFromUrl && !isNaN(parseInt(tableIdFromUrl, 10))
+    ? parseInt(tableIdFromUrl, 10)
+    : undefined;
+  const viewParam = searchParams.get("view") as View | null;
+  const view: View = viewParam && VIEWS.includes(viewParam) ? viewParam : "menu";
+
+  const { data: menus = [], isLoading: isMenusLoading, isError: isMenusError, refetch: refetchMenus } = useGetMenus(restaurantId);
   const { data: restaurantDetails, isLoading: isDetailsLoading } = useGetRestaurantDetails(restaurantId);
+  const { data: orderData, refetch: refetchOrders } = useGetOrders(
+    { restaurantId, tableNumber: parsedTableId },
+    // Poll only while something is being made, so the status moves without a refresh.
+    { refetchInterval: (query) => (query.state.data?.orders.length ? 15_000 : false) },
+  );
+  const activeOrders = orderData?.orders ?? [];
+
   const currency = restaurantDetails?.foodCourt?.currancy ?? "USD";
   const usesRazorpay = restaurantDetails?.foodCourt?.paymentSystem === "razorpay";
+  const stallName: string = restaurantDetails?.name ?? "";
+  const tableLabel = tableIdFromUrl ? `Table ${tableIdFromUrl}` : null;
+  const viewSubtitle = [stallName, tableLabel].filter(Boolean).join(" · ");
+  const courtHref = `/public/${foodCourtId}${tableIdFromUrl ? `?tableId=${tableIdFromUrl}` : ""}`;
   const closedMessage = restaurantDetails?.foodCourt?.isClosed
     ? "This food court isn't taking orders right now."
     : restaurantDetails?.isClosed
-      ? "This restaurant isn't taking orders right now."
+      ? "This stall isn't taking orders right now."
       : null;
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const searchParams = useSearchParams();
-  const tableIdFromUrl = searchParams.get("tableId");
-  const parsedTableId = tableIdFromUrl && !isNaN(parseInt(tableIdFromUrl, 10)) 
-    ? parseInt(tableIdFromUrl, 10) 
-    : undefined;
 
-  const {data, isLoading : isOrderLoading} = useGetOrders({
-    restaurantId,
-    tableNumber: parsedTableId
-  });
-
-  const orders = data?.orders || []; 
-  console.log(orders)
-
-  const activeOrder = orders.find(
-    (order) => order.status === "PENDING" || order.status === "PREPARING" || order.status === "COMPLETED"
-  ) || orders[0];
-
-  const getStepFromStatus = (orderStatus?: string): number => {
-    if (!orderStatus) return 1;
-    const statusMap: Record<string, number> = {
-      PENDING: 1,
-      PREPARING: 2,
-      READY: 3,
-      COMPLETED: 4,
-    };
-    return statusMap[orderStatus.toUpperCase()] || 1;
-  };
-
-  const initialStep = getStepFromStatus(activeOrder?.status);
-
-  const [filterMenu, setFilterMenu] = useState<Menu[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [status, setStatus] = useState(['Pending', 'Preparing', 'Ready', 'Completed'])
-
-  useEffect(() => {
-    if (!searchQuery) {
-      setFilterMenu(menus);
-    } else {
-      const query = searchQuery.toLowerCase();
-      const filtered = menus.filter(
-        (menu) =>
-          menu.itemName.toLowerCase().includes(query) ||
-          (menu.description && menu.description.toLowerCase().includes(query))
-      );
-      setFilterMenu(filtered);
-    }
-  }, [menus, searchQuery]);
-  
   const itemsMap = useCartStore((state) => state.items);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const addItem = useCartStore((state) => state.addItem);
@@ -114,324 +71,295 @@ function Restaurant({ params }: { params: Promise<{ foodCourtId: string; restaur
     }
   }, [restaurantId, clearCart]);
 
-  const cartItems = React.useMemo(() => Object.values(itemsMap), [itemsMap]);
-  const cartTotal = React.useMemo(
-    () =>
-      cartItems.reduce(
-        (total, item) => total + item.price * item.cartQuantity,
-        0,
-      ),
-    [cartItems],
-  );
-  const totalItems = React.useMemo(
-    () => cartItems.reduce((total, item) => total + item.cartQuantity, 0),
-    [cartItems],
-  );
+  const cartItems = useMemo(() => Object.values(itemsMap), [itemsMap]);
+  const cartTotal = cartItems.reduce((total, item) => total + item.price * item.cartQuantity, 0);
+  const totalItems = cartItems.reduce((total, item) => total + item.cartQuantity, 0);
 
-  const groupedMenus = React.useMemo(() => {
-    return filterMenu.reduce(
-      (acc, menu) => {
-        if (!menu.category) return acc;
-        const category = menu.category;
-        if (!acc[category]) {
-          acc[category] = [];
-        }
-        acc[category].push(menu);
-        return acc;
-      },
-      {} as Record<string, typeof filterMenu>,
-    );
-  }, [filterMenu]);
+  const addToCart = (menu: Menu) => {
+    if ((itemsMap[menu.id]?.cartQuantity ?? 0) < menu.quantity) {
+      addItem(menu);
+    }
+  };
+
+  // Views live in the URL so the phone's back button steps back through them
+  // instead of leaving the stall.
+  const pushedView = useRef(false);
+  const menuScrollY = useRef(0);
+
+  const viewUrl = (next: View) => {
+    const nextParams = new URLSearchParams(searchParams.toString());
+    if (next === "menu") nextParams.delete("view");
+    else nextParams.set("view", next);
+    const query = nextParams.toString();
+    return `${window.location.pathname}${query ? `?${query}` : ""}`;
+  };
+
+  const openView = (next: View) => {
+    if (view === "menu") menuScrollY.current = window.scrollY;
+    window.history.pushState(null, "", viewUrl(next));
+    pushedView.current = true;
+  };
+
+  const backToMenu = () => {
+    if (pushedView.current) {
+      pushedView.current = false;
+      window.history.back();
+    } else {
+      window.history.replaceState(null, "", viewUrl("menu"));
+    }
+  };
+
+  const handlePaid = () => {
+    refetchOrders();
+    if (parsedTableId !== undefined) {
+      window.history.replaceState(null, "", viewUrl("orders"));
+    } else {
+      backToMenu();
+    }
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, view === "menu" ? menuScrollY.current : 0);
+  }, [view]);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const query = searchQuery.trim().toLowerCase();
+
+  const sections = useMemo(() => {
+    const visible = query
+      ? menus.filter(
+          (menu) =>
+            menu.itemName.toLowerCase().includes(query) ||
+            menu.description?.toLowerCase().includes(query),
+        )
+      : menus;
+
+    const groups = new Map<string, Menu[]>();
+    for (const menu of visible) {
+      const category = menu.category || "More";
+      groups.set(category, [...(groups.get(category) ?? []), menu]);
+    }
+    return [...groups].map(([category, items]) => ({ category, items }));
+  }, [menus, query]);
+
+  const showRail = !query && sections.length > 1;
+  const headerRef = useRef<HTMLElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [activeSection, setActiveSection] = useState(0);
+
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const observer = new ResizeObserver(() => setHeaderHeight(header.offsetHeight));
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, [view, closedMessage]);
+
+  // Highlight the section under the sticky header as the guest scrolls.
+  useEffect(() => {
+    if (view !== "menu" || !showRail) return;
+    let frame = 0;
+    const update = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const line = (headerRef.current?.offsetHeight ?? 0) + 24;
+        let current = 0;
+        sections.forEach((_, index) => {
+          const section = document.getElementById(sectionId(index));
+          if (section && section.getBoundingClientRect().top <= line) current = index;
+        });
+        setActiveSection(current);
+      });
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", update);
+    };
+  }, [view, showRail, sections]);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    const chip = rail?.children[activeSection] as HTMLElement | undefined;
+    if (rail && chip) rail.scrollTo({ left: chip.offsetLeft - 16, behavior: "smooth" });
+  }, [activeSection]);
+
+  const jumpToSection = (index: number) => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById(sectionId(index))?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  };
 
   if (closedMessage) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen gap-4 p-6 text-center">
-        <h1 className="text-3xl font-semibold">{restaurantDetails?.name}</h1>
-        <p className="text-muted-foreground">{closedMessage}</p>
-        <Button asChild className="rounded-xl">
-          <Link href={`/public/${foodCourtId}${tableIdFromUrl ? `?tableId=${tableIdFromUrl}` : ""}`}>
-            Back to food court
-          </Link>
-        </Button>
-      </div>
+      <Shell>
+        <CenteredMessage
+          eyebrow={tableLabel}
+          title={stallName}
+          message={closedMessage}
+          action={
+            <Button asChild className="h-11 rounded-xl px-6 font-semibold">
+              <Link href={courtHref}>See other stalls</Link>
+            </Button>
+          }
+        />
+      </Shell>
+    );
+  }
+
+  if (view === "cart") {
+    return (
+      <Shell>
+        <CartView
+          restaurantId={restaurantId}
+          subtitle={viewSubtitle}
+          cartItems={cartItems}
+          cartTotal={cartTotal}
+          currency={currency}
+          usesRazorpay={usesRazorpay}
+          tableIdFromUrl={tableIdFromUrl}
+          onBack={backToMenu}
+          onPaid={handlePaid}
+          onIncrement={(item) => item.cartQuantity < item.quantity && updateQuantity(item.id, 1)}
+          onDecrement={(item) => updateQuantity(item.id, -1)}
+        />
+      </Shell>
+    );
+  }
+
+  if (view === "orders") {
+    return (
+      <Shell>
+        <OrdersView orders={activeOrders} currency={currency} subtitle={viewSubtitle} onBack={backToMenu} />
+      </Shell>
     );
   }
 
   return (
-    <>
-      <div className="relative rounded-b-[2rem] px-2 py-4 h-34 bg-accent flex flex-col justify-between">
-        <section className="flex justify-between items-center">
-          <h1 className="text-3xl font-semibold
-           leading-none">{restaurantDetails?.name}</h1>
-          <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-            <SheetTrigger asChild>
-              <div className="flex min-w-18 justify-center gap-2 items-center bg-primary text-black px-3 py-1.5 rounded-lg cursor-pointer transition-all">
-                <ShoppingCart size={18} className="text-primary-foreground"/>
-                <span className="text-sm text-primary-foreground font-semibold text-center min-w-5">
-                  {totalItems}
-                </span>
-              </div>
-            </SheetTrigger>
-            <SheetContent className="flex flex-col h-full w-full max-w-md">
-              {/* 1. Header */}
-              <SheetHeader>
-                <SheetTitle>Your Cart</SheetTitle>
-              </SheetHeader>
-              {/* 2. Scrollable Cart Items */}
-              <div className="flex-1 overflow-y-auto py-4 flex flex-col gap-4">
-                {cartItems.length === 0 ? (
-                  <p className="text-muted-foreground text-center mt-10">
-                    Your cart is empty.
-                  </p>
-                ) : (
-                  cartItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="px-2 py-2 flex justify-between items-center"
-                    >
-                      <div>
-                        <p className="font-semibold">{item.itemName}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatMoney(item.price, currency)}
-                        </p>
-                      </div>
+    <Shell>
+      <header
+        ref={headerRef}
+        className="sticky top-0 z-30 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-md"
+      >
+        <IdentityBar
+          title={stallName}
+          tableId={tableIdFromUrl}
+          isLoading={isDetailsLoading}
+          backHref={courtHref}
+          backLabel="Back to all stalls"
+        />
 
-                      {/* Quantity Controls (Reusing your existing function) */}
-                      <div className="flex items-center gap-3 bg-secondary rounded-lg px-2 py-1">
-                        <button onClick={() => updateQuantity(item.id, -1)}>
-                          -
-                        </button>
-                        <span className="w-4 text-center">
-                          {item.cartQuantity}
-                        </span>
-                        <button onClick={() => updateQuantity(item.id, 1)}>
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-              {/* 3. Footer / Checkout */}
-              {cartItems.length > 0 && (
-                <div className="border-t pt-4 mt-auto px-2 py-2 flex flex-col gap-4">
-                  <div className="flex justify-between font-semibold text-lg">
-                    <span>Total</span>
-                    <span>{formatMoney(cartTotal, currency)}</span>
-                  </div>
-                  {usesRazorpay ? (
-                    <RazorpayCheckoutForm
-                      restaurantId={restaurantId}
-                      cartItems={cartItems}
-                      cartTotal={cartTotal}
-                      onSuccess={() => setIsCartOpen(false)}
-                      tableIdFromUrl={tableIdFromUrl}
-                      currency={currency}
-                    />
-                  ) : (
-                    <Elements stripe={stripePromise}>
-                      <CheckoutForm
-                        restaurantId={restaurantId}
-                        cartItems={cartItems}
-                        cartTotal={cartTotal}
-                        onSuccess={() => setIsCartOpen(false)}
-                        tableIdFromUrl={tableIdFromUrl}
-                      />
-                    </Elements>
+        <div className="px-4 pb-3">
+          <SearchField value={searchQuery} onChange={setSearchQuery} placeholder="Search dishes" label="Search the menu" />
+        </div>
+
+        {showRail && (
+          <nav aria-label="Menu sections">
+            <div ref={railRef} className="no-scrollbar relative flex gap-1.5 overflow-x-auto px-4 pb-2.5">
+              {sections.map((section, index) => (
+                <button
+                  key={section.category}
+                  type="button"
+                  onClick={() => jumpToSection(index)}
+                  aria-current={index === activeSection ? "true" : undefined}
+                  className={cn(
+                    "h-9 shrink-0 rounded-full px-3.5 text-body font-medium transition-colors duration-150",
+                    index === activeSection ? "bg-accent text-accent-foreground" : "text-fg-secondary active:bg-accent",
                   )}
-                </div>
-              )}
-            </SheetContent>
-          </Sheet>
-        </section>
-
-        <section className="w-full flex items-center gap-2">
-          <div className="flex w-full items-center gap-2 border border-border/40 px-3 py-3 rounded-xl bg-black/20">
-            <Search size={18} className="text-muted-foreground" />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 border-none bg-transparent shadow-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 px-0 text-white placeholder:text-muted-foreground"
-              placeholder="Search the menu.."
-            />
-          </div>
-          <ThemeToggle />
-        </section>
-      </div>
-
-      <section className="my-10 mx-2">
-        {isMenusLoading || isDetailsLoading ? (
-          <div className="flex justify-center items-center py-20 w-full">
-            <Spinner className="size-8 text-primary" />
-          </div>
-        ) : Object.keys(groupedMenus).length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground">
-            No items found matching your search.
-          </div>
-        ) : (
-          Object.entries(groupedMenus).map(([category, items], index) => (
-            <div key={category}>
-              <Accordion type="single" defaultValue={category} collapsible>
-                <AccordionItem value={category}>
-                  <AccordionTrigger className="text-2xl font-semibold ">
-                    <h1>{category}</h1>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="flex flex-col gap-4">
-                      {items.map((menu, idx) => (
-                        <div
-                          key={idx}
-                          className="flex justify-between items-stretch p-3 rounded-3xl bg-card border border-border/40 shadow-sm gap-4 transition-all hover:shadow-md"
-                        >
-                          <div className="flex-1 flex flex-col justify-between">
-                            <div>
-                              <h3 className="font-semibold text-lg leading-tight tracking-tight">
-                                {menu.itemName}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                {menu.description}
-                              </p>
-                            </div>
-
-                            <div className="flex items-center justify-between mt-4">
-                              <span className="font-semibold text-lg">
-                                {formatMoney(menu.price, currency)}
-                              </span>
-                              <div className="flex items-center gap-2 bg-accent rounded-full p-1 border border-border/50">
-                                {!itemsMap[menu.id] ? (
-                                  <Button
-                                    onClick={() => addItem(menu)}
-                                    className="rounded-lg"
-                                  >
-                                    Add
-                                  </Button>
-                                ) : (
-                                  <>
-                                    <Button
-                                      onClick={() =>
-                                        updateQuantity(menu.id, -1)
-                                      }
-                                      variant="ghost"
-                                      size="icon"
-                                    >
-                                      -
-                                    </Button>
-                                    <span className="w-4 text-center font-medium text-sm">
-                                      {itemsMap[menu.id].cartQuantity}
-                                    </span>
-                                    <Button
-                                      onClick={() => updateQuantity(menu.id, 1)}
-                                      variant="ghost"
-                                      size="icon"
-                                    >
-                                      +
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          {menu.image && (
-                            <div className="relative w-[110px] shrink-0">
-                              <Image
-                                fill
-                                className="object-cover rounded-2xl"
-                                alt={menu.itemName || "Menu item"}
-                                src={menu.image}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              <Separator />
+                >
+                  {section.category}
+                </button>
+              ))}
             </div>
-          ))
+          </nav>
+        )}
+      </header>
+
+      <main className={cn("flex flex-col gap-6 px-4 pt-4", totalItems > 0 ? "pb-32" : "pb-10")}>
+        {activeOrders.length > 0 && (
+          <OrderStatusStrip orders={activeOrders} onOpen={() => openView("orders")} />
         )}
 
-
-      <footer className="fixed z-50 bottom-6 right-6">
-        
-      {!isOrderLoading && orders.length < 0 && (
-        <Drawer>
-          <DrawerTrigger asChild>
-            <Button className="h-12 w-12 rounded-2xl flex items-center justify-center p-0 transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary/95">
-              <PiCookingPot size={26} />
+        {isMenusLoading || isDetailsLoading ? (
+          <MenuSkeleton />
+        ) : isMenusError ? (
+          <div className="flex flex-col items-center gap-3 py-16 text-center">
+            <p className="text-body text-fg-secondary">We couldn&apos;t load the menu.</p>
+            <Button variant="outline" onClick={() => refetchMenus()} className="h-11 rounded-xl px-6">
+              Try again
             </Button>
-          </DrawerTrigger>
-          <DrawerContent>
-            <div className="overflow-y-auto max-h-[85vh] w-full">
-              <DrawerHeader>
-                <DrawerTitle className="text-center text-3xl font-semibold tracking-tight">
-                  {activeOrder?.status 
-                    ? activeOrder.status.charAt(0) + activeOrder.status.slice(1).toLowerCase() 
-                    : "It's Cooking"}
-                </DrawerTitle>
-              </DrawerHeader>
-              <Stepper 
-                key={activeOrder?.id ? `${activeOrder.id}-${initialStep}` : "no-order"}
-                initialStep={initialStep}
-                disableStepIndicators={true}
-                hideFooter={true}
-                onStepChange={(step) => {
-                  console.log(step)
-                }}
-                onFinalStepCompleted={() => console.log('All steps completed!')}
-              >
-                {status.map((stepName) => (
-                  <Step key={stepName}>
-                    <p className="text-center hidden rounded-xl max-w-sm w-full border border-state-ready/30 bg-state-ready-bg text-md font-semibold py-1.5 px-3">
-                      {stepName}
-                    </p>
-                  </Step>
+          </div>
+        ) : sections.length === 0 ? (
+          <div className="flex flex-col items-center gap-1 py-16 text-center">
+            <p className="text-lead font-medium">
+              {query ? `Nothing matches “${searchQuery.trim()}”` : "No dishes yet"}
+            </p>
+            <p className="text-caption text-fg-tertiary">
+              {query ? "Try a different word." : "This stall hasn't added its menu."}
+            </p>
+          </div>
+        ) : (
+          sections.map((section, index) => (
+            <section
+              key={section.category}
+              id={sectionId(index)}
+              aria-labelledby={`${sectionId(index)}-title`}
+              style={{ scrollMarginTop: headerHeight + 8 }}
+              className="flex flex-col gap-2"
+            >
+              <h2 id={`${sectionId(index)}-title`} className="flex items-baseline gap-2 px-1 text-h3">
+                {section.category}
+                <span data-numeric className="text-caption font-normal text-fg-tertiary">
+                  {section.items.length}
+                </span>
+              </h2>
+              <ul className="surface-raise divide-y divide-border rounded-2xl">
+                {section.items.map((menu) => (
+                  <MenuItemRow
+                    key={menu.id}
+                    menu={menu}
+                    currency={currency}
+                    quantityInCart={itemsMap[menu.id]?.cartQuantity ?? 0}
+                    onAdd={() => addToCart(menu)}
+                    onDecrement={() => updateQuantity(menu.id, -1)}
+                  />
                 ))}
-              </Stepper>
+              </ul>
+            </section>
+          ))
+        )}
+      </main>
 
-              <div className="min-h-37.5 max-h-[45vh] overflow-y-auto pr-1">
-                              
-              {activeOrder ? (
-                
-                orders.filter((statuses) => statuses?.status !== 'CANCELLED' && 'COMPLETED').map((order) => (
-                  <div className="mx-auto w-full max-w-md px-6 pb-8 space-y-5">
-                  <p className="text-sm text-muted-foreground">For {order.customerName}</p>
-    
-                  <div className="space-y-3">
-
-                    <div className="bg-card border border-border/20 rounded-xl p-4 divide-y divide-border/20">
-                      {order.items?.map((item) => (
-                        <div key={item.id} className="flex justify-between items-center py-2.5 first:pt-0 last:pb-0">
-                          <div>
-                            <p className="font-medium text-sm">{item.menu?.itemName || `Item #${item.menuID}`}</p>
-                            <p className="text-xs text-muted-foreground">{formatMoney(item.price, currency)} each</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-semibold">x{item.quantity}</p>
-                            <p className="text-xs font-medium">{formatMoney(item.price * item.quantity, currency)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  No active orders found.
-                </div>
-              )}
-              </div>
-            </div>
-          </DrawerContent>
-        </Drawer>
+      {totalItems > 0 && (
+        <TicketBar
+          itemCount={totalItems}
+          total={formatMoney(cartTotal, currency, { wholeUnits: true })}
+          caption={tableLabel && `for ${tableLabel}`}
+          onClick={() => openView("cart")}
+        />
       )}
-      </footer>
+    </Shell>
+  );
+}
 
-      </section>
-    </>
+function MenuSkeleton() {
+  return (
+    <div className="flex flex-col gap-2" aria-busy="true" aria-label="Loading menu">
+      <Skeleton className="mx-1 h-5 w-28" />
+      <div className="surface-raise divide-y divide-border rounded-2xl">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div key={index} className="flex gap-3 p-3">
+            <div className="flex flex-1 flex-col gap-2">
+              <Skeleton className="h-4 w-3/5" />
+              <Skeleton className="h-3 w-4/5" />
+              <Skeleton className="mt-4 h-4 w-16" />
+            </div>
+            <Skeleton className="size-22 rounded-xl" />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

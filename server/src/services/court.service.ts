@@ -65,9 +65,10 @@ export const editRestaurantService = async (restaurantId: string, foodCourtId: s
 
 export const fetchPublicFoodCourtService = async (foodCourtId: string, tableNumber?: string) => {
     const foodCourt = await prisma.foodCourt.findUnique({
-        where: { id: foodCourtId }
+        where: { id: foodCourtId },
+        select: { id: true, name: true, location: true, isClosed: true, currancy: true, paymentSystem: true }
     });
-    
+
     if (!foodCourt) throw new Error("Food Court not found");
 
     if (tableNumber) {
@@ -82,7 +83,8 @@ export const fetchPublicFoodCourtService = async (foodCourtId: string, tableNumb
 
     const restaurants = await prisma.restaurant.findMany({
         where: { foodCourtId, isClosed: false },
-        select: { id: true, name: true, logo: true, description: true, isClosed: true }
+        select: { id: true, name: true, logo: true, description: true, isClosed: true },
+        orderBy: { name: "asc" }
     });
 
     return { foodCourt, restaurants };

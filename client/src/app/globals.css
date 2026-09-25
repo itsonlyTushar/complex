@@ -266,9 +266,15 @@
     @apply border-border outline-ring/50;
   }
 
+  /*
+    clip, not hidden: hidden turns body into a scroll container, which silently
+    breaks position: sticky for everything inside it. hidden stays as the
+    fallback for browsers without clip.
+  */
   html,
   body {
     overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
   }
 

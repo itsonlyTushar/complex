@@ -1,3 +1,5 @@
+import type { CartItem } from "./cart.types";
+
 export type Payment = {
     id: string;
     amount: number;
@@ -47,7 +49,7 @@ export interface RazorpayVerifyPayload extends RazorpayCheckoutPayload {
 
 export interface CheckoutFormProps {
   restaurantId: string;
-  cartItems: any[];
+  cartItems: CartItem[];
   cartTotal: number;
   onSuccess: () => void;
   tableIdFromUrl: string | null;

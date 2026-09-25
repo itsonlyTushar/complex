@@ -1,155 +1,185 @@
 "use client";
 
-import { Spinner } from "@/components/ui/spinner";
-import Image from "next/image";
-import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, Suspense } from "react";
-import { API_URL } from "@/lib/api";
+import React, { Suspense, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetPublicFoodCourt } from "@/hooks/queries/useCourtQuery";
+import { useCartStore } from "@/stores/useCartStore";
+import { formatMoney } from "@/lib/utils";
+import { PublicShell } from "@/components/public/order/PublicShell";
+import { IdentityBar } from "@/components/public/order/IdentityBar";
+import { SearchField } from "@/components/public/order/SearchField";
+import { TicketBar } from "@/components/public/order/TicketBar";
+import { CenteredMessage } from "@/components/public/order/CenteredMessage";
+import { StallRow } from "@/components/public/order/StallRow";
 
-function PublicFoodCourtContent() {
-    const params = useParams();
-    const searchParams = useSearchParams();
-    const foodCourtId = params?.foodCourtId;
-    const tableId = searchParams?.get("tableId");
+// Search only earns its space once there are more stalls than fit on one screen.
+const SEARCH_THRESHOLD = 6;
 
-    const [foodCourtName, setFoodCourtName] = useState<string>("");
-    const [isCourtClosed, setIsCourtClosed] = useState(false);
-    const [restaurants, setRestaurants] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+// A bad QR code can't be fixed by retrying, so only a network-style failure offers "Try again".
+const friendlyError = (message?: string) => {
+  if (message?.includes("Invalid Table"))
+    return { text: "This QR code doesn't match a table here. Please ask a staff member.", retryable: false };
+  if (message?.includes("not found"))
+    return { text: "This link doesn't lead to a food court. Try scanning the QR code again.", retryable: false };
+  return { text: "Something went wrong while loading the stalls.", retryable: true };
+};
 
-    useEffect(() => {
-        if (!foodCourtId) return;
+function FoodCourtContent({ foodCourtId }: { foodCourtId: string }) {
+  const searchParams = useSearchParams();
+  const tableId = searchParams.get("tableId");
+  const { data, isLoading, isError, error, refetch } = useGetPublicFoodCourt(foodCourtId, tableId);
 
-        const fetchRestaurants = async () => {
-            try {
-                const url = new URL(`${API_URL}/api/court/public/${foodCourtId}/restaurants`);
-                if (tableId) {
-                    url.searchParams.append("tableId", tableId);
-                }
-                const response = await fetch(url.toString());
+  const [searchQuery, setSearchQuery] = useState("");
+  const query = searchQuery.trim().toLowerCase();
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || "Failed to fetch data");
-                }
+  const itemsMap = useCartStore((state) => state.items);
+  const cartItems = useMemo(() => Object.values(itemsMap), [itemsMap]);
 
-                const data = await response.json();
-                setRestaurants(data.restaurants);
-                setFoodCourtName(data.foodCourt.name);
-                setIsCourtClosed(!!data.foodCourt.isClosed);
-                setError(null);
-            } catch (err: any) {
-                console.error("Failed to fetch restaurants:", err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
+  const tableLabel = tableId ? `Table ${tableId}` : null;
+  const withTable = (path: string, extra = "") =>
+    `${path}${tableId ? `?tableId=${encodeURIComponent(tableId)}${extra && `&${extra}`}` : extra && `?${extra}`}`;
 
-        fetchRestaurants();
-    }, [foodCourtId, tableId]);
+  if (isLoading) return <StallListSkeleton tableId={tableId} />;
 
-    if (!foodCourtId) return null;
-
-    if (loading) {
-        return (
-            <div className="flex gap-2 justify-center items-center h-screen text-md">
-                <Spinner />
-                Wait while we load restaurants
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="flex flex-col justify-center items-center h-screen bg-accent p-6">
-                <div className="bg-state-late text-state-late p-8 rounded-3xl shadow-sm text-center max-w-md border border-state-late/30">
-                    <svg className="w-16 h-16 mx-auto mb-4 text-state-late" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <h2 className="text-3xl font-semibold mb-2">Oops!</h2>
-                    <p className="text-lg font-medium">{error}</p>
-                </div>
-            </div>
-        );
-    }
-
+  if (isError || !data) {
+    const problem = friendlyError(error?.message);
     return (
-        <>
-            <main>
-                <section className="relative h-screen w-full overflow-hidden bg-foreground rounded-b-[2.5rem] shadow-md">
-                    <Image
-                        fill
-                        className="object-cover scale-[1.15]"
-                        alt="welcome-image"
-                        src={
-                            "https://images.unsplash.com/photo-1665765401107-742047bc93a9?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                        }
-                    />
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 text-center text-white drop-shadow-md w-full">
-                        <h1 className="text-7xl font-semibold tracking-tight">Welcome</h1>
-                        <p className="text-lg italic font-semibold">to</p>
-                        <span className="text-3xl font-semibold">
-                            {foodCourtName}
-                        </span>
-                        {tableId && (
-                            <div className="mt-6 block">
-                                <div className="inline-block bg-card/20 backdrop-blur-md px-6 py-2 rounded-full border border-border shadow-lg">
-                                    <p className="text-xl font-medium tracking-wide">Table <span className="font-semibold text-white">{tableId}</span></p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </section>
-            </main>
-
-            <section className="py-12 px-6">
-                {isCourtClosed ? (
-                    <div className="border py-8 px-4 rounded-xl bg-card text-center">
-                        <h2 className="text-2xl font-semibold">We&apos;re closed right now</h2>
-                        <p className="text-fg-secondary text-sm mt-1">
-                            {foodCourtName} isn&apos;t taking orders at the moment. Please check back later.
-                        </p>
-                    </div>
-                ) : (
-                    restaurants.filter((r: any) => !r.isClosed).map((restaurant) => {
-                        const logoUrl = restaurant?.logo || "";
-                        const description = restaurant?.description || 'Lorem ipsum, dolor sit amet consectetur';
-
-                        return (
-                            <Link  
-                            key={restaurant.id}
-                            href={`/public/${foodCourtId}/${restaurant.id}${tableId ? `?tableId=${tableId}` : ''}`} >
-                            <div  className="mb-8 border cursor-pointer py-4 px-4 rounded-xl flex gap-2 items-center justify-start bg-card">
-                                {logoUrl ? (
-                                    <Image alt="logo" src={logoUrl} width={70} height={70} className="object-cover rounded-full shrink-0 w-[70px] h-[70px]"/>
-                                ) : (
-                                    <div className="w-[70px] h-[70px] shrink-0"></div>
-                                )}
-                                <div className="ml-2">
-                                    <h1 className="text-2xl font-semibold">{restaurant?.name}</h1>
-                                    <p className="text-fg-secondary text-sm text-mutated">{description}</p>
-                                </div>
-                            </div>
-                            </Link>
-                        );
-                    })
-                )}
-            </section>
-        </>
+      <CenteredMessage
+        eyebrow={tableLabel}
+        title="We couldn't open this food court"
+        message={problem.text}
+        action={
+          problem.retryable && (
+            <Button variant="outline" onClick={() => refetch()} className="h-11 rounded-xl px-6">
+              Try again
+            </Button>
+          )
+        }
+      />
     );
+  }
+
+  const { foodCourt, restaurants: stalls } = data;
+
+  if (foodCourt.isClosed) {
+    return (
+      <CenteredMessage
+        eyebrow={tableLabel}
+        title={foodCourt.name}
+        message="We're closed right now and not taking orders. Please check back later."
+      />
+    );
+  }
+
+  const visibleStalls = query
+    ? stalls.filter(
+        (stall) =>
+          stall.name.toLowerCase().includes(query) ||
+          stall.description?.toLowerCase().includes(query),
+      )
+    : stalls;
+
+  // The cart only ever holds one stall's items (a stall page clears anything from another).
+  const cartStall = stalls.find((stall) => stall.id === cartItems[0]?.restaurantId);
+  const cartCount = cartStall ? cartItems.reduce((sum, item) => sum + item.cartQuantity, 0) : 0;
+  const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.cartQuantity, 0);
+
+  return (
+    <>
+      <header className="sticky top-0 z-30 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+        <IdentityBar title={foodCourt.name} tableId={tableId} />
+        {stalls.length >= SEARCH_THRESHOLD && (
+          <div className="px-4 pb-3">
+            <SearchField value={searchQuery} onChange={setSearchQuery} placeholder="Search stalls" label="Search stalls" />
+          </div>
+        )}
+      </header>
+
+      <main className={cartCount > 0 ? "px-4 pt-4 pb-32" : "px-4 pt-4 pb-10"}>
+        <section aria-labelledby="stalls-title" className="flex flex-col gap-2">
+          <div className="px-1">
+            <h2 id="stalls-title" className="flex items-baseline gap-2 text-h3">
+              Stalls
+              <span data-numeric className="text-caption font-normal text-fg-tertiary">
+                {stalls.length}
+              </span>
+            </h2>
+            <p className="text-caption text-fg-tertiary">
+              Order from one stall at a time. Each stall takes its own payment.
+            </p>
+          </div>
+
+          {visibleStalls.length === 0 ? (
+            <div className="flex flex-col items-center gap-1 py-16 text-center">
+              <p className="text-lead font-medium">
+                {query ? `No stall matches “${searchQuery.trim()}”` : "No stalls are open right now"}
+              </p>
+              <p className="text-caption text-fg-tertiary">
+                {query ? "Try a different word." : "Please check back in a little while."}
+              </p>
+            </div>
+          ) : (
+            <ul className="surface-raise divide-y divide-border overflow-hidden rounded-2xl">
+              {visibleStalls.map((stall) => (
+                <StallRow
+                  key={stall.id}
+                  stall={stall}
+                  href={withTable(`/public/${foodCourtId}/${stall.id}`)}
+                  itemsInOrder={stall.id === cartStall?.id ? cartCount : 0}
+                />
+              ))}
+            </ul>
+          )}
+        </section>
+      </main>
+
+      {cartStall && cartCount > 0 && (
+        <TicketBar
+          itemCount={cartCount}
+          total={formatMoney(cartTotal, foodCourt.currancy, { wholeUnits: true })}
+          caption={`at ${cartStall.name}`}
+          href={withTable(`/public/${foodCourtId}/${cartStall.id}`, "view=cart")}
+        />
+      )}
+    </>
+  );
 }
 
-export default function PublicFoodCourtPage() {
-    return (
-        <Suspense fallback={
-            <div className="flex justify-center items-center h-screen bg-accent">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+function StallListSkeleton({ tableId }: { tableId: string | null }) {
+  return (
+    <>
+      <header className="border-b border-border pt-[env(safe-area-inset-top)]">
+        <IdentityBar title="" tableId={tableId} isLoading />
+      </header>
+      <div className="flex flex-col gap-2 px-4 pt-4" aria-busy="true" aria-label="Loading stalls">
+        <Skeleton className="mx-1 h-5 w-24" />
+        <Skeleton className="mx-1 h-3 w-64" />
+        <div className="surface-raise divide-y divide-border rounded-2xl">
+          {Array.from({ length: 5 }, (_, index) => (
+            <div key={index} className="flex items-center gap-3 p-3">
+              <Skeleton className="size-12 rounded-xl" />
+              <div className="flex flex-1 flex-col gap-2">
+                <Skeleton className="h-4 w-2/5" />
+                <Skeleton className="h-3 w-3/5" />
+              </div>
             </div>
-        }>
-            <PublicFoodCourtContent />
-        </Suspense>
-    );
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function PublicFoodCourtPage({ params }: { params: Promise<{ foodCourtId: string }> }) {
+  const { foodCourtId } = React.use(params);
+
+  return (
+    <PublicShell>
+      <Suspense fallback={<StallListSkeleton tableId={null} />}>
+        <FoodCourtContent foodCourtId={foodCourtId} />
+      </Suspense>
+    </PublicShell>
+  );
 }

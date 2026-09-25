@@ -1,5 +1,6 @@
 import { getAuth } from "@/app/actions/auth"
 import { API_URL } from "@/lib/api"
+import type { PublicFoodCourtResponse } from "@/types/restaurant.types"
 
 export const fetchRestaurants = async () => {
     let token = await getAuth()
@@ -83,6 +84,20 @@ export const updateFoodCourtStatus = async (isClosed: boolean) => {
     if(!response.ok) {
         const result = await response.json().catch(() => ({}));
         throw new Error(result.message || "Failed to update food court status")
+    }
+    return response.json();
+}
+
+export const fetchPublicFoodCourt = async (foodCourtId: string, tableId?: string | null): Promise<PublicFoodCourtResponse> => {
+    const url = new URL(`${API_URL}/api/court/public/${foodCourtId}/restaurants`);
+    if (tableId) {
+        url.searchParams.append("tableId", tableId);
+    }
+
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.message || "Failed to load this food court");
     }
     return response.json();
 }
