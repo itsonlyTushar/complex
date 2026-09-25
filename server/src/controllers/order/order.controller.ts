@@ -9,6 +9,8 @@ import {
 } from "../../services/order.service.js";
 import { refundPayment } from "../../services/payment.service.js";
 import { restoreInventory } from "../../services/menu.service.js";
+import { OrderingClosedError } from "../../services/court.service.js";
+import { refundRazorpayPayment } from "../../services/razorpay.service.js";
 
 export const createOrderController = async (req: Request, res: Response) => {
   try {
@@ -21,6 +23,9 @@ export const createOrderController = async (req: Request, res: Response) => {
       order: createdOrder,
     });
   } catch (error: any) {
+    if (error instanceof OrderingClosedError) {
+      return res.status(409).json({ error: error.message });
+    }
     res.status(400).json({ error: "Failed to place order" });
   }
 };
@@ -65,6 +70,8 @@ export const cancelOrderController = async (req: Request, res: Response) => {
     let refund = null;
     if (updatedOrder.paymentIntentId) {
       refund = await refundPayment(updatedOrder.restaurantId, updatedOrder.id);
+    } else if (updatedOrder.razorpayPaymentId) {
+      refund = await refundRazorpayPayment(updatedOrder.restaurantId, updatedOrder.razorpayPaymentId);
     }
 
     if (updatedOrder.items && updatedOrder.items.length > 0) {

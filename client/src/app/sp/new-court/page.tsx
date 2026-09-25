@@ -132,6 +132,7 @@ const CourtOnboard = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="stripe">Stripe</SelectItem>
+                                  <SelectItem value="razorpay">Razorpay (India)</SelectItem>
                                 </SelectContent>
                               </Select>
                             )}

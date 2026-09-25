@@ -181,6 +181,16 @@ Core entities and relationships:
 | `GET` | `/api/payments/restaurants-commission` | List commission rates across all restaurants | Super Admin |
 | `PATCH` | `/api/payments/restaurants-commission/:id` | Update commission rate for a restaurant | Super Admin |
 
+### Payments & Razorpay
+Food courts set to the Razorpay payment system take payments into each restaurant's own Razorpay account. The platform takes no commission and makes no payouts; it verifies each payment and records the order.
+
+| Method | Path | Description | Auth |
+|---|---|---|---|
+| `POST` | `/api/payments/razorpay/connect` | Validate and save the restaurant's Razorpay API keys (secret stored encrypted) | Vendor |
+| `DELETE` | `/api/payments/razorpay/connect` | Remove the restaurant's Razorpay keys | Vendor |
+| `POST` | `/api/payments/razorpay/order` | Price the cart server-side and create a Razorpay order | Public |
+| `POST` | `/api/payments/razorpay/verify` | Verify the payment signature, capture, and record the order | Public |
+
 ### Dashboards & User Profile
 | Method | Path | Description | Auth |
 |---|---|---|---|
@@ -228,6 +238,7 @@ CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 CLIENT_URL=http://localhost:3000
+PAYMENT_SECRETS_KEY=a_long_random_string   # encrypts restaurants' Razorpay key secrets; keep it stable
 ```
 
 ### Local Development (without Docker)

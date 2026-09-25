@@ -1,19 +1,64 @@
 import { prisma } from "../config/db.js";
 import type { Order, OrderItem } from "../types/order.types.js";
-import { updatePaymentIntentMetadata } from "./payment.service.js";
+import { isPaymentIntentSucceeded, updatePaymentIntentMetadata } from "./payment.service.js";
+import { assertRestaurantAcceptingOrders, OrderingClosedError } from "./court.service.js";
 
 type CreateOrderPayload = Omit<Order, 'id' | 'status' | 'createdAt'>;
+
+// The card is charged before the order is written, so a court or stall that closes
+// mid-checkout still has to take an order the customer already paid for.
+const isUnclaimedPayment = async (paymentIntentId: string, restaurantId: string) => {
+    const claimed = await prisma.order.findFirst({ where: { paymentIntentId }, select: { id: true } });
+    return !claimed && await isPaymentIntentSucceeded(paymentIntentId, restaurantId);
+}
 
 export const addOrder = async (data: CreateOrderPayload) => {
     const { restaurantId, totalAmount, items, tableNumber, paymentIntentId, customerName } = data;
 
-    const newOrder = await prisma.$transaction(async (tx) => {
+    try {
+        await assertRestaurantAcceptingOrders(restaurantId);
+    } catch (error) {
+        const paidBeforeClosing = error instanceof OrderingClosedError
+            && !!paymentIntentId
+            && await isUnclaimedPayment(paymentIntentId, restaurantId);
+        if (!paidBeforeClosing) throw error;
+    }
+
+    const menuIds = [...new Set(items.map((item) => item.menuID))];
+    const ownedItems = await prisma.menu.count({ where: { id: { in: menuIds }, restaurantId } });
+    if (ownedItems !== menuIds.length) {
+        throw new Error("Order contains items from another restaurant");
+    }
+
+    const newOrder = await createOrderRecord({ restaurantId, totalAmount, items, tableNumber, paymentIntentId, customerName });
+
+    if (paymentIntentId) {
+        await updatePaymentIntentMetadata(paymentIntentId, newOrder.id);
+    }
+
+    return newOrder;
+}
+
+type OrderRecord = Pick<Order, 'restaurantId' | 'totalAmount' | 'tableNumber' | 'customerName' | 'paymentIntentId'> & {
+    items: Pick<OrderItem, 'menuID' | 'quantity' | 'price'>[];
+    razorpayOrderId?: string;
+    razorpayPaymentId?: string;
+};
+
+// Writes the order and takes its items out of stock. Callers are responsible for
+// checking the restaurant is open and that the items and payment are genuine.
+export const createOrderRecord = async (data: OrderRecord) => {
+    const { restaurantId, totalAmount, items, tableNumber, paymentIntentId, customerName, razorpayOrderId, razorpayPaymentId } = data;
+
+    return await prisma.$transaction(async (tx) => {
         const order = await tx.order.create({
             data: {
                 restaurantId,
                 totalAmount,
                 tableNumber,
                 paymentIntentId,
+                razorpayOrderId,
+                razorpayPaymentId,
                 customerName,
                 items: {
                     create: items.map((item) => ({
@@ -41,12 +86,6 @@ export const addOrder = async (data: CreateOrderPayload) => {
 
         return order;
     });
-
-    if (paymentIntentId) {
-        await updatePaymentIntentMetadata(paymentIntentId, newOrder.id);
-    }
-
-    return newOrder;
 }
 
 export const fetchOrdersForRestaurant = async (restaurantId: string) => {
@@ -133,10 +172,11 @@ export const updateOrderStatusService = async (id: number, status: Order['status
 export const fetchPaymentDetailsForRestaurant = async (restaurantId: string) => {
     const restaurant = await prisma.restaurant.findUnique({
         where: { id: restaurantId },
-        select: { commissionRate: true }
+        select: { commissionRate: true, foodCourt: { select: { currancy: true } } }
     });
 
-    const commissionRate = restaurant?.commissionRate ?? 5.0;
+    const platformCommissionRate = restaurant?.commissionRate ?? 5.0;
+    const currency = restaurant?.foodCourt.currancy ?? "USD";
 
     const orders = await prisma.order.findMany({
         where: {
@@ -157,6 +197,9 @@ export const fetchPaymentDetailsForRestaurant = async (restaurantId: string) => 
 
     const paymentDetails = orders.map((order) => {
         const totalAmount = order.totalAmount;
+        const paymentProvider = order.razorpayPaymentId ? "razorpay" : order.paymentIntentId ? "stripe" : "cash";
+        // Razorpay payments land directly in the restaurant's own account, so the platform takes no cut.
+        const commissionRate = paymentProvider === "razorpay" ? 0 : platformCommissionRate;
         const commissionAmount = parseFloat(((totalAmount * commissionRate) / 100).toFixed(2));
         const netAmount = parseFloat((totalAmount - commissionAmount).toFixed(2));
 
@@ -173,6 +216,9 @@ export const fetchPaymentDetailsForRestaurant = async (restaurantId: string) => 
             customerName: order.customerName,
             tableNumber: order.tableNumber,
             status: order.status,
+            paymentProvider,
+            paymentReference: order.razorpayPaymentId ?? order.paymentIntentId,
+            currency,
             totalAmount,
             commissionRate,
             commissionAmount,

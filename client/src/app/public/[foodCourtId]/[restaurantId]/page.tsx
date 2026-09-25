@@ -11,6 +11,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -25,6 +26,8 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { useSearchParams } from "next/navigation";
 import { CheckoutForm } from "@/components/public/CheckoutForm";
+import { RazorpayCheckoutForm } from "@/components/public/RazorpayCheckoutForm";
+import { formatMoney } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Menu } from "@/types";
@@ -35,11 +38,18 @@ import { useGetRestaurantDetails } from "@/hooks/queries/useCourtQuery";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
 
-function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
-  const { restaurantId } = React.use(params);
+function Restaurant({ params }: { params: Promise<{ foodCourtId: string; restaurantId: string }> }) {
+  const { foodCourtId, restaurantId } = React.use(params);
 
   const { data: menus = [], isLoading: isMenusLoading } = useGetMenus(restaurantId);
-  const { data: restaurantDetails } = useGetRestaurantDetails(restaurantId);
+  const { data: restaurantDetails, isLoading: isDetailsLoading } = useGetRestaurantDetails(restaurantId);
+  const currency = restaurantDetails?.foodCourt?.currancy ?? "USD";
+  const usesRazorpay = restaurantDetails?.foodCourt?.paymentSystem === "razorpay";
+  const closedMessage = restaurantDetails?.foodCourt?.isClosed
+    ? "This food court isn't taking orders right now."
+    : restaurantDetails?.isClosed
+      ? "This restaurant isn't taking orders right now."
+      : null;
   const [isCartOpen, setIsCartOpen] = useState(false);
   const searchParams = useSearchParams();
   const tableIdFromUrl = searchParams.get("tableId");
@@ -93,6 +103,16 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
   const itemsMap = useCartStore((state) => state.items);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const addItem = useCartStore((state) => state.addItem);
+  const clearCart = useCartStore((state) => state.clearCart);
+
+  // The cart is shared across every store page, so items picked at another
+  // (possibly now closed) store must not be checked out under this one.
+  useEffect(() => {
+    const items = Object.values(useCartStore.getState().items);
+    if (items.some((item) => item.restaurantId !== restaurantId)) {
+      clearCart();
+    }
+  }, [restaurantId, clearCart]);
 
   const cartItems = React.useMemo(() => Object.values(itemsMap), [itemsMap]);
   const cartTotal = React.useMemo(
@@ -122,6 +142,20 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
       {} as Record<string, typeof filterMenu>,
     );
   }, [filterMenu]);
+
+  if (closedMessage) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen gap-4 p-6 text-center">
+        <h1 className="text-3xl font-semibold">{restaurantDetails?.name}</h1>
+        <p className="text-muted-foreground">{closedMessage}</p>
+        <Button asChild className="rounded-xl">
+          <Link href={`/public/${foodCourtId}${tableIdFromUrl ? `?tableId=${tableIdFromUrl}` : ""}`}>
+            Back to food court
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -158,7 +192,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
                       <div>
                         <p className="font-semibold">{item.itemName}</p>
                         <p className="text-sm text-muted-foreground">
-                          ${item.price.toFixed(2)}
+                          {formatMoney(item.price, currency)}
                         </p>
                       </div>
 
@@ -183,17 +217,28 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
                 <div className="border-t pt-4 mt-auto px-2 py-2 flex flex-col gap-4">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>${cartTotal.toFixed(2)}</span>
+                    <span>{formatMoney(cartTotal, currency)}</span>
                   </div>
-                  <Elements stripe={stripePromise}>
-                    <CheckoutForm
+                  {usesRazorpay ? (
+                    <RazorpayCheckoutForm
                       restaurantId={restaurantId}
                       cartItems={cartItems}
                       cartTotal={cartTotal}
                       onSuccess={() => setIsCartOpen(false)}
                       tableIdFromUrl={tableIdFromUrl}
+                      currency={currency}
                     />
-                  </Elements>
+                  ) : (
+                    <Elements stripe={stripePromise}>
+                      <CheckoutForm
+                        restaurantId={restaurantId}
+                        cartItems={cartItems}
+                        cartTotal={cartTotal}
+                        onSuccess={() => setIsCartOpen(false)}
+                        tableIdFromUrl={tableIdFromUrl}
+                      />
+                    </Elements>
+                  )}
                 </div>
               )}
             </SheetContent>
@@ -215,7 +260,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
       </div>
 
       <section className="my-10 mx-2">
-        {isMenusLoading ? (
+        {isMenusLoading || isDetailsLoading ? (
           <div className="flex justify-center items-center py-20 w-full">
             <Spinner className="size-8 text-primary" />
           </div>
@@ -250,7 +295,7 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
 
                             <div className="flex items-center justify-between mt-4">
                               <span className="font-semibold text-lg">
-                                ${menu.price}
+                                {formatMoney(menu.price, currency)}
                               </span>
                               <div className="flex items-center gap-2 bg-accent rounded-full p-1 border border-border/50">
                                 {!itemsMap[menu.id] ? (
@@ -361,11 +406,11 @@ function Restaurant({ params }: { params: Promise<{ restaurantId: string }> }) {
                         <div key={item.id} className="flex justify-between items-center py-2.5 first:pt-0 last:pb-0">
                           <div>
                             <p className="font-medium text-sm">{item.menu?.itemName || `Item #${item.menuID}`}</p>
-                            <p className="text-xs text-muted-foreground">${item.price} each</p>
+                            <p className="text-xs text-muted-foreground">{formatMoney(item.price, currency)} each</p>
                           </div>
                           <div className="text-right">
                             <p className="text-sm font-semibold">x{item.quantity}</p>
-                            <p className="text-xs font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                            <p className="text-xs font-medium">{formatMoney(item.price * item.quantity, currency)}</p>
                           </div>
                         </div>
                       ))}

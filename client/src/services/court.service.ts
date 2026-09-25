@@ -69,6 +69,24 @@ export const editRestaurant = async (id: string, data: any) => {
     return response.json();
 }
 
+export const updateFoodCourtStatus = async (isClosed: boolean) => {
+    const token = await getAuth()
+    const response = await fetch(`${API_URL}/api/court/status`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token || ""}`
+        },
+        body: JSON.stringify({ isClosed })
+    })
+
+    if(!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.message || "Failed to update food court status")
+    }
+    return response.json();
+}
+
 export const fetchPublicRestaurantDetails = async (id: string) => {
     const response = await fetch(`${API_URL}/api/court/public/restaurant/${id}`, {
         method: "GET",

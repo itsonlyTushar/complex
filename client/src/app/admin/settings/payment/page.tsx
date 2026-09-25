@@ -11,6 +11,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
 import { CheckCircle2, AlertCircle, Loader2, CreditCard, ArrowRight, ExternalLink } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { RazorpayConnectCard } from "@/components/admin/RazorpayConnectCard";
 
 const PaymentContent = () => {
   const { data: user, isLoading: isUserLoading, refetch: refetchUser } = useGetMe();
@@ -26,6 +27,8 @@ const PaymentContent = () => {
   const isClosed = restaurant?.isClosed ?? true;
   const stripeAccountId = restaurant?.stripeAccountId;
   const onBoradingCompleted = restaurant?.onBoradingCompleted ?? false;
+  const usesRazorpay = user?.foodCourt?.paymentSystem === "razorpay";
+  const paymentsReady = usesRazorpay ? !!restaurant?.razorpayKeyId : onBoradingCompleted;
 
   React.useEffect(() => {
     if (status === "success") {
@@ -100,27 +103,36 @@ const PaymentContent = () => {
                   Accept Online Payments
                 </Label>
 
+                  {usesRazorpay ? (
+                    <span className="text-xs text-mutated">No platform fee. Razorpay&apos;s own charges apply.</span>
+                  ) : (
                   <div className="flex items-center gap-2">
                   <p className="font-semibold border border-state-ready/30 max-w-sm w-[60px] text-center rounded-xl text-xs bg-state-ready-bg text-state-ready">{restaurant?.commissionRate}%</p>
                   <span className="text-xs text-mutated">fee is charged per order.</span>
                   </div>
+                  )}
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-border/30">
               <span className="text-sm font-semibold text-muted-foreground">
-                {!onBoradingCompleted ? "Requires Stripe Connect" : isClosed ? "Status: Disabled" : "Status: Active"}
+                {!paymentsReady
+                  ? usesRazorpay ? "Requires Razorpay keys" : "Requires Stripe Connect"
+                  : isClosed ? "Status: Disabled" : "Status: Active"}
               </span>
               <Switch
                 id="online-payments"
-                checked={onBoradingCompleted && !isClosed}
+                checked={paymentsReady && !isClosed}
                 onCheckedChange={handleToggleOnlinePayments}
-                disabled={!onBoradingCompleted || isUpdatingStatus}
+                disabled={!paymentsReady || isUpdatingStatus}
               />
             </div>
           </div>
 
           {/* FOR ACTIVATTION  */}
+          {usesRazorpay ? (
+            <RazorpayConnectCard keyId={restaurant?.razorpayKeyId} />
+          ) : (
           <div className="flex flex-col justify-between p-5 rounded-xl bg-muted/30 dark:bg-muted/10 border border-border/40 p-6 mb-8">
             <div>
               <div className="flex items-start justify-between gap-4 mb-4">
@@ -184,6 +196,7 @@ const PaymentContent = () => {
               )}
             </div>
           </div>
+          )}
         </div>
       </section>
     </>

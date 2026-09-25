@@ -1,6 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { formatMoney } from "@/lib/utils";
 
 export interface PaymentRow {
   orderId: number;
@@ -8,6 +9,9 @@ export interface PaymentRow {
   customerName: string;
   status: string;
   tableNumber: number;
+  paymentProvider: "stripe" | "razorpay" | "cash";
+  paymentReference: string | null;
+  currency: string;
   totalAmount: number;
   commissionRate: number;
   commissionAmount: number;
@@ -16,17 +20,25 @@ export interface PaymentRow {
   realProfit: number;
 }
 
-const currencyFmt = (value: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+const providerLabels: Record<PaymentRow["paymentProvider"], string> = {
+  stripe: "Stripe",
+  razorpay: "Razorpay",
+  cash: "Cash / manual",
+};
 
 export const columns: ColumnDef<PaymentRow>[] = [
   {
     accessorKey: "orderId",
     header: "Order",
     cell: ({ row }) => (
-      <span className="font-mono text-xs font-semibold">
-        #{row.getValue("orderId")}
-      </span>
+      <div>
+        <span className="font-mono text-xs font-semibold">
+          #{row.getValue("orderId")}
+        </span>
+        <p className="text-[10px] text-muted-foreground" title={row.original.paymentReference ?? undefined}>
+          {providerLabels[row.original.paymentProvider]}
+        </p>
+      </div>
     ),
   },
   {
@@ -89,7 +101,7 @@ export const columns: ColumnDef<PaymentRow>[] = [
     header: "Total Amount",
     cell: ({ row }) => (
       <span className="font-semibold text-sm">
-        {currencyFmt(row.getValue("totalAmount"))}
+        {formatMoney(row.getValue("totalAmount"), row.original.currency)}
       </span>
     ),
   },
@@ -104,10 +116,10 @@ export const columns: ColumnDef<PaymentRow>[] = [
     cell: ({ row }) => (
       <div>
         <span className="font-semibold text-sm text-state-ready">
-          {currencyFmt(row.getValue("netAmount"))}
+          {formatMoney(row.getValue("netAmount"), row.original.currency)}
         </span>
         <p className="text-[10px] text-muted-foreground">
-          -{currencyFmt(row.original.commissionAmount)} ({row.original.commissionRate}%)
+          -{formatMoney(row.original.commissionAmount, row.original.currency)} ({row.original.commissionRate}%)
         </p>
       </div>
     ),
@@ -126,10 +138,10 @@ export const columns: ColumnDef<PaymentRow>[] = [
       return (
         <div>
           <span className={`font-semibold text-sm ${isPositive ? "text-state-ready" : "text-state-late"}`}>
-            {currencyFmt(profit)}
+            {formatMoney(profit, row.original.currency)}
           </span>
           <p className="text-[10px] text-muted-foreground">
-            Cost: {currencyFmt(row.original.costOfGoods)}
+            Cost: {formatMoney(row.original.costOfGoods, row.original.currency)}
           </p>
         </div>
       );

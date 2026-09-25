@@ -138,7 +138,11 @@ export default function PaymentsPage() {
                       {res.stripeAccountId || <span className="text-muted-foreground/50 italic">None</span>}
                     </td>
                     <td className="p-4">
-                      {res.onBoradingCompleted ? (
+                      {res.foodCourt?.paymentSystem === "razorpay" ? (
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${res.razorpayKeyId ? "bg-state-ready-bg text-state-ready border-state-ready/30" : "bg-state-aging-bg text-state-aging border-state-aging/30"}`}>
+                          {res.razorpayKeyId ? "Razorpay connected" : "Razorpay not set up"}
+                        </span>
+                      ) : res.onBoradingCompleted ? (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-state-ready-bg text-state-ready border border-state-ready/30">
                           Active
                         </span>
@@ -149,11 +153,16 @@ export default function PaymentsPage() {
                       )}
                     </td>
                     <td className="p-4">
+                      {res.foodCourt?.paymentSystem === "razorpay" ? (
+                        <span className="text-xs text-muted-foreground">No fee (paid to restaurant directly)</span>
+                      ) : (
                       <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-semibold bg-primary/10 text-primary border border-primary/20">
                         {res.commissionRate ?? 5.0}%
                       </span>
+                      )}
                     </td>
                     <td className="p-4 text-right">
+                      {res.foodCourt?.paymentSystem !== "razorpay" && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -162,6 +171,7 @@ export default function PaymentsPage() {
                       >
                         Adjust Fee
                       </Button>
+                      )}
                     </td>
                   </tr>
                 ))

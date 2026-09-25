@@ -1,6 +1,7 @@
 
 import { USER_KEYS } from "@/constants/queryFactory"
 import { uploadLogo, updateRestaurantStatus } from "@/services/user.service"
+import { updateFoodCourtStatus } from "@/services/court.service"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export const useUploadLogo = () => {
@@ -21,6 +22,16 @@ export const useUpdateRestaurantStatus = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['me'] })
             queryClient.invalidateQueries({ queryKey: ['restaurants'] })
+        }
+    })
+}
+
+export const useUpdateFoodCourtStatus = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: updateFoodCourtStatus,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['me'] })
         }
     })
 }

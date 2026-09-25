@@ -24,10 +24,32 @@ export interface PaymentIntentResponse {
     };
 }
 
+export interface RazorpayCheckoutPayload {
+    restaurantId: string;
+    items: { menuID: number; quantity: number }[];
+    customerName: string;
+    tableNumber: number;
+}
+
+export interface RazorpayCheckoutResponse {
+    keyId: string;
+    razorpayOrderId: string;
+    amount: number;
+    currency: string;
+    restaurantName: string;
+}
+
+export interface RazorpayVerifyPayload extends RazorpayCheckoutPayload {
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+}
+
 export interface CheckoutFormProps {
   restaurantId: string;
   cartItems: any[];
   cartTotal: number;
   onSuccess: () => void;
   tableIdFromUrl: string | null;
+  currency?: string;
 }

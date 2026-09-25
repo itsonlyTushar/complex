@@ -80,14 +80,56 @@ export const fetchPublicFoodCourtService = async (foodCourtId: string, tableNumb
         if (!table) throw new Error("Invalid Table for this Food Court");
     }
 
-    const restaurants = await fetchRestaurantService(foodCourtId);
+    const restaurants = await prisma.restaurant.findMany({
+        where: { foodCourtId, isClosed: false },
+        select: { id: true, name: true, logo: true, description: true, isClosed: true }
+    });
 
     return { foodCourt, restaurants };
 }
 
 export const fetchPublicRestaurantById = async (restaurantId: string) => {
     const restaurant = await prisma.restaurant.findUnique({
-        where: { id: restaurantId }
+        where: { id: restaurantId },
+        select: {
+            id: true,
+            name: true,
+            location: true,
+            logo: true,
+            description: true,
+            isClosed: true,
+            foodCourtId: true,
+            foodCourt: { select: { isClosed: true, currancy: true, paymentSystem: true } }
+        }
     });
     return restaurant;
+}
+
+export const updateFoodCourtStatusService = async (foodCourtId: string, isClosed: boolean) => {
+    return await prisma.foodCourt.update({
+        where: { id: foodCourtId },
+        data: { isClosed },
+        select: { id: true, name: true, isClosed: true }
+    });
+}
+
+export class OrderingClosedError extends Error {}
+
+export const assertRestaurantAcceptingOrders = async (restaurantId: string) => {
+    const restaurant = await prisma.restaurant.findUnique({
+        where: { id: restaurantId },
+        select: { isClosed: true, foodCourt: { select: { isClosed: true } } }
+    });
+
+    if (!restaurant) {
+        throw new Error("Restaurant not found");
+    }
+
+    if (restaurant.foodCourt.isClosed) {
+        throw new OrderingClosedError("This food court is closed and is not accepting orders right now.");
+    }
+
+    if (restaurant.isClosed) {
+        throw new OrderingClosedError("This restaurant is closed and is not accepting orders right now.");
+    }
 }

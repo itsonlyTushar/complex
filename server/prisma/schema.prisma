@@ -24,6 +24,7 @@ model FoodCourt {
   createdAt     DateTime     @default(now())
   currancy      String       @default("USD")
   paymentSystem String       @default("stripe")
+  isClosed      Boolean      @default(false)
   restaurants   Restaurant[]
   admins        User[]
   tables        Table[]
@@ -112,6 +113,8 @@ model Order {
   restaurantId    String
   tableNumber     Int
   paymentIntentId String?
+  razorpayOrderId   String?
+  razorpayPaymentId String?     @unique
   customerName    String
   restarant       Restaurant  @relation(fields: [restaurantId], references: [id])
   items           OrderItem[]

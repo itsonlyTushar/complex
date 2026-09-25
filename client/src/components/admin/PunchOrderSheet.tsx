@@ -19,6 +19,7 @@ import { useAddOrder } from "@/hooks/mutations/useOrderMutation";
 import { toast } from "@/lib/toast";
 import { Plus, Minus, ShoppingCart, Trash2 } from "lucide-react";
 import type { Menu } from "@/types/menu.types";
+import { formatMoney } from "@/lib/utils";
 
 interface CartItem {
   menuId: number;
@@ -36,6 +37,12 @@ export function PunchOrderSheet() {
 
   const { data: user } = useGetMe();
   const restaurantId = user?.restaurant?.id || user?.restaurantId || "";
+  const currency = user?.foodCourt?.currancy ?? "USD";
+  const closedMessage = user?.foodCourt?.isClosed
+    ? "The food court is closed, so new orders can't be placed."
+    : user?.restaurant?.isClosed
+      ? "Your store is closed. Reopen it in Settings to place orders."
+      : null;
 
   const { data: menus = [], isLoading: isMenuLoading } = useGetMenus();
   const { mutate: addOrder, isPending: isSubmitting } = useAddOrder();
@@ -153,6 +160,14 @@ export function PunchOrderSheet() {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto space-y-5 pr-1 py-4 px-4">
+          {closedMessage && (
+            <div
+              role="status"
+              className="rounded-xl border border-state-late/30 bg-state-late-bg px-4 py-3 text-sm font-medium text-state-late"
+            >
+              {closedMessage}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="punch-customer-name" className="text-sm font-semibold">
@@ -212,7 +227,7 @@ export function PunchOrderSheet() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{menu.itemName}</p>
                         <p className="text-xs text-muted-foreground">
-                          ${menu.price.toFixed(2)}
+                          {formatMoney(menu.price, currency)}
                           {menu.quantity <= 0 && (
                             <span className="ml-2 text-destructive font-semibold">Out of stock</span>
                           )}
@@ -282,7 +297,7 @@ export function PunchOrderSheet() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatMoney(item.price * item.quantity, currency)}
                       </span>
                       <Button
                         variant="ghost"
@@ -299,7 +314,7 @@ export function PunchOrderSheet() {
               </div>
               <div className="flex justify-between items-center mt-3 pt-3 border-t border-border/40">
                 <span className="font-semibold">Total</span>
-                <span className="font-semibold text-lg">${cartTotal.toFixed(2)}</span>
+                <span className="font-semibold text-lg">{formatMoney(cartTotal, currency)}</span>
               </div>
             </div>
           )}
@@ -316,10 +331,10 @@ export function PunchOrderSheet() {
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting || cart.length === 0}
+            disabled={isSubmitting || cart.length === 0 || !!closedMessage}
             className="rounded-xl gap-2 font-semibold"
           >
-            {isSubmitting ? "Placing..." : `Place Order $${cartTotal.toFixed(2)}`}
+            {isSubmitting ? "Placing..." : `Place Order ${formatMoney(cartTotal, currency)}`}
           </Button>
         </SheetFooter>
       </SheetContent>

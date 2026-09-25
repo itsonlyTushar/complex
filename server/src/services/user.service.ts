@@ -12,6 +12,15 @@ export const userService = async (userId: number) => {
                 role: true,
                 restaurantId: true,
                 foodCourtId: true,
+                foodCourt: {
+                    select: {
+                        id: true,
+                        name: true,
+                        isClosed: true,
+                        currancy: true,
+                        paymentSystem: true
+                    }
+                },
                 restaurant: {
                     select: {
                         id: true,
@@ -19,6 +28,7 @@ export const userService = async (userId: number) => {
                         isClosed: true,
                         stripeAccountId: true,
                         onBoradingCompleted: true,
+                        razorpayKeyId: true,
                         logo: true,
                         description: true,
                         commissionRate: true

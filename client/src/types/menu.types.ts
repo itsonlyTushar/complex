@@ -6,7 +6,8 @@ export type Menu = {
     price: number
     cost: number
     quantity: number
-    description: string   
+    description: string
+    restaurantId?: string | null
 }
 
 export type Category = {

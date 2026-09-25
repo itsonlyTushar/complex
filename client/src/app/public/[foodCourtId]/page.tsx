@@ -14,6 +14,7 @@ function PublicFoodCourtContent() {
     const tableId = searchParams?.get("tableId");
 
     const [foodCourtName, setFoodCourtName] = useState<string>("");
+    const [isCourtClosed, setIsCourtClosed] = useState(false);
     const [restaurants, setRestaurants] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -37,6 +38,7 @@ function PublicFoodCourtContent() {
                 const data = await response.json();
                 setRestaurants(data.restaurants);
                 setFoodCourtName(data.foodCourt.name);
+                setIsCourtClosed(!!data.foodCourt.isClosed);
                 setError(null);
             } catch (err: any) {
                 console.error("Failed to fetch restaurants:", err);
@@ -104,7 +106,14 @@ function PublicFoodCourtContent() {
             </main>
 
             <section className="py-12 px-6">
-                {
+                {isCourtClosed ? (
+                    <div className="border py-8 px-4 rounded-xl bg-card text-center">
+                        <h2 className="text-2xl font-semibold">We&apos;re closed right now</h2>
+                        <p className="text-fg-secondary text-sm mt-1">
+                            {foodCourtName} isn&apos;t taking orders at the moment. Please check back later.
+                        </p>
+                    </div>
+                ) : (
                     restaurants.filter((r: any) => !r.isClosed).map((restaurant) => {
                         const logoUrl = restaurant?.logo || "";
                         const description = restaurant?.description || 'Lorem ipsum, dolor sit amet consectetur';
@@ -127,7 +136,7 @@ function PublicFoodCourtContent() {
                             </Link>
                         );
                     })
-                }
+                )}
             </section>
         </>
     );

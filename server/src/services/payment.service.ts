@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { prisma } from "../config/db.js";
 import type { Payments } from "../types/payment.types.js";
+import { assertRestaurantAcceptingOrders } from "./court.service.js";
 
 const stripeKey = process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY;
 if (!stripeKey) {
@@ -103,6 +104,8 @@ export const createPaymentIntent = async (data: Payments, restaurantId: string) 
         throw new Error("Restaurant does not have a Stripe account onboarded");
     }
 
+    await assertRestaurantAcceptingOrders(restaurantId);
+
     const commissionRate = restaurant.commissionRate ?? 5.0;
     const computedFee = Math.round(amount * (commissionRate / 100));
 
@@ -121,6 +124,15 @@ export const createPaymentIntent = async (data: Payments, restaurantId: string) 
     });
 
     return paymentIntent;
+};
+
+export const isPaymentIntentSucceeded = async (paymentIntentId: string, restaurantId: string) => {
+    try {
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        return paymentIntent.status === "succeeded" && paymentIntent.metadata.restaurantId === restaurantId;
+    } catch {
+        return false;
+    }
 };
 
 export const updatePaymentIntentMetadata = async (paymentIntentId: string, orderId: number) => {
@@ -204,10 +216,17 @@ export const handleStripeWebhook = async (rawBody: Buffer, signature: string) =>
 
 export const getRestaurantsCommission = async () => {
     return await prisma.restaurant.findMany({
-        include: {
+        select: {
+            id: true,
+            name: true,
+            stripeAccountId: true,
+            onBoradingCompleted: true,
+            razorpayKeyId: true,
+            commissionRate: true,
             foodCourt: {
                 select: {
                     name: true,
+                    paymentSystem: true,
                 },
             },
         },

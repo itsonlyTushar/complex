@@ -54,10 +54,25 @@ const ActionsCell = ({ restaurant }: { restaurant: any }) => {
     }
   };
 
+  // Re-read the row on open: the vendor can close their own store after this row
+  // mounted, and saving stale state here would silently reopen it.
+  const handleEditOpenChange = (open: boolean) => {
+    if (open) {
+      setEditName(restaurant.name);
+      setEditLocation(restaurant.location || "");
+      setIsClosed(restaurant.isClosed);
+    }
+    setIsEditOpen(open);
+  };
+
   const handleEdit = async () => {
     setIsEditing(true);
     try {
-      await editRestaurant(restaurant.id, { name: editName, location: editLocation, isClosed });
+      await editRestaurant(restaurant.id, {
+        name: editName,
+        location: editLocation,
+        ...(isClosed !== restaurant.isClosed && { isClosed }),
+      });
       queryClient.invalidateQueries({ queryKey: COURT_KEYS.restaurants() });
       toast.success(`${restaurant.name} updated successfully!`);
       setIsEditOpen(false);
@@ -70,7 +85,7 @@ const ActionsCell = ({ restaurant }: { restaurant: any }) => {
 
   return (
     <div className="flex items-center gap-2">
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+      <Dialog open={isEditOpen} onOpenChange={handleEditOpenChange}>
         <DialogTrigger asChild>
           <Button
             variant="ghost"

@@ -1,5 +1,5 @@
 import type { Request, Response } from "express"
-import { fetchRestaurantService, deleteRestaurantService, editRestaurantService, fetchPublicFoodCourtService, fetchPublicRestaurantById } from "../../services/court.service.js"
+import { fetchRestaurantService, deleteRestaurantService, editRestaurantService, fetchPublicFoodCourtService, fetchPublicRestaurantById, updateFoodCourtStatusService } from "../../services/court.service.js"
 
 export const fetchRestaurantsController = async (req: Request, res: Response) => {
     try {
@@ -53,6 +53,29 @@ export const editRestaurantController = async (req: Request, res: Response) => {
 
         const updatedRestaurant = await editRestaurantService(id as string, foodCourtId as string, updateData);
         res.status(200).json({ message: "Restaurant updated successfully", data: updatedRestaurant });
+    } catch(error: any) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+export const updateFoodCourtStatusController = async (req: Request, res: Response) => {
+    try {
+        const foodCourtId = (req as any).user?.foodCourtId;
+        const userRole = (req as any).user?.role;
+        const { isClosed } = req.body;
+
+        if (userRole !== "FOOD_COURT_ADMIN" || !foodCourtId) {
+             res.status(403).json({ message: "Only food court admins can open or close the food court" });
+             return;
+        }
+
+        if (typeof isClosed !== "boolean") {
+             res.status(400).json({ message: "isClosed must be a boolean" });
+             return;
+        }
+
+        const foodCourt = await updateFoodCourtStatusService(foodCourtId as string, isClosed);
+        res.status(200).json(foodCourt);
     } catch(error: any) {
         res.status(400).json({ message: error.message });
     }

@@ -22,7 +22,9 @@ export const addMenuController = async (req: Request, res: Response) => {
 
 export const fetchMenuController = async (req: Request, res: Response) => {
     try {
-        const restaurantId = (req as any).user?.restaurantId || req.query.restaurantId as string;
+        // An explicit restaurantId (the public menu page) wins, otherwise a signed-in
+        // vendor browsing another store would be served their own menu.
+        const restaurantId = req.query.restaurantId as string || (req as any).user?.restaurantId;
         if (!restaurantId) {
             return res.status(400).json({ message: "Restaurant ID is required." });
         }

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Armchair, Users, Plus, Loader2, Link2 } from "lucide-react"
 import Link from 'next/link'
 import QR from '@/components/shared/QR'
+import { APP_URL } from '@/lib/api'
 
 function Tables() {
     const { handleSubmit, register, reset, control, formState: { errors } } = useForm<TableInput>({
@@ -23,6 +24,9 @@ function Tables() {
     const { mutateAsync: addTable, isPending: isAdding } = useAddTable()
 
     const { foodCourtId, isLoading: isCourtLoading } = useCourt()
+
+    const tableUrl = (tableNumber: string) =>
+        `${APP_URL}/public/${foodCourtId}?tableId=${encodeURIComponent(tableNumber)}`
 
     const handleAddNewTable = handleSubmit(async (data) => {
         try {
@@ -172,11 +176,11 @@ function Tables() {
                                         <Users className="h-4 w-4 text-muted-foreground/75" />
                                         <span>Max: <strong className="text-foreground">{table.occupacy} people</strong></span>
                                     </div>
-                                    <QR url={`http://localhost:3000/public/${foodCourtId}?tableId=${table.number}`} />
+                                    <QR url={tableUrl(table.number)} />
 
-                                    <Link 
+                                    <Link
                                     target="_blank"
-                                    className='flex items-center justify-center gap-2 hover:underline text-sm font-semibold tracking-tight text-center' href={`http://localhost:3000/public/${foodCourtId}?tableId=${table.number}`}>
+                                    className='flex items-center justify-center gap-2 hover:underline text-sm font-semibold tracking-tight text-center' href={tableUrl(table.number)}>
                                         
                                       <Link2 size={16} />  Table Link</Link>
                                 </div>

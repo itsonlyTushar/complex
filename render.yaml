@@ -27,6 +27,8 @@ services:
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
+      - key: PAYMENT_SECRETS_KEY
+        sync: false
       - key: CLOUDINARY_URL
         sync: false
       - key: CLOUDINARY_API_KEY
