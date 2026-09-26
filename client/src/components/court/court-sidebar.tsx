@@ -13,6 +13,7 @@ import {
 import { COURT_NAV_DATA } from "@/constants/navConstants";
 import { NavLink } from "../court/nav-link";
 import { Logo } from "../ui/logo";
+import { AccountSummary } from "../shared/account-summary";
 import { LogOut } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import {
@@ -55,7 +56,9 @@ export const CourtSidebar = ({
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="gap-0 border-t">
+        <AccountSummary />
+
         <SidebarMenu className="px-2">
           <SidebarMenuItem>
             <AlertDialog>

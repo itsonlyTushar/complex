@@ -13,9 +13,9 @@ import {
 } from "../ui/sidebar";
 import { LogOut } from "lucide-react";
 import { NavLink } from "./nav-link";
-import { useGetMe } from "@/hooks/queries/useUserQuery";
 import { logout } from "@/app/actions/auth";
 import { Logo } from "../ui/logo";
+import { AccountSummary } from "../shared/account-summary";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,9 +31,6 @@ import {
 export function AdminSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-
-  const { data: user, isLoading } = useGetMe();
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="h-12 flex-row items-center gap-2.5 border-b px-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
@@ -51,7 +48,9 @@ export function AdminSidebar({
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="gap-0 border-t">
+        <AccountSummary />
+
         <SidebarMenu className="px-2">
           <SidebarMenuItem>
             <AlertDialog>
