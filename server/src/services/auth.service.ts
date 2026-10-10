@@ -32,7 +32,9 @@ export const signupService = async (data: SignupInput, foodCourtId: string) => {
             }
         },
         include: {
-            vendors: true
+            vendors: {
+                select: { id: true, name: true, email: true, role: true, foodCourtId: true, restaurantId: true }
+            }
         }
     });
 
@@ -69,7 +71,9 @@ export const signFoodCourtService = async (data: FoodCourtSignUp) => {
             }
         },
         include: {
-            admins: true
+            admins: {
+                select: { id: true, name: true, email: true, role: true, foodCourtId: true }
+            }
         }
     })
     return newFoodCourt
@@ -113,8 +117,20 @@ export const loginService = async (data: LoginInput) => {
 
 export const fetchFoodCourtsService = async () => {
     return await prisma.foodCourt.findMany({
-        include: {
-            admins: true
+        select: {
+            id: true,
+            name: true,
+            location: true,
+            createdAt: true,
+            currancy: true,
+            paymentSystem: true,
+            isClosed: true,
+            layout: true,
+            admins: {
+                select: { id: true, name: true, email: true, role: true }
+            },
+            restaurants: { select: { id: true, name: true } },
+            tables: { select: { id: true, number: true, occupacy: true } }
         }
     });
 };

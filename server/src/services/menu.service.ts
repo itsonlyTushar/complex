@@ -69,6 +69,13 @@ export const fetchMenuService = async (restaurandId: string) => {
 
 export const updateMenuService = async (data: Menu, restaurantId: string) => {
     const { id, itemName, category, image, price, cost, quantity, description } = data;
+    const existingItem = await prisma.menu.findFirst({
+        where: { id, restaurantId },
+        select: { id: true },
+    });
+    if (!existingItem) {
+        throw new Error("Menu item not found for this restaurant.");
+    }
 
     let resolvedCategoryId: number | null = null;
     if (category) {
@@ -83,9 +90,10 @@ export const updateMenuService = async (data: Menu, restaurantId: string) => {
         }
     }
 
-    const updatedItem = await prisma.menu.update({
+    const result = await prisma.menu.updateMany({
         where: {
-            id: id
+            id,
+            restaurantId,
         },
         data: {
             itemName,
@@ -96,9 +104,13 @@ export const updateMenuService = async (data: Menu, restaurantId: string) => {
             quantity: Math.round(quantity),
             description
         },
-        include: {
-            category: true
-        }
+    });
+    if (result.count !== 1) {
+        throw new Error("Menu item not found for this restaurant.");
+    }
+    const updatedItem = await prisma.menu.findFirstOrThrow({
+        where: { id, restaurantId },
+        include: { category: true },
     });
 
     return {
@@ -140,48 +152,45 @@ export const fetchCategory = async (restaurantId: string) => {
     return data
 }
 
-export const updateCategory = async (data: Category) => {
+export const updateCategory = async (data: Category, restaurantId: string) => {
     const { id, name } = data
-    const updateCat = await prisma.category.update({
+    const result = await prisma.category.updateMany({
         where: {
-           id 
+           id,
+           restaurantId,
         },
         data: {name}
     })
-    return updateCat
+    if (result.count !== 1) {
+        throw new Error("Category not found for this restaurant.");
+    }
+    return prisma.category.findFirstOrThrow({ where: { id, restaurantId } });
 }
 
-export const deleteCategory = async (data: Category) => {
+export const deleteCategory = async (data: { id: number }, restaurantId: string) => {
     const {id} = data
-    const deleteCat = await prisma.category.delete({
+    const result = await prisma.category.deleteMany({
         where: {
-            id
+            id,
+            restaurantId,
         }
     })
-    return deleteCat
+    if (result.count !== 1) {
+        throw new Error("Category not found for this restaurant.");
+    }
+    return { id };
 }
 
-export const deleteMenuService = async (data: { id: number }) => {
+export const deleteMenuService = async (data: { id: number }, restaurantId: string) => {
     const { id } = data;
-    const deletedItem = await prisma.menu.delete({
+    const result = await prisma.menu.deleteMany({
         where: {
-            id: id
+            id,
+            restaurantId,
         }
     });
-    return deletedItem;
-}
-
-export const restoreInventory = async (data: { id: number, quantity: number }) => {
-    const { id, quantity } = data;
-    const restoreItem = await prisma.menu.update({
-        where: {
-            id: id
-        },
-        data: {
-            quantity: {
-                increment: quantity
-            }
-        }
-    });
-    return restoreItem;
+    if (result.count !== 1) {
+        throw new Error("Menu item not found for this restaurant.");
+    }
+    return { id };
 }

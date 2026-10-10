@@ -5,10 +5,8 @@ const COLUMNS = [
   {
     heading: "Product",
     links: [
-      { label: "How it works", href: "/#how-it-works" },
-      { label: "For operators", href: "/#operators" },
-      { label: "Venues", href: "/#venues" },
       { label: "Pricing", href: "/pricing" },
+      { label: "Contact us", href: "/contact" },
     ],
   },
   {
@@ -34,7 +32,7 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div className="max-w-xs">
-            <Logo size={40} />
+            <Logo className="h-7 sm:h-8" />
             <p className="mt-3 text-caption text-fg-secondary">
               Table ordering for multi-vendor food halls. One cart for the
               guest, separate tickets for every kitchen.

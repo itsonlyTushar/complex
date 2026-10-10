@@ -63,8 +63,8 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
-      <header className="flex items-center justify-between px-4 py-3">
-        <Logo />
+      <header className="flex items-center justify-between px-4 py-3 sm:px-6">
+        <Logo className="h-7 sm:h-8" />
         <ThemeToggle />
       </header>
 

@@ -1,46 +1,100 @@
 import { prisma } from "../config/db.js";
-import type { Order, OrderItem } from "../types/order.types.js";
-import { isPaymentIntentSucceeded, updatePaymentIntentMetadata } from "./payment.service.js";
+import type { CreateOrderPayload, Order, OrderItem } from "../types/order.types.js";
+import { refundUnfulfilledPaymentIntent, updatePaymentIntentMetadata, verifyPaymentIntentForOrder } from "./payment.service.js";
 import { assertRestaurantAcceptingOrders, OrderingClosedError } from "./court.service.js";
-
-type CreateOrderPayload = Omit<Order, 'id' | 'status' | 'createdAt'>;
-
-// The card is charged before the order is written, so a court or stall that closes
-// mid-checkout still has to take an order the customer already paid for.
-const isUnclaimedPayment = async (paymentIntentId: string, restaurantId: string) => {
-    const claimed = await prisma.order.findFirst({ where: { paymentIntentId }, select: { id: true } });
-    return !claimed && await isPaymentIntentSucceeded(paymentIntentId, restaurantId);
-}
+import { parseCartLines, priceCart } from "./pricing.service.js";
 
 export const addOrder = async (data: CreateOrderPayload) => {
-    const { restaurantId, totalAmount, items, tableNumber, paymentIntentId, customerName } = data;
+    const {
+        restaurantId,
+        items: rawItems,
+        tableNumber: rawTableNumber,
+        paymentIntentId,
+        customerName: rawCustomerName,
+    } = data;
+    const existingOrder = await prisma.order.findUnique({
+        where: { paymentIntentId },
+        include: { items: true },
+    });
+    if (existingOrder) {
+        if (existingOrder.restaurantId !== restaurantId) {
+            throw new Error("Payment is already associated with another restaurant.");
+        }
+        await updatePaymentIntentMetadata(paymentIntentId, existingOrder.id);
+        return existingOrder;
+    }
 
+    let paymentVerified = false;
     try {
-        await assertRestaurantAcceptingOrders(restaurantId);
-    } catch (error) {
-        const paidBeforeClosing = error instanceof OrderingClosedError
-            && !!paymentIntentId
-            && await isUnclaimedPayment(paymentIntentId, restaurantId);
-        if (!paidBeforeClosing) throw error;
-    }
+        if (typeof rawCustomerName !== "string" || !rawCustomerName.trim()) {
+            throw new Error("Customer name is required.");
+        }
+        if (typeof rawTableNumber !== "number" || !Number.isSafeInteger(rawTableNumber) || rawTableNumber <= 0) {
+            throw new Error("A valid table number is required.");
+        }
+        const lines = parseCartLines(rawItems);
+        const { items, totalAmount } = await verifyPaymentIntentForOrder(paymentIntentId, restaurantId, lines);
+        paymentVerified = true;
+        try {
+            await assertRestaurantAcceptingOrders(restaurantId);
+        } catch (error) {
+            if (!(error instanceof OrderingClosedError)) throw error;
+        }
 
-    const menuIds = [...new Set(items.map((item) => item.menuID))];
-    const ownedItems = await prisma.menu.count({ where: { id: { in: menuIds }, restaurantId } });
-    if (ownedItems !== menuIds.length) {
-        throw new Error("Order contains items from another restaurant");
-    }
+        const newOrder = await createOrderRecord({
+            restaurantId,
+            totalAmount,
+            items,
+            tableNumber: rawTableNumber,
+            paymentIntentId,
+            customerName: rawCustomerName.trim(),
+            status: "PREPARING",
+        });
 
-    const newOrder = await createOrderRecord({ restaurantId, totalAmount, items, tableNumber, paymentIntentId, customerName });
-
-    if (paymentIntentId) {
         await updatePaymentIntentMetadata(paymentIntentId, newOrder.id);
-    }
+        return newOrder;
+    } catch (error) {
+        const concurrentlyCreatedOrder = await prisma.order.findUnique({
+            where: { paymentIntentId },
+            include: { items: true },
+        });
+        if (concurrentlyCreatedOrder?.restaurantId === restaurantId) {
+            await updatePaymentIntentMetadata(paymentIntentId, concurrentlyCreatedOrder.id);
+            return concurrentlyCreatedOrder;
+        }
 
-    return newOrder;
+        if (paymentVerified) {
+            await refundUnfulfilledPaymentIntent(paymentIntentId, restaurantId);
+        }
+        throw error;
+    }
 }
 
-type OrderRecord = Pick<Order, 'restaurantId' | 'totalAmount' | 'tableNumber' | 'customerName' | 'paymentIntentId'> & {
-    items: Pick<OrderItem, 'menuID' | 'quantity' | 'price'>[];
+export const addManualOrder = async (data: Omit<CreateOrderPayload, "paymentIntentId">) => {
+    const { restaurantId, items: rawItems, tableNumber: rawTableNumber, customerName: rawCustomerName } = data;
+    if (typeof rawCustomerName !== "string" || !rawCustomerName.trim()) {
+        throw new Error("Customer name is required.");
+    }
+    if (typeof rawTableNumber !== "number" || !Number.isSafeInteger(rawTableNumber) || rawTableNumber <= 0) {
+        throw new Error("A valid table number is required.");
+    }
+
+    const lines = parseCartLines(rawItems);
+    await assertRestaurantAcceptingOrders(restaurantId);
+    const { items, totalAmount } = await priceCart(restaurantId, lines);
+    return createOrderRecord({
+        restaurantId,
+        totalAmount,
+        items,
+        tableNumber: rawTableNumber,
+        customerName: rawCustomerName.trim(),
+    });
+};
+
+type OrderRecord = Pick<Order, 'restaurantId' | 'totalAmount' | 'tableNumber' | 'customerName'> & {
+    items: (Pick<OrderItem, 'menuID' | 'quantity' | 'price'>)[];
+    paymentIntentId?: string;
+    status?: Order["status"];
     razorpayOrderId?: string;
     razorpayPaymentId?: string;
 };
@@ -51,6 +105,20 @@ export const createOrderRecord = async (data: OrderRecord) => {
     const { restaurantId, totalAmount, items, tableNumber, paymentIntentId, customerName, razorpayOrderId, razorpayPaymentId } = data;
 
     return await prisma.$transaction(async (tx) => {
+        for (const item of items) {
+            const inventory = await tx.menu.updateMany({
+                where: {
+                    id: item.menuID,
+                    restaurantId,
+                    quantity: { gte: item.quantity },
+                },
+                data: { quantity: { decrement: item.quantity } },
+            });
+            if (inventory.count !== 1) {
+                throw new Error("An item sold out before the order could be placed.");
+            }
+        }
+
         const order = await tx.order.create({
             data: {
                 restaurantId,
@@ -60,6 +128,7 @@ export const createOrderRecord = async (data: OrderRecord) => {
                 razorpayOrderId,
                 razorpayPaymentId,
                 customerName,
+                status: data.status,
                 items: {
                     create: items.map((item) => ({
                         menuId: item.menuID,
@@ -72,17 +141,6 @@ export const createOrderRecord = async (data: OrderRecord) => {
                 items: true
             }
         });
-
-        for (const item of items) {
-            await tx.menu.update({
-                where: { id: item.menuID },
-                data: {
-                    quantity: {
-                        decrement: item.quantity
-                    }
-                }
-            });
-        }
 
         return order;
     });
@@ -130,44 +188,77 @@ export const fetchOrdersForTable = async (restaurantId: string, tableNumber: num
     return orders;
 }
 
-export const updateOrderService = async (data: Order) => {
-    const { id, status, totalAmount, items } = data;
+export const updateOrderStatusService = async (id: number, status: Order['status'], restaurantId: string) => {
+    const currentOrder = await prisma.order.findFirst({
+        where: { id, restaurantId },
+        select: { status: true },
+    });
+    if (!currentOrder) {
+        throw new Error("Order not found for this restaurant.");
+    }
+    const allowedTransitions: Record<Order["status"], Order["status"][]> = {
+        PENDING: ["PREPARING", "CANCELLED"],
+        PREPARING: ["READY", "CANCELLED"],
+        READY: ["COMPLETED", "CANCELLED"],
+        COMPLETED: [],
+        CANCELLED: [],
+    };
+    if (!allowedTransitions[currentOrder.status as Order["status"]]?.includes(status)) {
+        throw new Error("This order status transition is not allowed.");
+    }
 
-    const updatedOrder = await prisma.order.update({
-        where: {
-            id: id
-        },
-        data: {
-            status: status,
-            totalAmount: totalAmount,
-            items: {
-                deleteMany: {}, 
-                create: items.map((item) => ({ 
-                    menuId: item.menuID,
-                    quantity: item.quantity,
-                    price: item.price
-                }))
-            }
-        },
+    const result = await prisma.order.updateMany({
+        where: { id, restaurantId, status: currentOrder.status },
+        data: { status },
+    });
+    if (result.count !== 1) {
+        throw new Error("Order not found for this restaurant.");
+    }
+
+    return prisma.order.findFirstOrThrow({
+        where: { id, restaurantId },
         include: {
             items: true
         }
     });
-
-    return updatedOrder;
 }
 
-export const updateOrderStatusService = async (id: number, status: Order['status']) => {
-    const updatedOrder = await prisma.order.update({
-        where: { id: id },
-        data: { status: status },
-        include: {
-            items: true
+export const cancelOrderService = async (id: number, restaurantId: string) =>
+    prisma.$transaction(async (tx) => {
+        const order = await tx.order.findFirst({
+            where: { id, restaurantId },
+            include: { items: true },
+        });
+        if (!order) {
+            throw new Error("Order not found for this restaurant.");
         }
-    });
+        if (order.status === "CANCELLED") {
+            return { order, newlyCancelled: false };
+        }
+        if (order.status === "COMPLETED" || !["PENDING", "PREPARING", "READY"].includes(order.status)) {
+            throw new Error("This order can no longer be cancelled.");
+        }
 
-    return updatedOrder;
-}
+        const update = await tx.order.updateMany({
+            where: { id, restaurantId, status: order.status },
+            data: { status: "CANCELLED" },
+        });
+        if (update.count !== 1) {
+            throw new Error("Order status changed while cancellation was in progress.");
+        }
+
+        for (const item of order.items) {
+            await tx.menu.updateMany({
+                where: { id: item.menuId, restaurantId },
+                data: { quantity: { increment: item.quantity } },
+            });
+        }
+
+        return {
+            order: { ...order, status: "CANCELLED" },
+            newlyCancelled: true,
+        };
+    });
 
 export const fetchPaymentDetailsForRestaurant = async (restaurantId: string) => {
     const restaurant = await prisma.restaurant.findUnique({

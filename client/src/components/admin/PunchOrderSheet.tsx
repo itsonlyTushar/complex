@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useGetMenus } from "@/hooks/queries/useMenuQuery";
 import { useGetMe } from "@/hooks/queries/useUserQuery";
-import { useAddOrder } from "@/hooks/mutations/useOrderMutation";
+import { useCreateManualOrder } from "@/hooks/mutations/useOrderMutation";
 import { toast } from "@/lib/toast";
 import { Plus, Minus, ShoppingCart, Trash2 } from "lucide-react";
 import type { Menu } from "@/types/menu.types";
@@ -45,7 +45,7 @@ export function PunchOrderSheet() {
       : null;
 
   const { data: menus = [], isLoading: isMenuLoading } = useGetMenus();
-  const { mutate: addOrder, isPending: isSubmitting } = useAddOrder();
+  const { mutate: addOrder, isPending: isSubmitting } = useCreateManualOrder();
 
   const filteredMenus = useMemo(() => {
     if (!searchQuery.trim()) return menus;
@@ -121,13 +121,11 @@ export function PunchOrderSheet() {
     addOrder(
       {
         restaurantId,
-        totalAmount: Math.round(cartTotal),
         tableNumber: parsedTable,
         customerName: customerName.trim(),
         items: cart.map((item) => ({
           menuID: item.menuId,
           quantity: item.quantity,
-          price: Math.round(item.price),
         })),
       },
       {
@@ -136,8 +134,8 @@ export function PunchOrderSheet() {
           resetForm();
           setOpen(false);
         },
-        onError: (error: any) => {
-          toast.error(error.message || "Failed to punch order.");
+        onError: (error: unknown) => {
+          toast.error(error instanceof Error ? error.message : "Failed to punch order.");
         },
       }
     );

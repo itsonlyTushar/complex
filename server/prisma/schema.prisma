@@ -112,7 +112,7 @@ model Order {
   createdAt       DateTime    @default(now())
   restaurantId    String
   tableNumber     Int
-  paymentIntentId String?
+  paymentIntentId String?     @unique
   razorpayOrderId   String?
   razorpayPaymentId String?     @unique
   customerName    String

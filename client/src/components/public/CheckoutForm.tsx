@@ -36,15 +36,9 @@ export function CheckoutForm({ restaurantId, cartItems, cartTotal, onSuccess, ta
     setIsProcessing(true);
 
     try {
-      const amountInCents = Math.round(cartTotal * 100);
-      const commissionInCents = Math.round(amountInCents * 0.05);
-
       const paymentIntentResponse = await createPaymentIntent({
-        amount: amountInCents,
-        currency: "usd",
-        application_fee_amount: commissionInCents,
-        commissionAmount: commissionInCents.toString(),
         restaurantId,
+        items: cartItems.map((item) => ({ menuID: item.id, quantity: item.cartQuantity })),
       });
 
       const clientSecret = paymentIntentResponse?.paymentIntent?.client_secret;
@@ -72,14 +66,12 @@ export function CheckoutForm({ restaurantId, cartItems, cartTotal, onSuccess, ta
       if (paymentIntent?.status === "succeeded") {
         await addOrder({
           restaurantId,
-          totalAmount: Math.round(cartTotal),
           tableNumber: details.tableNumber,
           paymentIntentId,
           customerName: details.customerName,
           items: cartItems.map((item) => ({
             menuID: item.id,
             quantity: item.cartQuantity,
-            price: Math.round(item.price),
           })),
         });
 

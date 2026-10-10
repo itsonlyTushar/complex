@@ -3,7 +3,10 @@ import { fetchRestaurantService, deleteRestaurantService, editRestaurantService,
 
 export const fetchRestaurantsController = async (req: Request, res: Response) => {
     try {
-        const foodCourtId = (req as any).user?.foodCourtId
+        const foodCourtId = req.user?.foodCourtId
+        if (!foodCourtId) {
+            return res.status(403).json({ message: "No food court is associated with this user." });
+        }
         const data = await fetchRestaurantService(foodCourtId)
         res.status(200).json(data)
     } catch(error: any) {
@@ -13,8 +16,8 @@ export const fetchRestaurantsController = async (req: Request, res: Response) =>
 
 export const deleteRestaurantController = async (req: Request, res: Response) => {
     try {
-        const foodCourtId = (req as any).user?.foodCourtId;
-        const userRole = (req as any).user?.role;
+        const foodCourtId = req.user?.foodCourtId;
+        const userRole = req.user?.role;
         const { id } = req.params;
 
         if (userRole !== "FOOD_COURT_ADMIN") {
@@ -36,8 +39,8 @@ export const deleteRestaurantController = async (req: Request, res: Response) =>
 
 export const editRestaurantController = async (req: Request, res: Response) => {
     try {
-        const foodCourtId = (req as any).user?.foodCourtId;
-        const userRole = (req as any).user?.role;
+        const foodCourtId = req.user?.foodCourtId;
+        const userRole = req.user?.role;
         const { id } = req.params;
         const updateData = req.body;
 
@@ -60,8 +63,8 @@ export const editRestaurantController = async (req: Request, res: Response) => {
 
 export const updateFoodCourtStatusController = async (req: Request, res: Response) => {
     try {
-        const foodCourtId = (req as any).user?.foodCourtId;
-        const userRole = (req as any).user?.role;
+        const foodCourtId = req.user?.foodCourtId;
+        const userRole = req.user?.role;
         const { isClosed } = req.body;
 
         if (userRole !== "FOOD_COURT_ADMIN" || !foodCourtId) {
@@ -116,7 +119,7 @@ export const fetchPublicRestaurantDetailsController = async (req: Request, res: 
 
 export const getMyFoodCourtIdController = async (req: Request, res: Response) => {
     try {
-        const foodCourtId = (req as any).user?.foodCourtId;
+        const foodCourtId = req.user?.foodCourtId;
         if (!foodCourtId) {
              res.status(404).json({ message: "No food court associated with this user" });
              return;

@@ -14,11 +14,12 @@ import {
   createRazorpayCheckout,
   verifyRazorpayPayment,
 } from "../../services/razorpay.service.js";
-import type { RazorpayCheckoutPayload } from "../../types/payment.types.js";
+import type { CreatePaymentIntentPayload, RazorpayCheckoutPayload } from "../../types/payment.types.js";
+import { parseCartLines } from "../../services/pricing.service.js";
 
 export const onboardRestaurantStripeController = async (req: Request, res: Response) => {
   try {
-    const restaurantId = (req as any).user?.restaurantId || (req.body.restaurantId || req.query.restaurantId) as string;
+    const restaurantId = req.user?.restaurantId;
 
     if (!restaurantId) {
       return res.status(400).json({ error: "Restaurant ID is required." });
@@ -37,7 +38,7 @@ export const onboardRestaurantStripeController = async (req: Request, res: Respo
 
 export const verifyOnboardingController = async (req: Request, res: Response) => {
   try {
-    const restaurantId = (req as any).user?.restaurantId;
+    const restaurantId = req.user?.restaurantId;
 
     if (!restaurantId) {
       return res.status(400).json({ error: "Restaurant ID is required." });
@@ -56,23 +57,13 @@ export const verifyOnboardingController = async (req: Request, res: Response) =>
 
 export const createPaymentIntentController = async (req: Request, res: Response) => {
   try {
-    const { amount, currency, commissionAmount, application_fee_amount, orderId, restaurantId } = req.body;
-
-    const resolvedRestaurantId = restaurantId || (req as any).user?.restaurantId;
-
-    if (!resolvedRestaurantId) {
+    const body = req.body as Partial<CreatePaymentIntentPayload> | null;
+    if (typeof body?.restaurantId !== "string" || !body.restaurantId) {
       return res.status(400).json({ error: "Restaurant ID is required." });
     }
 
-    const paymentData = {
-      amount,
-      currency,
-      commissionAmount,
-      application_fee_amount,
-      orderId,
-    };
-
-    const paymentIntent = await createPaymentIntent(paymentData, resolvedRestaurantId);
+    const items = parseCartLines(body.items);
+    const paymentIntent = await createPaymentIntent(body.restaurantId, items);
 
     res.status(200).json({
       message: "Payment intent created successfully.",
@@ -85,15 +76,14 @@ export const createPaymentIntentController = async (req: Request, res: Response)
 
 export const refundPaymentController = async (req: Request, res: Response) => {
   try {
-    const { orderId, restaurantId } = req.body;
-
-    const resolvedRestaurantId = restaurantId || (req as any).user?.restaurantId;
+    const { orderId } = req.body ?? {};
+    const resolvedRestaurantId = req.user?.restaurantId;
 
     if (!resolvedRestaurantId) {
-      return res.status(400).json({ error: "Restaurant ID is required." });
+      return res.status(403).json({ error: "No restaurant ID found for this user." });
     }
 
-    if (!orderId) {
+    if (!Number.isSafeInteger(orderId)) {
       return res.status(400).json({ error: "Order ID is required." });
     }
 
@@ -125,7 +115,7 @@ export const stripeWebhookController = async (req: Request, res: Response) => {
 
 export const connectRazorpayController = async (req: Request, res: Response) => {
   try {
-    const restaurantId = (req as any).user?.restaurantId;
+    const restaurantId = req.user?.restaurantId;
     const { keyId, keySecret } = req.body;
 
     if (!restaurantId) {
@@ -149,7 +139,7 @@ export const connectRazorpayController = async (req: Request, res: Response) => 
 
 export const disconnectRazorpayController = async (req: Request, res: Response) => {
   try {
-    const restaurantId = (req as any).user?.restaurantId;
+    const restaurantId = req.user?.restaurantId;
 
     if (!restaurantId) {
       return res.status(403).json({ error: "No restaurant ID found for this user." });
@@ -162,25 +152,29 @@ export const disconnectRazorpayController = async (req: Request, res: Response) 
   }
 };
 
-const parseCheckoutPayload = (body: any): RazorpayCheckoutPayload => {
-  const { restaurantId, items, customerName, tableNumber } = body;
-
+const parseCheckoutDetails = (body: unknown) => {
+  if (!body || typeof body !== "object") {
+    throw new Error("Checkout details are required.");
+  }
+  const { restaurantId, items, customerName, tableNumber } = body as Record<string, unknown>;
   if (typeof restaurantId !== "string" || !restaurantId) {
     throw new Error("Restaurant ID is required.");
   }
-  if (!Array.isArray(items) || items.length === 0) {
-    throw new Error("Your cart is empty.");
-  }
+  return { restaurantId, items, customerName, tableNumber };
+};
+
+const parseCheckoutPayload = (body: unknown): RazorpayCheckoutPayload => {
+  const { restaurantId, items, customerName, tableNumber } = parseCheckoutDetails(body);
   if (typeof customerName !== "string" || !customerName.trim()) {
     throw new Error("Customer name is required.");
   }
-  if (!Number.isInteger(tableNumber) || tableNumber <= 0) {
+  if (typeof tableNumber !== "number" || !Number.isSafeInteger(tableNumber) || tableNumber <= 0) {
     throw new Error("A valid table number is required.");
   }
 
   return {
     restaurantId,
-    items: items.map((item: any) => ({ menuID: Number(item?.menuID), quantity: Number(item?.quantity) })),
+    items: parseCartLines(items),
     customerName: customerName.trim(),
     tableNumber,
   };
@@ -197,14 +191,14 @@ export const createRazorpayOrderController = async (req: Request, res: Response)
 
 export const verifyRazorpayPaymentController = async (req: Request, res: Response) => {
   try {
-    const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+    const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body ?? {};
 
     if (![razorpayOrderId, razorpayPaymentId, razorpaySignature].every((value) => typeof value === "string" && value)) {
       return res.status(400).json({ error: "Payment details are missing." });
     }
 
     const order = await verifyRazorpayPayment({
-      ...parseCheckoutPayload(req.body),
+      ...parseCheckoutDetails(req.body),
       razorpayOrderId,
       razorpayPaymentId,
       razorpaySignature,
@@ -218,7 +212,7 @@ export const verifyRazorpayPaymentController = async (req: Request, res: Respons
 
 export const getRestaurantsCommissionController = async (req: Request, res: Response) => {
   try {
-    const userRole = (req as any).user?.role;
+    const userRole = req.user?.role;
     if (userRole !== "SUPER_ADMIN") {
       return res.status(403).json({ error: "Access denied. Super Admin privileges required." });
     }
@@ -232,7 +226,7 @@ export const getRestaurantsCommissionController = async (req: Request, res: Resp
 
 export const updateRestaurantCommissionController = async (req: Request, res: Response) => {
   try {
-    const userRole = (req as any).user?.role;
+    const userRole = req.user?.role;
     if (userRole !== "SUPER_ADMIN") {
       return res.status(403).json({ error: "Access denied. Super Admin privileges required." });
     }
@@ -240,8 +234,8 @@ export const updateRestaurantCommissionController = async (req: Request, res: Re
     const { id } = req.params;
     const { commissionRate } = req.body;
 
-    if (commissionRate === undefined || isNaN(Number(commissionRate))) {
-      return res.status(400).json({ error: "Valid commissionRate is required." });
+    if (!Number.isFinite(Number(commissionRate)) || Number(commissionRate) < 0 || Number(commissionRate) > 100) {
+      return res.status(400).json({ error: "Commission rate must be between 0 and 100." });
     }
 
     const updated = await updateRestaurantCommission(id as string, Number(commissionRate));

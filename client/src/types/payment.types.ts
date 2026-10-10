@@ -9,11 +9,8 @@ export type Payment = {
 };
 
 export interface PaymentIntentPayload {
-    amount: number;
-    currency: string;
-    commissionAmount: string;
-    application_fee_amount: number;
     restaurantId: string;
+    items: { menuID: number; quantity: number }[];
 }
 
 export interface PaymentIntentResponse {

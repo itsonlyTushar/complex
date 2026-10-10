@@ -5,7 +5,7 @@ export interface FoodCourtAdmin {
 }
 
 export interface FoodCourtItem {
-  id: number;
+  id: string;
   name: string;
   location: string | null;
   currancy: string;
@@ -14,11 +14,24 @@ export interface FoodCourtItem {
 }
 
 export interface EditingFormState {
-  id: number;
+  id: string;
   foodCourtName: string;
   email: string;
   managementDetails: string;
   location: string;
   currancy: string;
   paymentSystem: string;
+}
+
+export interface RestaurantCommission {
+  id: string;
+  name: string;
+  stripeAccountId: string | null;
+  onBoradingCompleted: boolean;
+  razorpayKeyId: string | null;
+  commissionRate: number;
+  foodCourt: {
+    name: string;
+    paymentSystem: string;
+  };
 }

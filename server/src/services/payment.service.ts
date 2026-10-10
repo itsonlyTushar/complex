@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { prisma } from "../config/db.js";
-import type { Payments } from "../types/payment.types.js";
+import type { CartLine } from "../types/payment.types.js";
+import { fingerprintCart, priceCart } from "./pricing.service.js";
 import { assertRestaurantAcceptingOrders } from "./court.service.js";
 
 const stripeKey = process.env.STRIPE_SECRET || process.env.STRIPE_SECRET_KEY;
@@ -89,11 +90,15 @@ export const verifyRestaurantOnboarding = async (restaurantId: string) => {
     return { completed }
 }
 
-export const createPaymentIntent = async (data: Payments, restaurantId: string) => {
-    const { amount, currency, commissionAmount, application_fee_amount, orderId } = data;
-
+export const createPaymentIntent = async (restaurantId: string, lines: CartLine[]) => {
     const restaurant = await prisma.restaurant.findUnique({
-        where: { id: restaurantId }
+        where: { id: restaurantId },
+        select: {
+            id: true,
+            stripeAccountId: true,
+            commissionRate: true,
+            foodCourt: { select: { currancy: true, paymentSystem: true } },
+        },
     });
 
     if (!restaurant) {
@@ -104,13 +109,30 @@ export const createPaymentIntent = async (data: Payments, restaurantId: string) 
         throw new Error("Restaurant does not have a Stripe account onboarded");
     }
 
+    if (restaurant.foodCourt.paymentSystem.toLowerCase() !== "stripe") {
+        throw new Error("Stripe is not enabled for this food court.");
+    }
+
     await assertRestaurantAcceptingOrders(restaurantId);
 
+    const { items, totalAmount } = await priceCart(restaurantId, lines);
+    const currency = restaurant.foodCourt.currancy.toLowerCase();
+    if (!/^[a-z]{3}$/.test(currency)) {
+        throw new Error("The food court has an invalid payment currency.");
+    }
+
     const commissionRate = restaurant.commissionRate ?? 5.0;
-    const computedFee = Math.round(amount * (commissionRate / 100));
+    if (!Number.isFinite(commissionRate) || commissionRate < 0 || commissionRate > 100) {
+        throw new Error("The restaurant commission rate is invalid.");
+    }
+    const amountInMinorUnits = totalAmount * 100;
+    if (!Number.isSafeInteger(amountInMinorUnits)) {
+        throw new Error("The cart total is too large to process.");
+    }
+    const computedFee = Math.round(amountInMinorUnits * (commissionRate / 100));
 
     const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount),
+        amount: amountInMinorUnits,
         currency,
         application_fee_amount: computedFee,
         transfer_data: {
@@ -118,7 +140,7 @@ export const createPaymentIntent = async (data: Payments, restaurantId: string) 
         },
         metadata: {
             restaurantId: restaurantId.toString(),
-            orderId: orderId ? orderId.toString() : "",
+            cartHash: fingerprintCart(items),
             commissionAmount: computedFee.toString(),
         }
     });
@@ -126,25 +148,62 @@ export const createPaymentIntent = async (data: Payments, restaurantId: string) 
     return paymentIntent;
 };
 
-export const isPaymentIntentSucceeded = async (paymentIntentId: string, restaurantId: string) => {
-    try {
-        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-        return paymentIntent.status === "succeeded" && paymentIntent.metadata.restaurantId === restaurantId;
-    } catch {
-        return false;
+export const verifyPaymentIntentForOrder = async (
+    paymentIntentId: string,
+    restaurantId: string,
+    lines: CartLine[],
+) => {
+    const { items, totalAmount } = await priceCart(restaurantId, lines);
+    const restaurant = await prisma.restaurant.findUnique({
+        where: { id: restaurantId },
+        select: {
+            stripeAccountId: true,
+            foodCourt: { select: { currancy: true } },
+        },
+    });
+    if (!restaurant?.stripeAccountId) {
+        throw new Error("Restaurant payment configuration was not found.");
     }
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const destination = paymentIntent.transfer_data?.destination;
+    const destinationId = typeof destination === "string" ? destination : destination?.id;
+    const expectedCurrency = restaurant.foodCourt.currancy.toLowerCase();
+    if (
+        paymentIntent.status !== "succeeded"
+        || paymentIntent.metadata.restaurantId !== restaurantId
+        || paymentIntent.metadata.cartHash !== fingerprintCart(items)
+        || paymentIntent.amount !== totalAmount * 100
+        || paymentIntent.currency.toLowerCase() !== expectedCurrency
+        || destinationId !== restaurant.stripeAccountId
+    ) {
+        throw new Error("Payment does not match this restaurant and cart.");
+    }
+
+    return { items, totalAmount };
+};
+
+export const refundUnfulfilledPaymentIntent = async (paymentIntentId: string, restaurantId: string) => {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    if (paymentIntent.metadata.restaurantId !== restaurantId || paymentIntent.status !== "succeeded") {
+        return;
+    }
+
+    await stripe.refunds.create({
+        payment_intent: paymentIntentId,
+        reverse_transfer: true,
+        refund_application_fee: true,
+    }, {
+        idempotencyKey: `unfulfilled-order-${paymentIntentId}`.slice(0, 255),
+    });
 };
 
 export const updatePaymentIntentMetadata = async (paymentIntentId: string, orderId: number) => {
-    try {
-        await stripe.paymentIntents.update(paymentIntentId, {
-            metadata: {
-                orderId: orderId.toString(),
-            },
-        });
-    } catch (error) {
-        console.error("Failed to update Stripe payment intent metadata:", error);
-    }
+    await stripe.paymentIntents.update(paymentIntentId, {
+        metadata: {
+            orderId: orderId.toString(),
+        },
+    });
 };
 
 
@@ -161,9 +220,10 @@ export const refundPayment = async (restaurantId: string, orderId: number) => {
         throw new Error("Restaurant does not have a Stripe account onboarded");
     }
 
-    const order = await prisma.order.findUnique({
+    const order = await prisma.order.findFirst({
         where: {
-            id: orderId
+            id: orderId,
+            restaurantId,
         }
     });
 
@@ -181,6 +241,8 @@ export const refundPayment = async (restaurantId: string, orderId: number) => {
         payment_intent: paymentIntent,
         reverse_transfer: true,
         refund_application_fee: true,
+    }, {
+        idempotencyKey: `order-refund-${orderId}`,
     });
 
     return refund;

@@ -13,7 +13,7 @@ export interface Order {
     userId?: number;
     restaurantId: string;
     totalAmount: number;
-    status: 'PENDING' | 'PREPARING' | 'COMPLETED' | 'CANCELLED';
+    status: 'PENDING' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED';
     createdAt: Date;
     tableNumber: number;
     paymentIntentId?: string;
@@ -21,6 +21,12 @@ export interface Order {
     items: OrderItem[];
 }
 
-export type CreateOrderPayload = Omit<Order, "id" | "status" | "createdAt" | "items"> & {
-    items: Omit<OrderItem, "id">[];
+export type CreateOrderPayload = {
+    restaurantId: string;
+    paymentIntentId: string;
+    customerName: string;
+    tableNumber: number;
+    items: { menuID: number; quantity: number }[];
 };
+
+export type CreateManualOrderPayload = Omit<CreateOrderPayload, "paymentIntentId">;

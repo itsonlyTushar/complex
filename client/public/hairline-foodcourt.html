@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minimalist Hairline Food Court Animation</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Page container demonstration (simulating light / dark toggle) */
+    body {
+      background-color: var(--background, #0B0B0F);
+      color: var(--foreground, #FFFFFF);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+
+    /* =========================================================================
+     * COMPONENT ROOT & THEME VARIABLES
+     * Sits on top of whatever background the app uses.
+     * ========================================================================= */
+    .hairline-foodcourt {
+      --fc-line:    color-mix(in srgb, var(--foreground, currentColor) 22%, transparent);  /* static floor plan */
+      --fc-text:    color-mix(in srgb, var(--foreground, currentColor) 55%, transparent);  /* labels */
+      --fc-accent:  var(--primary, #3B82F6);    /* active order line, packet, highlighted shop */
+      --fc-success: var(--success, #10B981);    /* "ready" return line */
+
+      width: 100%;
+      max-width: 800px;
+      background: transparent;
+      font-family: inherit;
+    }
+
+    .hairline-foodcourt svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    /* Strokes only: 1px hairline rendering */
+    .fc-static-stroke {
+      stroke: var(--fc-line);
+      stroke-width: 1px;
+      vector-effect: non-scaling-stroke;
+      fill: none;
+    }
+
+    .fc-static-text {
+      fill: var(--fc-text);
+      font-family: inherit;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .fc-order-line {
+      stroke: var(--fc-accent);
+      stroke-width: 1px;
+      vector-effect: non-scaling-stroke;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .fc-ready-line {
+      stroke: var(--fc-success);
+      stroke-width: 1px;
+      vector-effect: non-scaling-stroke;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .fc-order-packet {
+      fill: var(--fc-accent);
+    }
+
+    .fc-ready-packet {
+      fill: var(--fc-success);
+    }
+
+    .fc-pulse-ring {
+      stroke: var(--fc-accent);
+      stroke-width: 1px;
+      vector-effect: non-scaling-stroke;
+      fill: none;
+    }
+
+    /* CSS state classes (zero color animation in JS) */
+    .fc-shop.is-active .fc-shop-rect {
+      stroke: var(--fc-accent);
+    }
+
+    .fc-shop.is-ready .fc-shop-rect {
+      stroke: var(--fc-success);
+    }
+
+    .fc-shop.is-active .fc-shop-name {
+      fill: var(--fc-accent);
+    }
+
+    .fc-shop.is-ready .fc-shop-name {
+      fill: var(--fc-success);
+    }
+
+    .fc-table.is-ordering .fc-table-circle {
+      stroke: var(--fc-accent);
+    }
+
+    .fc-table.is-ready .fc-table-circle {
+      stroke: var(--fc-success);
+    }
+
+    .fc-table.is-ordering .fc-table-label {
+      fill: var(--fc-accent);
+    }
+
+    .fc-table.is-ready .fc-table-label {
+      fill: var(--fc-success);
+    }
+
+    .fc-prep-bar {
+      stroke: var(--fc-accent);
+      stroke-width: 1px;
+      vector-effect: non-scaling-stroke;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Component Container -->
+  <div class="hairline-foodcourt" id="foodcourt-container">
+    <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet">
+      <!-- Dynamic Wire Layer (Active paths & packets) -->
+      <g id="wires-layer"></g>
+
+      <!-- Shops Layer (4 clean rounded rectangles) -->
+      <g id="shops-layer"></g>
+
+      <!-- Tables Layer (6 clean circles) -->
+      <g id="tables-layer"></g>
+    </svg>
+  </div>
+
+  <script>
+    /* =========================================================================
+     * CONFIGURATION
+     * ========================================================================= */
+    const CONFIG = {
+      timing: {
+        orderInterval: 3.4,     // Seconds between order starts (never > 2 concurrent)
+        lineDrawDuration: 1.0,  // Hairline outbound draw duration
+        prepDuration: 1.0,      // Shop prep fill duration
+        returnDuration: 0.8,    // Ready return line duration
+        readyHoldDuration: 1.2, // Duration table displays "READY"
+      },
+      shops: [
+        { id: "S1", name: "TACOS",   x: 130, y: 35,  w: 160, h: 44, edge: "top" },
+        { id: "S2", name: "RAMEN",   x: 510, y: 35,  w: 160, h: 44, edge: "top" },
+        { id: "S3", name: "TAPROOM", x: 130, y: 420, w: 160, h: 44, edge: "bottom" },
+        { id: "S4", name: "COFFEE",  x: 510, y: 420, w: 160, h: 44, edge: "bottom" },
+      ],
+      tables: [
+        { id: "T1", x: 210, y: 190, r: 20 },
+        { id: "T2", x: 400, y: 190, r: 20 },
+        { id: "T3", x: 590, y: 190, r: 20 },
+        { id: "T4", x: 210, y: 310, r: 20 },
+        { id: "T5", x: 400, y: 310, r: 20 },
+        { id: "T6", x: 590, y: 310, r: 20 },
+      ],
+      orders: [
+        { tableId: "T1", shopId: "S1", tag: "#101 · 2 ITEMS" },
+        { tableId: "T6", shopId: "S4", tag: "#102 · 1 ITEM" },
+        { tableId: "T2", shopId: "S2", tag: "#103 · 3 ITEMS" },
+        { tableId: "T4", shopId: "S3", tag: "#104 · 2 ITEMS" },
+        { tableId: "T3", shopId: "S2", tag: "#105 · 1 ITEM" },
+        { tableId: "T5", shopId: "S4", tag: "#106 · 2 ITEMS" },
+      ],
+    };
+
+    /* Softly rounded right-angle orthogonal path generator with zero crossing */
+    function createOrthogonalPath(startX, startY, endX, endY, channelY, radius = 6) {
+      if (Math.abs(startX - endX) < radius * 2) {
+        return `M ${startX} ${startY} L ${endX} ${endY}`;
+      }
+
+      const isGoingDown = channelY > startY;
+      const isTargetBelow = endY > channelY;
+      const isGoingRight = endX > startX;
+
+      const r1y = isGoingDown ? radius : -radius;
+      const r1x = isGoingRight ? radius : -radius;
+      const r2x = isGoingRight ? -radius : radius;
+      const r2y = isTargetBelow ? radius : -radius;
+
+      return [
+        `M ${startX} ${startY}`,
+        `L ${startX} ${channelY - r1y}`,
+        `Q ${startX} ${channelY} ${startX + r1x} ${channelY}`,
+        `L ${endX + r2x} ${channelY}`,
+        `Q ${endX} ${channelY} ${endX} ${channelY + r2y}`,
+        `L ${endX} ${endY}`,
+      ].join(" ");
+    }
+
+    function getRoute(tableId, shopId, isReturn = false) {
+      const table = CONFIG.tables.find(t => t.id === tableId);
+      const shop = CONFIG.shops.find(s => s.id === shopId);
+      const offset = isReturn ? 4 : -4;
+      const isShopTop = shop.edge === "top";
+
+      const startX = table.x + offset;
+      const startY = isShopTop ? table.y - table.r : table.y + table.r;
+      const targetX = shop.x + shop.w / 2 + offset;
+      const targetY = isShopTop ? shop.y + shop.h : shop.y;
+
+      const channelY = isShopTop
+        ? table.y === 190 ? 115 + offset : 135 + offset
+        : table.y === 310 ? 385 + offset : 365 + offset;
+
+      return isReturn
+        ? createOrthogonalPath(targetX, targetY, startX, startY, channelY)
+        : createOrthogonalPath(startX, startY, targetX, targetY, channelY);
+    }
+
+    const container = document.getElementById("foodcourt-container");
+    const wiresLayer = document.getElementById("wires-layer");
+    const shopsLayer = document.getElementById("shops-layer");
+    const tablesLayer = document.getElementById("tables-layer");
+
+    // Render Shops
+    CONFIG.shops.forEach(shop => {
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.setAttribute("id", `fc-shop-${shop.id}`);
+      g.setAttribute("class", "fc-shop");
+      g.innerHTML = `
+        <rect class="fc-shop-rect fc-static-stroke" x="${shop.x}" y="${shop.y}" width="${shop.w}" height="${shop.h}" rx="6" />
+        <text class="fc-shop-name fc-static-text" x="${shop.x + shop.w / 2}" y="${shop.y + 18}" text-anchor="middle" dominant-baseline="central">${shop.name}</text>
+        <line class="fc-static-stroke" x1="${shop.x + 16}" y1="${shop.y + shop.h - 8}" x2="${shop.x + shop.w - 16}" y2="${shop.y + shop.h - 8}" opacity="0.3" />
+        <line id="fc-prep-${shop.id}" class="fc-prep-bar" x1="${shop.x + 16}" y1="${shop.y + shop.h - 8}" x2="${shop.x + 16}" y2="${shop.y + shop.h - 8}" opacity="0" />
+        <g id="fc-tag-${shop.id}" opacity="0">
+          <text id="fc-tag-text-${shop.id}" class="fc-static-text" fill="var(--fc-accent)" x="${shop.x + shop.w / 2}" y="${shop.edge === 'top' ? shop.y - 10 : shop.y + shop.h + 16}" text-anchor="middle" dominant-baseline="central" font-size="9px">#101 · 2 ITEMS</text>
+        </g>
+      `;
+      shopsLayer.appendChild(g);
+    });
+
+    // Render Tables
+    CONFIG.tables.forEach(table => {
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.setAttribute("id", `fc-table-${table.id}`);
+      g.setAttribute("class", "fc-table");
+      g.innerHTML = `
+        <circle class="fc-table-circle fc-static-stroke" cx="${table.x}" cy="${table.y}" r="${table.r}" />
+        <text id="fc-label-${table.id}" class="fc-table-label fc-static-text" x="${table.x}" y="${table.y}" text-anchor="middle" dominant-baseline="central">${table.id}</text>
+        <circle id="fc-pulse-${table.id}" class="fc-pulse-ring" cx="${table.x}" cy="${table.y}" r="${table.r}" opacity="0" />
+      `;
+      tablesLayer.appendChild(g);
+    });
+
+    // Reduced motion check
+    const isReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (isReducedMotion) {
+      // Show one static completed order frame
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("class", "fc-order-line");
+      path.setAttribute("d", getRoute("T1", "S1", false));
+      wiresLayer.appendChild(path);
+
+      const packet = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      packet.setAttribute("class", "fc-order-packet");
+      packet.setAttribute("cx", "206");
+      packet.setAttribute("cy", "79");
+      packet.setAttribute("r", "2.5");
+      wiresLayer.appendChild(packet);
+
+      document.getElementById("fc-shop-S1").classList.add("is-active");
+      document.getElementById("fc-tag-S1").setAttribute("opacity", "1");
+      document.getElementById("fc-table-T1").classList.add("is-ordering");
+    } else {
+      let orderIndex = 0;
+      const activeTimelines = new Set();
+      let nextTimer = null;
+
+      gsap.globalTimeline.resume();
+
+      function runOrder(order) {
+        const table = CONFIG.tables.find(t => t.id === order.tableId);
+        const shop = CONFIG.shops.find(s => s.id === order.shopId);
+        if (!table || !shop) return;
+
+        const tableGroup = document.getElementById(`fc-table-${table.id}`);
+        const tableLabel = document.getElementById(`fc-label-${table.id}`);
+        const pulseRing = document.getElementById(`fc-pulse-${table.id}`);
+        const shopGroup = document.getElementById(`fc-shop-${shop.id}`);
+        const prepLine = document.getElementById(`fc-prep-${shop.id}`);
+        const tag = document.getElementById(`fc-tag-${shop.id}`);
+        const tagText = document.getElementById(`fc-tag-text-${shop.id}`);
+
+        const outPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        outPath.setAttribute("class", "fc-order-line");
+        outPath.setAttribute("d", getRoute(table.id, shop.id, false));
+        wiresLayer.appendChild(outPath);
+
+        const retPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        retPath.setAttribute("class", "fc-ready-line");
+        retPath.setAttribute("d", getRoute(table.id, shop.id, true));
+        retPath.setAttribute("opacity", "0");
+        wiresLayer.appendChild(retPath);
+
+        const packet = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        packet.setAttribute("class", "fc-order-packet");
+        packet.setAttribute("r", "2.5");
+        packet.setAttribute("opacity", "0");
+        wiresLayer.appendChild(packet);
+
+        const outLen = outPath.getTotalLength();
+        outPath.style.strokeDasharray = outLen;
+        outPath.style.strokeDashoffset = outLen;
+
+        const retLen = retPath.getTotalLength();
+        retPath.style.strokeDasharray = retLen;
+        retPath.style.strokeDashoffset = retLen;
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            activeTimelines.delete(tl);
+            outPath.remove();
+            retPath.remove();
+            packet.remove();
+          }
+        });
+        activeTimelines.add(tl);
+
+        // 1. Table pulse ring
+        tl.add(() => tableGroup.classList.add("is-ordering"));
+        tl.fromTo(pulseRing, 
+          { attr: { r: table.r }, opacity: 0.9 },
+          { attr: { r: table.r + 14 }, opacity: 0, duration: 0.7, ease: "sine.out" }
+        );
+
+        // 2. Outbound line draws + packet dot travels
+        const packetProxy = { p: 0 };
+        tl.to(packet, { opacity: 1, duration: 0.1 }, "<0.1");
+        tl.to(outPath, { strokeDashoffset: 0, duration: CONFIG.timing.lineDrawDuration, ease: "power2.inOut" }, "<");
+        tl.to(packetProxy, {
+          p: 1,
+          duration: CONFIG.timing.lineDrawDuration,
+          ease: "power2.inOut",
+          onUpdate: () => {
+            const pt = outPath.getPointAtLength(packetProxy.p * outLen);
+            packet.setAttribute("cx", pt.x);
+            packet.setAttribute("cy", pt.y);
+          }
+        }, "<");
+
+        // 3. Shop confirms + tag displays
+        tl.add(() => {
+          packet.setAttribute("opacity", "0");
+          shopGroup.classList.add("is-active");
+          tagText.textContent = order.tag;
+        });
+        tl.to(tag, { opacity: 1, duration: 0.3, ease: "power1.out" });
+
+        // 4. Shop prep line fills along bottom rail
+        if (prepLine) {
+          const prepY = shop.y + shop.h - 8;
+          const xEnd = shop.x + shop.w - 16;
+          tl.set(prepLine, { attr: { x1: shop.x + 16, y1: prepY, x2: shop.x + 16, y2: prepY }, opacity: 1 });
+          tl.to(prepLine, { attr: { x2: xEnd }, duration: CONFIG.timing.prepDuration, ease: "power1.inOut" });
+        }
+
+        // 5. Return line draws in success color + table reads READY
+        tl.add(() => {
+          retPath.setAttribute("opacity", "1");
+          packet.setAttribute("class", "fc-ready-packet");
+          packet.setAttribute("opacity", "1");
+          shopGroup.classList.remove("is-active");
+          shopGroup.classList.add("is-ready");
+        });
+
+        const returnProxy = { p: 0 };
+        tl.to(retPath, { strokeDashoffset: 0, duration: CONFIG.timing.returnDuration, ease: "power2.inOut" });
+        tl.to(returnProxy, {
+          p: 1,
+          duration: CONFIG.timing.returnDuration,
+          ease: "power2.inOut",
+          onUpdate: () => {
+            const pt = retPath.getPointAtLength(returnProxy.p * retLen);
+            packet.setAttribute("cx", pt.x);
+            packet.setAttribute("cy", pt.y);
+          }
+        }, "<");
+
+        // Arrive at table
+        tl.add(() => {
+          packet.setAttribute("opacity", "0");
+          tableGroup.classList.remove("is-ordering");
+          tableGroup.classList.add("is-ready");
+          tableLabel.textContent = "READY";
+        });
+        tl.fromTo(pulseRing,
+          { attr: { r: table.r }, opacity: 0.9, stroke: "var(--fc-success)" },
+          { attr: { r: table.r + 14 }, opacity: 0, duration: 0.7, ease: "sine.out" },
+          "<"
+        );
+
+        // 6. Reset to idle
+        tl.to([outPath, retPath], { opacity: 0, duration: 0.4 }, `+=${CONFIG.timing.readyHoldDuration}`);
+        tl.to(tag, { opacity: 0, duration: 0.3 }, "<");
+        tl.to(prepLine, { opacity: 0, duration: 0.3 }, "<");
+
+        tl.add(() => {
+          tableGroup.classList.remove("is-ready");
+          shopGroup.classList.remove("is-ready");
+          tableLabel.textContent = table.id;
+        });
+      }
+
+      function scheduleNext() {
+        if (!isVisible) return;
+        const currentOrder = CONFIG.orders[orderIndex];
+        orderIndex = (orderIndex + 1) % CONFIG.orders.length;
+        runOrder(currentOrder);
+        nextTimer = gsap.delayedCall(CONFIG.timing.orderInterval, scheduleNext);
+      }
+
+      scheduleNext();
+
+      const observer = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) {
+          activeTimelines.forEach(t => t.pause());
+          nextTimer?.pause();
+        } else if (!document.hidden) {
+          activeTimelines.forEach(t => t.resume());
+          nextTimer?.resume();
+        }
+      }, { threshold: 0.1 });
+      observer.observe(container);
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          activeTimelines.forEach(t => t.pause());
+          nextTimer?.pause();
+        } else {
+          activeTimelines.forEach(t => t.resume());
+          nextTimer?.resume();
+        }
+      });
+    }
+  </script>
+</body>
+</html>

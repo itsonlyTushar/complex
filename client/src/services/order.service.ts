@@ -1,4 +1,4 @@
-import { Order, CreateOrderPayload } from "@/types/order.types";
+import { Order, CreateManualOrderPayload, CreateOrderPayload } from "@/types/order.types";
 import { getAuth } from "@/app/actions/auth";
 import { API_URL } from "@/lib/api";
 
@@ -21,11 +21,32 @@ export const addOrder = async (
     return response.json();
 };
 
+export const createManualOrder = async (
+    data: CreateManualOrderPayload,
+): Promise<{ message: string; order: Order }> => {
+    const token = await getAuth();
+    const response = await fetch(`${API_URL}/api/orders/manual`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + (token || ""),
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to create manual order");
+    }
+
+    return response.json();
+};
+
 export const fetchOrders = async (params?: {
     restaurantId?: string;
     tableNumber?: number;
 }): Promise<{ orders: Order[] }> => {
-    let token = await getAuth();
+    const token = await getAuth();
 
     let url = `${API_URL}/api/orders`;
     const headers: Record<string, string> = {
@@ -35,7 +56,7 @@ export const fetchOrders = async (params?: {
     if (params?.restaurantId && params?.tableNumber !== undefined) {
         url = `${API_URL}/api/public/orders?restaurantId=${params.restaurantId}&tableNumber=${params.tableNumber}`;
     } else {
-        headers["Authorization"] = `Bearer ${token || ""}`;
+        headers["Authorization"] = "Bearer " + (token || "");
     }
 
     const response = await fetch(url, {
@@ -49,12 +70,12 @@ export const fetchOrders = async (params?: {
 };
 
 export const cancelOrder = async (orderId: number) => {
-    let token = await getAuth();
+    const token = await getAuth();
     const response = await fetch(`${API_URL}/api/cancel-order`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token || ""}`,
+            Authorization: "Bearer " + (token || ""),
         },
         body: JSON.stringify({ id: orderId }),
     });
@@ -66,13 +87,13 @@ export const cancelOrder = async (orderId: number) => {
 };
 
 export const updateOrderStatus = async ({ orderId, status }: { orderId: number; status: string }) => {
-    let token = await getAuth();
+    const token = await getAuth();
 
     const response = await fetch(`${API_URL}/api/status-update`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token || ""}`,
+            Authorization: "Bearer " + (token || ""),
         },
         body: JSON.stringify({ id: orderId, status }),
     });
@@ -84,13 +105,13 @@ export const updateOrderStatus = async ({ orderId, status }: { orderId: number; 
 };
 
 export const fetchPaymentDetails = async () => {
-    let token = await getAuth();
+    const token = await getAuth();
 
     const response = await fetch(`${API_URL}/api/payment-details`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token || ""}`,
+            Authorization: "Bearer " + (token || ""),
         },
     });
     if (!response.ok) {

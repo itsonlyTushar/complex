@@ -1,12 +1,14 @@
-import { FoodCourtItem } from "@/types/sp.types";
+import type { EditingFormState, FoodCourtItem, RestaurantCommission } from "@/types/sp.types";
 import { getAuth } from "@/app/actions/auth";
 import { API_URL } from "@/lib/api";
 
 export const fetchFoodCourts = async (): Promise<FoodCourtItem[]> => {
+    const token = await getAuth();
     const response = await fetch(`${API_URL}/api/auth/courts`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + (token || ""),
         }
     });
     if (!response.ok) {
@@ -16,11 +18,13 @@ export const fetchFoodCourts = async (): Promise<FoodCourtItem[]> => {
     return response.json();
 };
 
-export const editFoodCourt = async ({ id, data }: { id: number; data: any }): Promise<any> => {
+export const editFoodCourt = async ({ id, data }: { id: string; data: EditingFormState }): Promise<unknown> => {
+    const token = await getAuth();
     const response = await fetch(`${API_URL}/api/auth/courts/${id}`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + (token || ""),
         },
         body: JSON.stringify(data),
     });
@@ -31,11 +35,13 @@ export const editFoodCourt = async ({ id, data }: { id: number; data: any }): Pr
     return response.json();
 };
 
-export const deleteFoodCourt = async (id: number): Promise<any> => {
+export const deleteFoodCourt = async (id: string): Promise<{ message: string }> => {
+    const token = await getAuth();
     const response = await fetch(`${API_URL}/api/auth/courts/${id}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
+            Authorization: "Bearer " + (token || ""),
         }
     });
     if (!response.ok) {
@@ -45,7 +51,7 @@ export const deleteFoodCourt = async (id: number): Promise<any> => {
     return response.json();
 };
 
-export const fetchRestaurantsCommission = async (): Promise<any[]> => {
+export const fetchRestaurantsCommission = async (): Promise<RestaurantCommission[]> => {
     const token = await getAuth();
     const response = await fetch(`${API_URL}/api/payments/restaurants-commission`, {
         method: "GET",
@@ -61,7 +67,7 @@ export const fetchRestaurantsCommission = async (): Promise<any[]> => {
     return response.json();
 };
 
-export const updateRestaurantCommission = async ({ id, commissionRate }: { id: number; commissionRate: number }): Promise<any> => {
+export const updateRestaurantCommission = async ({ id, commissionRate }: { id: string; commissionRate: number }): Promise<unknown> => {
     const token = await getAuth();
     const response = await fetch(`${API_URL}/api/payments/restaurants-commission/${id}`, {
         method: "PATCH",
