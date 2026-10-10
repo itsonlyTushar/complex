@@ -12,13 +12,13 @@ import { loginSchema, LoginInput } from "@/lib/schemas";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Logo } from "@/components/ui/logo";
 import { API_URL } from "@/lib/api";
+import { Store, ChefHat, ArrowRight, Eye } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -43,6 +43,7 @@ export default function LoginPage() {
 
       document.cookie = `token=${result.token}; path=/; max-age=86400; SameSite=Lax`;
       document.cookie = `user_role=${result.user.role}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `is_guest=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 
       toast.success("Welcome back! Login successful.");
 
@@ -61,6 +62,48 @@ export default function LoginPage() {
     }
   }
 
+  async function handleGuestLogin(
+    role: "FOOD_COURT_ADMIN" | "RESTAURANT_VENDOR",
+  ) {
+    setLoading(true);
+    try {
+      let guestToken =
+        role === "FOOD_COURT_ADMIN"
+          ? "guest_token_court"
+          : "guest_token_vendor";
+
+      try {
+        const response = await fetch(`${API_URL}/api/auth/guest-login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role }),
+        });
+        if (response.ok) {
+          const result = await response.json();
+          if (result.token) guestToken = result.token;
+        }
+      } catch {
+        // Fallback to client demo tokens if API is not running
+      }
+
+      document.cookie = `token=${guestToken}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `user_role=${role}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `is_guest=true; path=/; max-age=86400; SameSite=Lax`;
+
+      const label =
+        role === "FOOD_COURT_ADMIN" ? "Food Court" : "Food Court Shop / Stall";
+      toast.success(`Entering Guest Mode as ${label}`);
+
+      if (role === "FOOD_COURT_ADMIN") {
+        router.push("/court");
+      } else {
+        router.push("/admin");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col bg-background">
       <header className="flex items-center justify-between px-4 py-3 sm:px-6">
@@ -68,21 +111,21 @@ export default function LoginPage() {
         <ThemeToggle />
       </header>
 
-      <div className="flex flex-1 items-center justify-center px-4 pb-16">
-        <form
-          onSubmit={handleSubmit(handleLogin)}
-          className="w-full max-w-[380px]"
-          noValidate
-        >
+      <div className="flex flex-1 items-center justify-center px-4 py-8">
+        <div className="w-full max-w-[400px]">
           <div className="mb-5">
             <h1 className="mt-1.5 text-h2">Log in to Complex</h1>
             <p className="mt-1 text-caption text-fg-tertiary">
-              One sign-in for operators, vendors and platform admins. You land in
-              the right portal automatically.
+              Sign in to manage your food hall, or enter guest mode below to
+              explore the interface with demo data.
             </p>
           </div>
 
-          <div className="flex flex-col gap-4 rounded-xl border bg-card p-4">
+          <form
+            onSubmit={handleSubmit(handleLogin)}
+            className="flex flex-col gap-4 rounded-xl border bg-card p-4"
+            noValidate
+          >
             <Field>
               <FieldLabel htmlFor="email">Work email</FieldLabel>
               <Input
@@ -90,7 +133,6 @@ export default function LoginPage() {
                 type="email"
                 placeholder="you@venue.com"
                 autoComplete="email"
-                autoFocus
                 aria-invalid={!!errors.email}
                 {...register("email")}
               />
@@ -115,7 +157,69 @@ export default function LoginPage() {
             <Button type="submit" className="mt-1 w-full" disabled={loading}>
               {loading ? "Signing in…" : "Log in"}
             </Button>
+          </form>
+
+          <div className="relative mb-5 text-center mt-5">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <span className="relative bg-background px-3 text-micro font-medium uppercase tracking-wider text-fg-tertiary">
+              Or sign in with account
+            </span>
           </div>
+
+          {/* Guest Mode exploration section */}
+          <section
+            aria-label="Guest Mode"
+            className="mb-5 rounded-xl border border-primary/25 bg-primary/5 p-4"
+          >
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-caption font-semibold text-fg-primary">
+                <Eye className="size-3.5 text-primary" />
+                <span>Explore in Guest Mode</span>
+              </span>
+            </div>
+            <p className="mt-1 text-micro text-fg-secondary">
+              Instant one-click access to explore the live dashboard with sample
+              venues, tables, and orders.
+            </p>
+
+            <div className="mt-3 grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => handleGuestLogin("FOOD_COURT_ADMIN")}
+                disabled={loading}
+                className="group flex flex-col items-start gap-1 rounded-lg border bg-card p-3 text-left transition hover:border-primary hover:shadow-xs disabled:opacity-50"
+              >
+                <div className="flex w-full items-center justify-between text-primary">
+                  <Store className="size-4" />
+                  <ArrowRight className="size-3 text-fg-tertiary transition-transform group-hover:translate-x-0.5" />
+                </div>
+                <div className="mt-1 font-medium text-caption text-fg-primary">
+                  Food Court
+                </div>
+                <div className="text-micro text-fg-tertiary">
+                  Operator portal
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleGuestLogin("RESTAURANT_VENDOR")}
+                disabled={loading}
+                className="group flex flex-col items-start gap-1 rounded-lg border bg-card p-3 text-left transition hover:border-primary hover:shadow-xs disabled:opacity-50"
+              >
+                <div className="flex w-full items-center justify-between text-primary">
+                  <ChefHat className="size-4" />
+                  <ArrowRight className="size-3 text-fg-tertiary transition-transform group-hover:translate-x-0.5" />
+                </div>
+                <div className="mt-1 font-medium text-caption text-fg-primary">
+                  Shop / Stall
+                </div>
+                <div className="text-micro text-fg-tertiary">Vendor portal</div>
+              </button>
+            </div>
+          </section>
 
           <p className="mt-4 text-caption text-fg-tertiary">
             Vendors are invited by their food court operator. Need access?{" "}
@@ -126,9 +230,8 @@ export default function LoginPage() {
               Talk to your operator
             </a>
           </p>
-        </form>
+        </div>
       </div>
     </main>
   );
 }
-

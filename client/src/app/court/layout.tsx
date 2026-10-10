@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PortalTitle } from "@/components/shared/portal-title";
+import { GuestModeBanner } from "@/components/shared/guest-mode-banner";
 import React from "react";
 
 export const CourtLayout = ({ children }: { children: React.ReactNode }) => {
@@ -29,6 +30,7 @@ export const CourtLayout = ({ children }: { children: React.ReactNode }) => {
 
           <ThemeToggle />
         </header>
+        <GuestModeBanner />
         <div className="flex flex-1 flex-col px-4 pb-8">{children}</div>
       </SidebarInset>
     </SidebarProvider>
