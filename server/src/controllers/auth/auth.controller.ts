@@ -32,6 +32,25 @@ export const loginController = async (req: Request, res: Response) => {
     }
 }
 
+export const guestLoginController = async (req: Request, res: Response) => {
+    try {
+        const { role } = req.body;
+        const validRole = role === "RESTAURANT_VENDOR" ? "RESTAURANT_VENDOR" : "FOOD_COURT_ADMIN";
+        const guestUser = {
+            id: validRole === "FOOD_COURT_ADMIN" ? 9991 : 9992,
+            email: validRole === "FOOD_COURT_ADMIN" ? "court.guest@complexapp.food" : "stall.guest@complexapp.food",
+            role: validRole,
+            name: validRole === "FOOD_COURT_ADMIN" ? "Central Plaza Food Court (Guest)" : "Smokey Joe's BBQ (Guest)",
+            foodCourtId: "demo-court-1",
+            restaurantId: validRole === "RESTAURANT_VENDOR" ? "demo-stall-1" : null,
+        };
+        const token = validRole === "FOOD_COURT_ADMIN" ? "guest_token_court" : "guest_token_vendor";
+        res.status(200).json({ token, user: guestUser });
+    } catch (error: any) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
 export const fetchFoodCourtsController = async (req: Request, res: Response) => {
     try {
         const courts = await fetchFoodCourtsService();

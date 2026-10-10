@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PortalTitle } from "@/components/shared/portal-title";
+import { GuestModeBanner } from "@/components/shared/guest-mode-banner";
 
 export default function AdminLayout({
   children,
@@ -32,9 +33,9 @@ export default function AdminLayout({
 
           <ThemeToggle />
         </header>
+        <GuestModeBanner />
         <div className="flex flex-1 flex-col px-4 pb-8">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );
 }
-

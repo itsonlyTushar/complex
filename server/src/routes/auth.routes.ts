@@ -2,6 +2,7 @@ import { Router } from "express";
 import { 
     foodCourtSignUpController, 
     loginController, 
+    guestLoginController,
     signupController,
     fetchFoodCourtsController,
     editFoodCourtController,
@@ -14,6 +15,7 @@ const router = Router();
 router.post("/signup", authMiddleware, requireRole("FOOD_COURT_ADMIN"), signupController)
 router.post("/new-court", foodCourtSignUpController)
 router.post("/login", loginController)
+router.post("/guest-login", guestLoginController)
 
 router.get("/courts", authMiddleware, requireRole("SUPER_ADMIN"), fetchFoodCourtsController)
 router.patch("/courts/:id", authMiddleware, requireRole("SUPER_ADMIN"), editFoodCourtController)

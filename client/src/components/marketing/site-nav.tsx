@@ -68,7 +68,7 @@ export function SiteNav() {
             asChild
             variant="ghost"
             size="sm"
-            className="hidden sm:inline-flex"
+            className="hidden md:inline-flex"
           >
             <Link href="/login">Log in</Link>
           </Button>
