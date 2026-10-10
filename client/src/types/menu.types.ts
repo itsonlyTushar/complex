@@ -2,7 +2,8 @@ export type Menu = {
     id: number
     image?: string
     itemName: string
-    category: string
+    category?: string
+    categoryId?: number
     price: number
     cost: number
     quantity: number
