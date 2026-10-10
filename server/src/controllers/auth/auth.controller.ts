@@ -3,7 +3,7 @@ import { loginService, signFoodCourtService, signupService, fetchFoodCourtsServi
 
 export const signupController = async (req: Request, res: Response) => {
     try {
-        const foodCourtId = (req as any).user?.foodCourtId;
+        const foodCourtId = req.user?.foodCourtId;
         if (!foodCourtId) {
             throw new Error("Unauthorized: No food court associated with this admin.");
         }

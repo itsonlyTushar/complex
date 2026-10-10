@@ -4,6 +4,7 @@ import { decryptSecret, encryptSecret } from "../utils/crypto.js";
 import { assertRestaurantAcceptingOrders } from "./court.service.js";
 import { createOrderRecord } from "./order.service.js";
 import type { CartLine, RazorpayCheckoutPayload, RazorpayVerifyPayload } from "../types/payment.types.js";
+import { fingerprintCart, parseCartLines, priceCart } from "./pricing.service.js";
 
 const RAZORPAY_API = "https://api.razorpay.com/v1";
 
@@ -15,6 +16,13 @@ type RazorpayPayment = {
     amount: number;
     currency: string;
     status: "created" | "authorized" | "captured" | "refunded" | "failed";
+};
+
+type RazorpayOrder = {
+    id: string;
+    amount: number;
+    currency: string;
+    notes: Record<string, string>;
 };
 
 const razorpayRequest = async <T>(credentials: RazorpayCredentials, path: string, body?: object): Promise<T> => {
@@ -58,26 +66,6 @@ const getRestaurantRazorpay = async (restaurantId: string) => {
     return { restaurant, credentials };
 };
 
-// Prices come from the menu, never from the client, so the amount charged can't be tampered with.
-const priceCart = async (restaurantId: string, lines: CartLine[]) => {
-    const menus = await prisma.menu.findMany({
-        where: { id: { in: lines.map((line) => line.menuID) }, restaurantId },
-        select: { id: true, price: true },
-    });
-    const priceById = new Map(menus.map((menu) => [menu.id, menu.price]));
-
-    const items = lines.map((line) => {
-        const price = priceById.get(line.menuID);
-        if (price === undefined || !Number.isInteger(line.quantity) || line.quantity <= 0) {
-            throw new Error("Your cart has an item that is no longer available.");
-        }
-        return { menuID: line.menuID, quantity: line.quantity, price };
-    });
-
-    const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    return { items, totalAmount };
-};
-
 export const connectRazorpay = async (restaurantId: string, keyId: string, keySecret: string) => {
     // Try the keys against Razorpay first so a typo fails here, not at a customer's checkout.
     await razorpayRequest({ keyId, keySecret }, "/orders?count=1");
@@ -107,7 +95,7 @@ export const createRazorpayCheckout = async (data: RazorpayCheckoutPayload) => {
         throw new Error("Razorpay is not enabled for this food court.");
     }
 
-    const { totalAmount } = await priceCart(restaurantId, lines);
+    const { items, totalAmount } = await priceCart(restaurantId, lines);
     if (totalAmount <= 0) {
         throw new Error("Your cart is empty.");
     }
@@ -119,6 +107,7 @@ export const createRazorpayCheckout = async (data: RazorpayCheckoutPayload) => {
             restaurantId,
             tableNumber: String(tableNumber),
             customerName: customerName.slice(0, 100),
+            cartHash: fingerprintCart(items),
         },
     });
 
@@ -131,15 +120,29 @@ export const createRazorpayCheckout = async (data: RazorpayCheckoutPayload) => {
     };
 };
 
-export const verifyRazorpayPayment = async (data: RazorpayVerifyPayload) => {
-    const { restaurantId, razorpayOrderId, razorpayPaymentId, razorpaySignature, items: lines, customerName, tableNumber } = data;
+export const verifyRazorpayPayment = async (
+    data: Omit<RazorpayVerifyPayload, "items" | "customerName" | "tableNumber">
+        & { items: unknown; customerName: unknown; tableNumber: unknown },
+) => {
+    const {
+        restaurantId,
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature,
+        items: rawLines,
+        customerName: rawCustomerName,
+        tableNumber: rawTableNumber,
+    } = data;
 
     const alreadyRecorded = await prisma.order.findUnique({ where: { razorpayPaymentId }, include: { items: true } });
     if (alreadyRecorded) {
+        if (alreadyRecorded.restaurantId !== restaurantId) {
+            throw new Error("Payment is already associated with another restaurant.");
+        }
         return alreadyRecorded;
     }
 
-    const { credentials } = await getRestaurantRazorpay(restaurantId);
+    const { restaurant, credentials } = await getRestaurantRazorpay(restaurantId);
 
     const expectedSignature = crypto
         .createHmac("sha256", credentials.keySecret)
@@ -152,41 +155,79 @@ export const verifyRazorpayPayment = async (data: RazorpayVerifyPayload) => {
     }
 
     let payment = await razorpayRequest<RazorpayPayment>(credentials, `/payments/${razorpayPaymentId}`);
-    const { items, totalAmount } = await priceCart(restaurantId, lines);
+    if (payment.order_id !== razorpayOrderId) {
+        throw new Error("The payment does not match the checkout order.");
+    }
 
-    if (payment.amount !== totalAmount * 100) {
-        // Prices changed mid-checkout or the cart was altered after paying: return the money rather
-        // than record an order that doesn't match it. An uncaptured payment is released by Razorpay on its own.
-        if (payment.status === "captured") {
+    let paymentVerified = false;
+    try {
+        if (typeof rawCustomerName !== "string" || !rawCustomerName.trim()) {
+            throw new Error("Customer name is required.");
+        }
+        if (typeof rawTableNumber !== "number" || !Number.isSafeInteger(rawTableNumber) || rawTableNumber <= 0) {
+            throw new Error("A valid table number is required.");
+        }
+        const lines = parseCartLines(rawLines);
+        const { items, totalAmount } = await priceCart(restaurantId, lines);
+        const order = await razorpayRequest<RazorpayOrder>(credentials, `/orders/${razorpayOrderId}`);
+        if (
+            order.id !== razorpayOrderId
+            || order.notes.restaurantId !== restaurantId
+            || order.notes.cartHash !== fingerprintCart(items)
+            || order.amount !== totalAmount * 100
+            || order.currency.toLowerCase() !== restaurant.foodCourt.currancy.toLowerCase()
+            || order.notes.tableNumber !== String(rawTableNumber)
+            || order.notes.customerName !== rawCustomerName.trim().slice(0, 100)
+            || payment.amount !== order.amount
+            || payment.currency.toLowerCase() !== order.currency.toLowerCase()
+        ) {
+            throw new Error("The payment order does not match this restaurant and cart.");
+        }
+
+        if (payment.status === "authorized") {
+            payment = await razorpayRequest<RazorpayPayment>(credentials, `/payments/${razorpayPaymentId}/capture`, {
+                amount: payment.amount,
+                currency: payment.currency,
+            });
+        }
+
+        if (payment.status !== "captured") {
+            throw new Error("Payment was not completed.");
+        }
+
+        paymentVerified = true;
+        return await createOrderRecord({
+            restaurantId,
+            totalAmount,
+            items,
+            tableNumber: rawTableNumber,
+            customerName: rawCustomerName.trim(),
+            razorpayOrderId,
+            razorpayPaymentId,
+        });
+    } catch (error) {
+        const concurrentOrder = await prisma.order.findUnique({
+            where: { razorpayPaymentId },
+            include: { items: true },
+        });
+        if (concurrentOrder?.restaurantId === restaurantId) {
+            return concurrentOrder;
+        }
+        if (paymentVerified) {
             await razorpayRequest(credentials, `/payments/${razorpayPaymentId}/refund`, {});
         }
-        throw new Error("Your cart changed during payment, so the payment has been returned. Please try again.");
+        throw error;
     }
-
-    if (payment.status === "authorized") {
-        payment = await razorpayRequest<RazorpayPayment>(credentials, `/payments/${razorpayPaymentId}/capture`, {
-            amount: payment.amount,
-            currency: payment.currency,
-        });
-    }
-
-    if (payment.status !== "captured") {
-        throw new Error("Payment was not completed.");
-    }
-
-    // No open/closed check here: the customer has already paid, and ordering was open when checkout started.
-    return await createOrderRecord({
-        restaurantId,
-        totalAmount,
-        items,
-        tableNumber,
-        customerName,
-        razorpayOrderId,
-        razorpayPaymentId,
-    });
 };
 
 export const refundRazorpayPayment = async (restaurantId: string, razorpayPaymentId: string) => {
     const { credentials } = await getRestaurantRazorpay(restaurantId);
+    const payment = await razorpayRequest<RazorpayPayment>(credentials, `/payments/${razorpayPaymentId}`);
+    if (payment.status === "refunded") {
+        return payment;
+    }
+    if (payment.status !== "captured") {
+        throw new Error("Only captured Razorpay payments can be refunded.");
+    }
     return await razorpayRequest(credentials, `/payments/${razorpayPaymentId}/refund`, {});
 };

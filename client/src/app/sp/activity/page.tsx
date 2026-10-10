@@ -27,7 +27,7 @@ const Activity = () => {
   const deleteMutation = useDeleteFoodCourt();
   const [editingCourt, setEditingCourt] = useState<EditingFormState | null>(null);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this food court? This will delete all restaurants, menus, tables, and users associated with it.")) {
       return;
     }
@@ -35,7 +35,7 @@ const Activity = () => {
     try {
       await deleteMutation.mutateAsync(id);
       toast.success("Food Court deleted successfully!");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error(error, "Failed to delete food court.");
     }
@@ -49,7 +49,7 @@ const Activity = () => {
       await editMutation.mutateAsync({ id: editingCourt.id, data: editingCourt });
       toast.success("Food Court updated successfully!");
       setEditingCourt(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error(error, "Failed to update food court.");
     }

@@ -54,15 +54,9 @@ export function CheckoutForm({ restaurantId, cartItems, cartTotal, onSuccess, ta
     setIsProcessing(true);
 
     try {
-      const amountInCents = Math.round(cartTotal * 100);
-      const commissionInCents = Math.round(amountInCents * 0.05);
-      
       const paymentIntentResponse = await createPaymentIntent({
-        amount: amountInCents,
-        currency: "usd",
-        application_fee_amount: commissionInCents,
-        commissionAmount: commissionInCents.toString(),
         restaurantId,
+        items: cartItems.map((item) => ({ menuID: item.id, quantity: item.cartQuantity })),
       });
 
       const clientSecret = paymentIntentResponse?.paymentIntent?.client_secret;
@@ -90,14 +84,12 @@ export function CheckoutForm({ restaurantId, cartItems, cartTotal, onSuccess, ta
       if (paymentIntent?.status === "succeeded") {
         await addOrder({
           restaurantId,
-          totalAmount: Math.round(cartTotal),
           tableNumber: parsedTableNum,
           paymentIntentId,
           customerName,
           items: cartItems.map((item) => ({
             menuID: item.id,
             quantity: item.cartQuantity,
-            price: Math.round(item.price),
           })),
         });
 
@@ -107,9 +99,9 @@ export function CheckoutForm({ restaurantId, cartItems, cartTotal, onSuccess, ta
       } else {
         throw new Error("Payment status verification failed.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || "Checkout failed. Please try again.");
+      toast.error(err instanceof Error ? err.message : "Checkout failed. Please try again.");
     } finally {
       setIsProcessing(false);
     }

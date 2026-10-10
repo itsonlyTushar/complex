@@ -1,15 +1,12 @@
 
-export interface Payments {
-    amount: number
-    currency : string
-    application_fee_amount: number
-    orderId?: string
-    commissionAmount?: string
+export interface CartLine {
+    menuID: number;
+    quantity: number;
 }
 
-export interface CartLine {
-    menuID: number
-    quantity: number
+export interface CreatePaymentIntentPayload {
+    restaurantId: string;
+    items: CartLine[];
 }
 
 export interface RazorpayCheckoutPayload {

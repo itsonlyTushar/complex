@@ -1,5 +1,5 @@
 import { ORDER_KEYS } from "@/constants/queryFactory";
-import { addOrder, cancelOrder, updateOrderStatus } from "@/services/order.service";
+import { addOrder, cancelOrder, createManualOrder, updateOrderStatus } from "@/services/order.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useAddOrder = () => {
@@ -9,6 +9,16 @@ export const useAddOrder = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ORDER_KEYS.orders()})
     }
+  });
+};
+
+export const useCreateManualOrder = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: createManualOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ORDER_KEYS.orders() })
+    },
   });
 };
 

@@ -17,10 +17,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { label: "How it works", href: "/#how-it-works" },
-  { label: "For operators", href: "/#operators" },
-  { label: "Venues", href: "/#venues" },
+  { label: "Testimonials", href: "/#venues" },
   { label: "Pricing", href: "/pricing" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function SiteNav() {
@@ -31,10 +30,10 @@ export function SiteNav() {
       <nav className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/"
-          className="flex items-center rounded-md outline-none transition-opacity duration-[140ms] ease-(--ease-out) hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring/60"
+          className="flex shrink-0 items-center rounded-md outline-none transition-opacity duration-[140ms] ease-(--ease-out) hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring/60"
           aria-label="Complex home"
         >
-          <Logo size={42} />
+          <Logo />
         </Link>
 
         <ul className="hidden items-center gap-1 lg:flex">
@@ -65,7 +64,12 @@ export function SiteNav() {
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
 
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
             <Link href="/login">Log in</Link>
           </Button>
 

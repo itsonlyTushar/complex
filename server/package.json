@@ -2,7 +2,8 @@
   "scripts": {
     "build": "npx prisma generate && tsc",
     "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test": "tsx --test src/middleware/auth.middleware.test.ts src/services/pricing.service.test.ts"
   },
   "type": "module",
   "dependencies": {

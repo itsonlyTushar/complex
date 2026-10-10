@@ -1,55 +1,19 @@
 import Link from "next/link";
-import { QrCode, Split, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteNav } from "@/components/marketing/site-nav";
 import { SmoothScroll } from "@/components/marketing/smooth-scroll";
 import { SiteFooter } from "@/components/marketing/site-footer";
-import { SplitTicket } from "@/components/marketing/split-ticket";
-import { VenueSwitcher } from "@/components/marketing/venue-switcher";
-import { LiveRail } from "@/components/marketing/live-rail";
+import { HairlineFoodcourt } from "@/components/marketing/hairline-foodcourt";
+import { BuiltForSection } from "@/components/marketing/built-for";
+import { TestimonialsSection } from "@/components/marketing/testimonials";
+import { HairlineFlow } from "@/components/marketing/hairline-flow";
+import { IntegrationsBanner } from "@/components/marketing/integrations-banner";
 import { PricingTeaser } from "@/components/marketing/pricing-tiers";
 import { Faq } from "@/components/marketing/faq";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { Reveal } from "@/components/marketing/reveal";
 
-const PROOF = [
-  { value: "38s", label: "Scan to paid, typically" },
-  { value: "3.1×", label: "Stalls per guest cart" },
-  { value: "0", label: "Terminals to buy" },
-];
 
-const STEPS = [
-  {
-    icon: QrCode,
-    title: "Print one code per table",
-    body: "A sticker. That's the whole install. No tablets to mount, no hardware budget, nobody coming out to set it up.",
-  },
-  {
-    icon: Split,
-    title: "One cart, every stall",
-    body: "Guests browse the whole hall, build one cart and pay once, right in the browser. No app download, because nobody is downloading an app for lunch.",
-  },
-  {
-    icon: Timer,
-    title: "Kitchens get their own rail",
-    body: "We split the cart into per-stall tickets and start a clock on each one. Your stalls see their own line and nothing else.",
-  },
-];
-
-const OPERATOR_POINTS = [
-  {
-    title: "Ticket age, not vibes",
-    body: "Every ticket has a clock that escalates as it sits. You can spot the stall that's drowning from across the floor.",
-  },
-  {
-    title: "Splits sort themselves out",
-    body: "One guest payment, lots of vendors. We divide it per stall and take your commission out before anyone gets paid.",
-  },
-  {
-    title: "Vendors stay in their lane",
-    body: "Every stall gets its own portal, menu and kitchen view. They never see another vendor's orders or numbers.",
-  },
-];
 
 const FAQ_ITEMS = [
   {
@@ -102,7 +66,7 @@ export default function Home() {
                     <Link href="/login">Start free trial</Link>
                   </Button>
                   <Button asChild variant="outline" size="lg">
-                    <Link href="#how-it-works">See how it works</Link>
+                    <Link href="#built-for">See who it's for</Link>
                   </Button>
                 </div>
 
@@ -112,121 +76,40 @@ export default function Home() {
               </div>
             </div>
 
-            <SplitTicket />
+            <HairlineFoodcourt />
           </div>
         </section>
 
-        <section className="border-y bg-surface-sunken/40">
-          <div className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6">
-            <dl className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-              {PROOF.map((item) => (
-                <div key={item.label} className="flex items-baseline gap-3">
-                  <dt className="order-2 text-caption text-fg-tertiary">
-                    {item.label}
-                  </dt>
-                  <dd className="order-1 text-h1 leading-none" data-numeric>
-                    {item.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </section>
+        <IntegrationsBanner />
 
-        <section
-          id="how-it-works"
-          className="mx-auto w-full max-w-[1200px] scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28"
-        >
-          <Reveal>
-            <span className="eyebrow">How it works</span>
-            <h2 className="mt-3 max-w-2xl text-balance text-h1">
-              Three steps. Then the queue is gone.
-            </h2>
-          </Reveal>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {STEPS.map((step, index) => (
-              <Reveal key={step.title} delay={index * 0.07}>
-                <div className="flex h-full flex-col rounded-xl border bg-card p-5 transition-colors duration-[140ms] ease-(--ease-out) hover:border-border-strong">
-                  <div className="flex items-center gap-3">
-                    <span className="grid size-9 place-items-center rounded-md bg-accent text-accent-foreground">
-                      <step.icon className="size-4" />
-                    </span>
-                    <span className="eyebrow" data-numeric>
-                      0{index + 1}
-                    </span>
-                  </div>
-                  <h3 className="mt-4 text-h3">{step.title}</h3>
-                  <p className="mt-2 text-caption leading-relaxed text-fg-secondary">
-                    {step.body}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </section>
+        <BuiltForSection />
 
         <section
           id="operators"
-          className="scroll-mt-20 border-y bg-surface-sunken/40"
+          className="scroll-mt-20 border-y bg-surface-sunken/40 py-20 sm:py-28"
         >
-          <div className="mx-auto w-full max-w-[1200px] px-4 py-20 sm:px-6 sm:py-28">
-            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-14">
-              <Reveal>
-                <div>
-                  <span className="eyebrow">For operators</span>
-                  <h2 className="mt-3 text-balance text-h1">
-                    The whole floor on one rail
-                  </h2>
-                  <p className="mt-4 max-w-xl text-lead text-fg-secondary">
-                    You run the venue, not the kitchens. This is the view a hall
-                    has never really had: every stall&apos;s load, side by side,
-                    clock running.
-                  </p>
+          <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-6">
+            <Reveal>
+              <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-14">
+                <span className="eyebrow">End-to-end flow</span>
+                <h2 className="mt-3 text-balance text-h1">
+                  From table scan to kitchen payout
+                </h2>
+                <p className="mt-4 text-lead text-fg-secondary">
+                  One continuous loop connecting guests, multiple food hall kitchens, and automated operations.
+                </p>
+              </div>
+            </Reveal>
 
-                  <dl className="mt-7 flex flex-col gap-5">
-                    {OPERATOR_POINTS.map((point) => (
-                      <div key={point.title} className="flex gap-3">
-                        <span
-                          className="state-rail self-stretch"
-                          data-state="ready"
-                        />
-                        <div>
-                          <dt className="text-body font-medium">
-                            {point.title}
-                          </dt>
-                          <dd className="mt-1 text-caption leading-relaxed text-fg-secondary">
-                            {point.body}
-                          </dd>
-                        </div>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-              </Reveal>
-
-              <Reveal delay={0.08}>
-                <LiveRail />
-              </Reveal>
-            </div>
+            <Reveal delay={0.08}>
+              <div className="rounded-2xl border bg-card/60 p-4 sm:p-8 backdrop-blur-xs">
+                <HairlineFlow />
+              </div>
+            </Reveal>
           </div>
         </section>
 
-        <section
-          id="venues"
-          className="mx-auto w-full max-w-[1200px] scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28"
-        >
-          <Reveal>
-            <span className="eyebrow">Venues</span>
-            <h2 className="mt-3 max-w-2xl text-balance text-h1">
-              Built for rooms where nobody owns the table
-            </h2>
-          </Reveal>
-
-          <Reveal delay={0.06} className="mt-8">
-            <VenueSwitcher />
-          </Reveal>
-        </section>
+        <TestimonialsSection />
 
         <section className="border-t bg-surface-sunken/40">
           <div className="mx-auto w-full max-w-[1200px] px-4 py-20 sm:px-6 sm:py-28">

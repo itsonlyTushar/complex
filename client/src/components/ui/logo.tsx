@@ -1,14 +1,14 @@
 import React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import logoImage from "@/assets/logo.png";
+import logoSvg from "@/assets/logo.svg";
 import faviconImage from "@/assets/favicon.png";
 
 interface LogoProps {
   className?: string;
   /** Show only the square mark (favicon) instead of the full wordmark. Use for collapsed rails/tight spaces. */
   markOnly?: boolean;
-  /** Rendered height in pixels; width follows the source image's aspect ratio. */
+  /** Fixed rendered height in pixels. If omitted, scales responsively across viewport breakpoints. */
   size?: number;
 }
 
@@ -27,13 +27,19 @@ export function Logo({ className, markOnly = false, size }: LogoProps) {
     );
   }
 
-  const height = size ?? 40;
+  const isFixed = size !== undefined;
+
   return (
     <Image
-      src={logoImage}
+      src={logoSvg}
       alt="Complex"
-      style={{ height, width: "auto" }}
-      className={cn("shrink-0 object-contain", className)}
+      unoptimized
+      style={isFixed ? { height: size, width: "auto" } : { width: "auto" }}
+      className={cn(
+        "shrink-0 object-contain object-left",
+        !isFixed && "h-7 sm:h-8 lg:h-9",
+        className
+      )}
       priority
     />
   );
