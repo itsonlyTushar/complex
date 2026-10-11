@@ -6,20 +6,33 @@ export function middleware(request: NextRequest) {
     const role = request.cookies.get("user_role")?.value;
     const { pathname } = request.nextUrl;
 
-    if (!token && (pathname.startsWith("/sp") || pathname.startsWith("/court") || pathname.startsWith("/admin"))) {
+    const isProtected =
+        pathname.startsWith("/sp") ||
+        pathname.startsWith("/court") ||
+        pathname.startsWith("/admin");
+
+    if (!isProtected) {
+        return NextResponse.next();
+    }
+
+    if (!token || !role) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    if (pathname.startsWith("/sp") && role !== "SUPER_ADMIN") {
-        return NextResponse.redirect(new URL(role === "FOOD_COURT_ADMIN" ? "/court" : "/admin", request.url));
+    const roleTargetMap: Record<string, string> = {
+        SUPER_ADMIN: "/sp",
+        FOOD_COURT_ADMIN: "/court",
+        RESTAURANT_VENDOR: "/admin",
+    };
+
+    const targetPortal = roleTargetMap[role];
+
+    if (!targetPortal) {
+        return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    if (pathname.startsWith("/court") && role !== "FOOD_COURT_ADMIN") {
-        return NextResponse.redirect(new URL(role === "SUPER_ADMIN" ? "/sp" : "/admin", request.url));
-    }
-
-    if (pathname.startsWith("/admin") && role !== "RESTAURANT_VENDOR") {
-        return NextResponse.redirect(new URL(role === "SUPER_ADMIN" ? "/sp" : "/court", request.url));
+    if (!pathname.startsWith(targetPortal)) {
+        return NextResponse.redirect(new URL(targetPortal, request.url));
     }
 
     return NextResponse.next();
