@@ -2,7 +2,9 @@ import { Menu } from './menu.types';
 
 export interface OrderItem {
     id: number;
-    menuID: number;
+    menuId?: number;
+    menuID?: number;
+    orderId?: number;
     quantity: number;
     price: number;
     menu?: Menu;
@@ -14,7 +16,7 @@ export interface Order {
     restaurantId: string;
     totalAmount: number;
     status: 'PENDING' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED';
-    createdAt: Date;
+    createdAt: Date | string;
     tableNumber: number;
     paymentIntentId?: string;
     customerName: string;

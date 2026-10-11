@@ -1,10 +1,29 @@
+export type RestaurantVendor = {
+    id: number;
+    name: string;
+    email: string;
+    role?: string;
+};
+
 export type Restaurants = {
-    date: string
-    status: boolean
-    id: string
-    email: string
-    owner: string
-}
+    id: string;
+    name: string;
+    location?: string;
+    createdAt?: string;
+    foodCourtId?: string;
+    isClosed?: boolean;
+    status?: boolean;
+    onBoradingCompleted?: boolean;
+    commissionRate?: number;
+    description?: string | null;
+    logo?: string | null;
+    vendors?: RestaurantVendor[];
+
+    // Legacy/computed dashboard fields
+    date?: string;
+    email?: string;
+    owner?: string;
+};
 
 export type FoodCourt = {
     foodCourtName: string

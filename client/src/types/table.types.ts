@@ -19,15 +19,20 @@ export interface PlacedItem {
 }
 
 export interface Line {
-    x1: number
-    y1: number
-    x2: number
-    y2: number
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    id?: string;
+    startX?: number;
+    startY?: number;
+    endX?: number;
+    endY?: number;
 }
 
 export interface Table {
     id?: number;
-    foodCourtId: string;
+    foodCourtId?: string;
     number: string;
     occupacy: number;
     shape: string;
@@ -35,6 +40,6 @@ export interface Table {
     y?: number | null;
     rotation?: number | null;
     isPlaced?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
 }

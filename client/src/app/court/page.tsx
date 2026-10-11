@@ -33,7 +33,7 @@ export default function CourtPage() {
   const { data: metrics, isLoading: isMetricsLoading } = useGetCourtDashboard();
 
   const vendors: Restaurants[] = Array.isArray(data) ? data : [];
-  const trading = vendors.filter((v) => v.status).length;
+  const trading = vendors.filter((v) => (v.status !== undefined ? v.status : !v.isClosed)).length;
   const offline = vendors.length - trading;
 
   return (
@@ -181,7 +181,10 @@ export default function CourtPage() {
         ) : (
           <ul className="divide-y divide-border">
             {vendors.map((vendor) => {
-              const joined = formatJoined(vendor.date);
+              const joined = formatJoined(vendor.date || vendor.createdAt || "");
+              const isTrading = vendor.status !== undefined ? vendor.status : !vendor.isClosed;
+              const displayName = vendor.name || vendor.owner || vendor.vendors?.[0]?.name || "Unnamed stall";
+              const displayEmail = vendor.email || vendor.vendors?.[0]?.email || "";
 
               return (
                 <li
@@ -190,15 +193,15 @@ export default function CourtPage() {
                 >
                   <span
                     className="state-rail"
-                    data-state={vendor.status ? "ready" : "idle"}
+                    data-state={isTrading ? "ready" : "idle"}
                   />
                   <div className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                     <div className="min-w-0">
                       <p className="truncate text-body font-medium">
-                        {vendor.owner || "Unnamed stall"}
+                        {displayName}
                       </p>
                       <p className="truncate text-caption text-fg-tertiary">
-                        {vendor.email}
+                        {displayEmail}
                       </p>
                     </div>
 
@@ -213,9 +216,9 @@ export default function CourtPage() {
                       )}
                       <span
                         className="state-chip"
-                        data-state={vendor.status ? "ready" : "idle"}
+                        data-state={isTrading ? "ready" : "idle"}
                       >
-                        {vendor.status ? "Trading" : "Dark"}
+                        {isTrading ? "Trading" : "Dark"}
                       </span>
                     </div>
                   </div>
