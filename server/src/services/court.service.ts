@@ -64,6 +64,30 @@ export const editRestaurantService = async (restaurantId: string, foodCourtId: s
 };
 
 export const fetchPublicFoodCourtService = async (foodCourtId: string, tableNumber?: string) => {
+    if (foodCourtId === "demo-court-1") {
+        if (tableNumber) {
+            const isValidTable = /^T?([1-9]|1[0-2])$/i.test(tableNumber.trim());
+            if (!isValidTable) throw new Error("Invalid Table for this Food Court");
+        }
+        return {
+            foodCourt: {
+                id: "demo-court-1",
+                name: "Central Plaza Food Court",
+                location: "Level 2, North Wing",
+                isClosed: false,
+                currancy: "USD",
+                paymentSystem: "stripe",
+            },
+            restaurants: [
+                { id: "demo-stall-1", name: "Smokey Joe's BBQ", logo: null, description: "Low and slow authentic pit barbecue, smoked ribs and brisket.", isClosed: false },
+                { id: "demo-stall-2", name: "Tokyo Ramen Bar", logo: null, description: "Handcrafted tonkotsu and miso ramen with fresh gyoza.", isClosed: false },
+                { id: "demo-stall-3", name: "Taco Libre", logo: null, description: "Street-style tacos, roasted salsas, and fresh guacamole.", isClosed: false },
+                { id: "demo-stall-4", name: "Bella Pasta & Pinsa", logo: null, description: "Fresh homemade pasta, Roman pinsa, and classic tiramisu.", isClosed: false },
+                { id: "demo-stall-5", name: "Green Bowl Co.", logo: null, description: "Organic grain bowls, superfood salads, and fresh smoothies.", isClosed: false },
+            ],
+        };
+    }
+
     const foodCourt = await prisma.foodCourt.findUnique({
         where: { id: foodCourtId },
         select: { id: true, name: true, location: true, isClosed: true, currancy: true, paymentSystem: true }
@@ -91,6 +115,28 @@ export const fetchPublicFoodCourtService = async (foodCourtId: string, tableNumb
 }
 
 export const fetchPublicRestaurantById = async (restaurantId: string) => {
+    if (restaurantId.startsWith("demo-stall")) {
+        const demoStalls: Record<string, { name: string; location: string; description: string }> = {
+            "demo-stall-1": { name: "Smokey Joe's BBQ", location: "Counter 1", description: "Low and slow authentic pit barbecue, smoked ribs and brisket." },
+            "demo-stall-2": { name: "Tokyo Ramen Bar", location: "Counter 2", description: "Handcrafted tonkotsu and miso ramen with fresh gyoza." },
+            "demo-stall-3": { name: "Taco Libre", location: "Counter 3", description: "Street-style tacos, roasted salsas, and fresh guacamole." },
+            "demo-stall-4": { name: "Bella Pasta & Pinsa", location: "Counter 4", description: "Fresh homemade pasta, Roman pinsa, and classic tiramisu." },
+            "demo-stall-5": { name: "Green Bowl Co.", location: "Counter 5", description: "Organic grain bowls, superfood salads, and fresh smoothies." },
+            "demo-stall-6": { name: "Sweet Tooth Desserts", location: "Counter 6", description: "Artisanal gelato, warm churros, and speciality pastries." }
+        };
+        const stall = demoStalls[restaurantId] || demoStalls["demo-stall-1"];
+        return {
+            id: restaurantId,
+            name: stall.name,
+            location: stall.location,
+            logo: null,
+            description: stall.description,
+            isClosed: false,
+            foodCourtId: "demo-court-1",
+            foodCourt: { isClosed: false, currancy: "USD", paymentSystem: "stripe" }
+        };
+    }
+
     const restaurant = await prisma.restaurant.findUnique({
         where: { id: restaurantId },
         select: {

@@ -112,7 +112,7 @@ export const deleteCategory = async (data: {
 export const fetchMenus = async (restaurantId?: string): Promise<Menu[]> => {
   const token = await getAuth();
   const isGuest = token?.startsWith("guest_") || isGuestSession();
-  if (isGuest) {
+  if (isGuest || (restaurantId && restaurantId.startsWith("demo-stall"))) {
     return GUEST_MENUS;
   }
 
@@ -127,7 +127,7 @@ export const fetchMenus = async (restaurantId?: string): Promise<Menu[]> => {
     },
   });
   if (!response.ok) {
-    if (isGuest) return GUEST_MENUS;
+    if (isGuest || (restaurantId && restaurantId.startsWith("demo-stall"))) return GUEST_MENUS;
     throw new Error("failed to fetch menus");
   }
   return response.json();

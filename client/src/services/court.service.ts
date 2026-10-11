@@ -4,6 +4,7 @@ import type { PublicFoodCourtResponse } from "@/types/restaurant.types";
 import {
   GUEST_RESTAURANTS,
   GUEST_COURT_USER,
+  GUEST_TABLES,
   isGuestSession,
 } from "@/lib/guest-data";
 
@@ -136,6 +137,37 @@ export const fetchPublicFoodCourt = async (
   foodCourtId: string,
   tableId?: string | null,
 ): Promise<PublicFoodCourtResponse> => {
+  const isGuest = foodCourtId === "demo-court-1" || isGuestSession();
+  if (isGuest && foodCourtId === "demo-court-1") {
+    if (tableId) {
+      const trimmed = tableId.trim().toLowerCase();
+      const tableExists = GUEST_TABLES.some(
+        (t) => t.number.toLowerCase() === trimmed || String(t.id) === trimmed,
+      );
+      if (!tableExists) {
+        throw new Error("Invalid Table for this Food Court");
+      }
+    }
+
+    return {
+      foodCourt: {
+        id: GUEST_COURT_USER.foodCourt.id,
+        name: GUEST_COURT_USER.foodCourt.name,
+        location: GUEST_COURT_USER.foodCourt.location,
+        isClosed: GUEST_COURT_USER.foodCourt.isClosed,
+        currancy: GUEST_COURT_USER.foodCourt.currancy,
+        paymentSystem: GUEST_COURT_USER.foodCourt.paymentSystem,
+      },
+      restaurants: GUEST_RESTAURANTS.filter((r) => !r.isClosed).map((r) => ({
+        id: r.id,
+        name: r.name,
+        logo: r.logo || null,
+        description: r.description || null,
+        isClosed: !!r.isClosed,
+      })),
+    };
+  }
+
   const url = new URL(`${API_URL}/api/court/public/${foodCourtId}/restaurants`);
   if (tableId) {
     url.searchParams.append("tableId", tableId);
@@ -150,6 +182,26 @@ export const fetchPublicFoodCourt = async (
 };
 
 export const fetchPublicRestaurantDetails = async (id: string) => {
+  if (id.startsWith("demo-stall") || isGuestSession()) {
+    const stall = GUEST_RESTAURANTS.find((r) => r.id === id) || GUEST_RESTAURANTS[0];
+    if (stall) {
+      return {
+        id: stall.id,
+        name: stall.name,
+        location: stall.location || "",
+        logo: stall.logo || null,
+        description: stall.description || null,
+        isClosed: !!stall.isClosed,
+        foodCourtId: "demo-court-1",
+        foodCourt: {
+          isClosed: GUEST_COURT_USER.foodCourt.isClosed,
+          currancy: GUEST_COURT_USER.foodCourt.currancy,
+          paymentSystem: GUEST_COURT_USER.foodCourt.paymentSystem,
+        },
+      };
+    }
+  }
+
   const response = await fetch(`${API_URL}/api/court/public/restaurant/${id}`, {
     method: "GET",
     headers: {
