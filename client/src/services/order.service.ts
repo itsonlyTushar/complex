@@ -2,6 +2,7 @@ import { Order, CreateManualOrderPayload, CreateOrderPayload } from "@/types/ord
 import { getAuth } from "@/app/actions/auth";
 import { API_URL } from "@/lib/api";
 import {
+  GUEST_MENUS,
   GUEST_ORDERS,
   GUEST_PAYMENT_DETAILS,
   isGuestSession,
@@ -32,30 +33,36 @@ export const createManualOrder = async (
   const token = await getAuth();
   const isGuest = token?.startsWith("guest_") || isGuestSession();
   if (isGuest) {
-    const mockOrder: Order = {
-      id: Math.floor(Math.random() * 900) + 100,
-      tableNumber: data.tableNumber,
-      totalAmount: data.items.reduce((s, i) => s + i.price * i.quantity, 0),
-      status: "PENDING",
-      customerName: data.customerName || "Walk-in Guest",
-      createdAt: new Date().toISOString(),
-      restaurantId: "demo-stall-1",
-      items: data.items.map((it, idx) => ({
+    const items = data.items.map((it, idx) => {
+      const menu = GUEST_MENUS.find((m) => m.id === it.menuID);
+      const price = menu?.price ?? 0;
+      return {
         id: idx + 100,
         quantity: it.quantity,
-        price: it.price,
+        price,
         orderId: 999,
-        menuId: it.menuId,
-        menu: {
-          id: it.menuId,
-          itemName: `Item #${it.menuId}`,
+        menuId: it.menuID,
+        menu: menu || {
+          id: it.menuID,
+          itemName: `Item #${it.menuID}`,
           image: "",
-          price: it.price,
+          price,
           cost: 0,
           quantity: 10,
           description: "",
         },
-      })),
+      };
+    });
+
+    const mockOrder: Order = {
+      id: Math.floor(Math.random() * 900) + 100,
+      tableNumber: data.tableNumber,
+      totalAmount: items.reduce((s, i) => s + i.price * i.quantity, 0),
+      status: "PENDING",
+      customerName: data.customerName || "Walk-in Guest",
+      createdAt: new Date().toISOString(),
+      restaurantId: data.restaurantId || "demo-stall-1",
+      items,
     };
     GUEST_ORDERS.unshift(mockOrder);
     return { message: "Manual order created (demo)", order: mockOrder };
@@ -141,13 +148,13 @@ export const updateOrderStatus = async ({
   status,
 }: {
   orderId: number;
-  status: string;
+  status: Order["status"] | string;
 }) => {
   const token = await getAuth();
   const isGuest = token?.startsWith("guest_") || isGuestSession();
   if (isGuest) {
     const target = GUEST_ORDERS.find((o) => o.id === orderId);
-    if (target) target.status = status;
+    if (target) target.status = status as Order["status"];
     return { message: "Order status updated (demo)" };
   }
 
