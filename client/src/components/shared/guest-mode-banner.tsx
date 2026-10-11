@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ArrowRightLeft, LogOut, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { isGuestSession } from "@/lib/guest-data";
 import { toast } from "@/lib/toast";
 
 export function GuestModeBanner() {
-  const router = useRouter();
   const pathname = usePathname();
   const [isGuest, setIsGuest] = useState(false);
 
@@ -31,7 +30,7 @@ export function GuestModeBanner() {
     document.cookie = `is_guest=true; path=/; max-age=86400; SameSite=Lax`;
 
     toast.success(`Switched perspective to ${nextLabel}`);
-    router.push(nextPath);
+    window.location.replace(nextPath);
   };
 
   const handleExitGuest = () => {
@@ -40,7 +39,7 @@ export function GuestModeBanner() {
     document.cookie = `is_guest=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 
     toast.info("Exited guest mode");
-    router.push("/login");
+    window.location.replace("/login");
   };
 
   return (

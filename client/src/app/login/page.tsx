@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -15,7 +14,6 @@ import { API_URL } from "@/lib/api";
 import { Store, ChefHat, ArrowRight, Eye } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -48,43 +46,29 @@ export default function LoginPage() {
       toast.success("Welcome back! Login successful.");
 
       const role = result.user.role;
-      if (role === "SUPER_ADMIN") {
-        router.push("/sp");
-      } else if (role === "FOOD_COURT_ADMIN") {
-        router.push("/court");
-      } else if (role === "RESTAURANT_VENDOR") {
-        router.push("/admin");
-      }
+      const target =
+        role === "SUPER_ADMIN"
+          ? "/sp"
+          : role === "FOOD_COURT_ADMIN"
+            ? "/court"
+            : "/admin";
+
+      window.location.replace(target);
     } catch (err: any) {
       toast.error(err, "Login failed");
-    } finally {
       setLoading(false);
     }
   }
 
-  async function handleGuestLogin(
+  function handleGuestLogin(
     role: "FOOD_COURT_ADMIN" | "RESTAURANT_VENDOR",
   ) {
     setLoading(true);
     try {
-      let guestToken =
+      const guestToken =
         role === "FOOD_COURT_ADMIN"
           ? "guest_token_court"
           : "guest_token_vendor";
-
-      try {
-        const response = await fetch(`${API_URL}/api/auth/guest-login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role }),
-        });
-        if (response.ok) {
-          const result = await response.json();
-          if (result.token) guestToken = result.token;
-        }
-      } catch {
-        // Fallback to client demo tokens if API is not running
-      }
 
       document.cookie = `token=${guestToken}; path=/; max-age=86400; SameSite=Lax`;
       document.cookie = `user_role=${role}; path=/; max-age=86400; SameSite=Lax`;
@@ -94,12 +78,10 @@ export default function LoginPage() {
         role === "FOOD_COURT_ADMIN" ? "Food Court" : "Food Court Shop / Stall";
       toast.success(`Entering Guest Mode as ${label}`);
 
-      if (role === "FOOD_COURT_ADMIN") {
-        router.push("/court");
-      } else {
-        router.push("/admin");
-      }
-    } finally {
+      const target = role === "FOOD_COURT_ADMIN" ? "/court" : "/admin";
+      window.location.replace(target);
+    } catch (err: any) {
+      toast.error(err, "Failed to enter guest mode");
       setLoading(false);
     }
   }
