@@ -165,6 +165,18 @@ function renderFlowIcon(type: FlowStep["icon"], cx: number, cy: number) {
   }
 }
 
+function FlowIcon({ type, className }: { type: FlowStep["icon"]; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={cn("size-5", className)}
+      fill="none"
+    >
+      {renderFlowIcon(type, 12, 12)}
+    </svg>
+  );
+}
+
 export function HairlineFlow({ className }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState<number | null>(null);
@@ -188,6 +200,10 @@ export function HairlineFlow({ className }: { className?: string }) {
     // Static reduced-motion fallback: all nodes active
     if (isReduced) {
       container.querySelectorAll(".flow-step-node").forEach((el) => el.classList.add("is-active"));
+      const mobileActiveSpine = container.querySelector("#flow-mobile-active-spine") as HTMLElement | null;
+      if (mobileActiveSpine) {
+        mobileActiveSpine.style.height = "100%";
+      }
       return;
     }
 
@@ -196,6 +212,9 @@ export function HairlineFlow({ className }: { className?: string }) {
     const ctx = gsap.context(() => {
       const packet = container.querySelector("#flow-traveling-packet");
       const baselineActive = container.querySelector("#flow-active-spine");
+
+      const mobilePacket = container.querySelector("#flow-mobile-traveling-packet") as HTMLElement | null;
+      const mobileActiveSpine = container.querySelector("#flow-mobile-active-spine") as HTMLElement | null;
 
       flowTimeline = gsap.timeline({
         repeat: -1,
@@ -208,8 +227,10 @@ export function HairlineFlow({ className }: { className?: string }) {
         p: 1,
         duration: APPLICATION_FLOW_CONFIG.timing.loopDuration,
         onUpdate: () => {
-          const currentX = startX + proxy.p * (endX - startX);
+          const progress = proxy.p;
+          const currentX = startX + progress * (endX - startX);
 
+          // Update desktop SVG
           if (packet) {
             packet.setAttribute("cx", `${currentX}`);
           }
@@ -218,15 +239,32 @@ export function HairlineFlow({ className }: { className?: string }) {
             baselineActive.setAttribute("x2", `${currentX}`);
           }
 
-          // Activate node as packet crosses its X coord
-          steps.forEach((_, index) => {
-            const nodeX = startX + index * stepSpacing;
-            const nodeEl = container.querySelector(`#flow-node-${index}`);
+          // Update mobile elements
+          if (mobilePacket) {
+            mobilePacket.style.top = `${progress * 100}%`;
+          }
 
-            if (currentX >= nodeX - 4) {
+          if (mobileActiveSpine) {
+            mobileActiveSpine.style.height = `${progress * 100}%`;
+          }
+
+          // Activate node as packet crosses
+          steps.forEach((_, index) => {
+            const nodeProgress = index / (total - 1);
+            const isNodeActive = progress >= nodeProgress - 0.02;
+
+            const nodeEl = container.querySelector(`#flow-node-${index}`);
+            if (isNodeActive) {
               nodeEl?.classList.add("is-active");
             } else {
               nodeEl?.classList.remove("is-active");
+            }
+
+            const mobileNodeEl = container.querySelector(`#flow-mobile-node-${index}`);
+            if (isNodeActive) {
+              mobileNodeEl?.classList.add("is-active");
+            } else {
+              mobileNodeEl?.classList.remove("is-active");
             }
           });
         },
@@ -261,7 +299,7 @@ export function HairlineFlow({ className }: { className?: string }) {
       flowTimeline?.kill();
       ctx.revert();
     };
-  }, [endX, startX, stepSpacing, steps]);
+  }, [endX, startX, stepSpacing, steps, total]);
 
   return (
     <div
@@ -355,10 +393,39 @@ export function HairlineFlow({ className }: { className?: string }) {
         .flow-step-node.is-active .flow-icon-wrap {
           color: var(--fc-accent);
         }
+
+        /* Mobile Responsive Styles */
+        .flow-mobile-node.is-active .flow-mobile-circle {
+          border-color: var(--fc-accent);
+          background-color: color-mix(in srgb, var(--fc-accent) 15%, transparent);
+        }
+
+        .flow-mobile-node.is-active .flow-mobile-dot {
+          background-color: var(--fc-accent);
+        }
+
+        .flow-mobile-node.is-active .flow-mobile-card {
+          border-color: color-mix(in srgb, var(--fc-accent) 40%, transparent);
+          background-color: color-mix(in srgb, var(--fc-accent) 4%, transparent);
+        }
+
+        .flow-mobile-node.is-active .flow-mobile-icon-box {
+          border-color: color-mix(in srgb, var(--fc-accent) 40%, transparent);
+          background-color: color-mix(in srgb, var(--fc-accent) 12%, transparent);
+          color: var(--fc-accent);
+        }
+
+        .flow-mobile-node.is-active .flow-mobile-num {
+          color: var(--fc-accent);
+        }
+
+        .flow-mobile-node.is-active .flow-mobile-live {
+          opacity: 1;
+        }
       `}</style>
 
-      {/* Responsive SVG Canvas */}
-      <div className="relative aspect-[1000/280] w-full">
+      {/* Desktop Horizontal SVG Canvas (>= lg) */}
+      <div className="hidden lg:block relative aspect-[1000/280] w-full">
         <svg
           viewBox="0 0 1000 280"
           preserveAspectRatio="xMidYMid meet"
@@ -424,6 +491,7 @@ export function HairlineFlow({ className }: { className?: string }) {
                 id={`flow-node-${index}`}
                 className={cn(
                   "flow-step-node cursor-pointer transition-opacity duration-200",
+                  activeStep === index && "is-active",
                   activeStep !== null && activeStep !== index && "opacity-40"
                 )}
                 onMouseEnter={() => setActiveStep(index)}
@@ -496,6 +564,96 @@ export function HairlineFlow({ className }: { className?: string }) {
             );
           })}
         </svg>
+      </div>
+
+      {/* Responsive Vertical Flow for Mobile & Tablet (< lg) */}
+      <div className="block lg:hidden w-full max-w-xl mx-auto">
+        <div className="mb-4 flex items-center justify-between border-b border-border/40 pb-3 text-caption">
+          <div className="flex items-center gap-2">
+            <span className="size-2 rounded-full bg-primary animate-pulse" />
+            <span className="font-mono text-xs font-medium uppercase tracking-wider text-fg-secondary">
+              Live Architecture
+            </span>
+          </div>
+          <span className="text-xs text-fg-tertiary">
+            8 Automated Steps
+          </span>
+        </div>
+
+        <div className="relative">
+          {/* Hairline Spine Track */}
+          <div className="absolute left-[16px] sm:left-[18px] top-[26px] bottom-[26px] sm:top-[30px] sm:bottom-[30px] w-[1px]">
+            {/* Baseline Line */}
+            <div className="h-full w-full bg-[var(--fc-line)]" />
+            {/* Active Animated Spine */}
+            <div
+              id="flow-mobile-active-spine"
+              className="absolute top-0 left-0 w-full bg-primary transition-none"
+              style={{ height: "0%" }}
+            />
+            {/* Traveling Signal Packet */}
+            <div
+              id="flow-mobile-traveling-packet"
+              className="absolute -left-[1.5px] size-[4px] -translate-y-1/2 rounded-full bg-primary shadow-[0_0_8px_var(--primary)] pointer-events-none transition-none z-20"
+              style={{ top: "0%" }}
+            />
+          </div>
+
+          {/* Step items */}
+          <div className="flex flex-col gap-2.5 sm:gap-3">
+            {steps.map((step, index) => (
+              <div
+                key={step.id}
+                id={`flow-mobile-node-${index}`}
+                className={cn(
+                  "flow-step-node flow-mobile-node relative flex items-center gap-3 sm:gap-4 group cursor-pointer transition-all duration-200 select-none",
+                  activeStep === index && "is-active",
+                  activeStep !== null && activeStep !== index && "opacity-40"
+                )}
+                onClick={() => setActiveStep(activeStep === index ? null : index)}
+              >
+                {/* Spine Node Anchor */}
+                <div className="relative z-10 flex size-8 sm:size-9 shrink-0 items-center justify-center">
+                  <div className="flow-mobile-circle size-3 sm:size-3.5 rounded-full border border-[var(--fc-line)] bg-background flex items-center justify-center transition-colors">
+                    <div className="flow-mobile-dot size-1 rounded-full bg-muted-foreground/60 transition-colors" />
+                  </div>
+                </div>
+
+                {/* Step Card */}
+                <div className="flow-mobile-card flex-1 min-w-0 rounded-xl border border-border/50 bg-surface-sunken/40 px-3.5 py-2.5 sm:px-4 sm:py-3 transition-all duration-200">
+                  <div className="flex items-center gap-2.5 sm:gap-3">
+                    <div className="flow-mobile-icon-box flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-lg border border-border/50 bg-card text-muted-foreground transition-colors">
+                      <FlowIcon type={step.icon} className="size-4 sm:size-4.5" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="flow-mobile-num font-mono text-[10px] sm:text-xs font-semibold tracking-wider text-muted-foreground transition-colors">
+                          {step.number}
+                        </span>
+                        <span className="truncate text-xs sm:text-sm font-medium text-foreground">
+                          {step.title}
+                        </span>
+                      </div>
+                      {step.subtitle && (
+                        <p className="truncate text-[11px] sm:text-xs text-fg-secondary mt-0.5">
+                          {step.subtitle}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="shrink-0">
+                      <span className="flow-mobile-live inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] sm:text-[10px] font-medium tracking-wide transition-opacity opacity-0 bg-primary/10 text-primary border border-primary/20">
+                        <span className="size-1 rounded-full bg-primary animate-pulse" />
+                        LIVE
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
