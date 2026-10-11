@@ -91,7 +91,7 @@ export const fetchOrders = async (params?: {
 }): Promise<{ orders: Order[] }> => {
   const token = await getAuth();
   const isGuest = token?.startsWith("guest_") || isGuestSession();
-  if (isGuest) {
+  if (isGuest || params?.restaurantId?.startsWith("demo-stall")) {
     return { orders: GUEST_ORDERS };
   }
 
@@ -111,7 +111,7 @@ export const fetchOrders = async (params?: {
     headers,
   });
   if (!response.ok) {
-    if (isGuest) {
+    if (isGuest || params?.restaurantId?.startsWith("demo-stall")) {
       return { orders: GUEST_ORDERS };
     }
     throw new Error("failed to fetch orders");
